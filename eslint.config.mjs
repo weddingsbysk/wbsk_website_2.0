@@ -4,7 +4,7 @@ const config = [
   {
     ignores: [
       "**/.next/**",
-      "**/out/**",
+      "**/out/**", "**/out-lh/**", "**/dist/**",
       "**/node_modules/**",
       ".lighthouseci/**",
       "playwright-report/**",

@@ -90,19 +90,27 @@ export function WbskImage({
       data-parallax={parallax ? "on" : undefined}
       style={{ aspectRatio: String(ratio), backgroundImage: blur ? `url(${blur})` : undefined }}
     >
-      {priority && portraitImage?.kind === "local" ? (
+      {priority && portraitImage ? (
         <>
           <link
             rel="preload"
             as="image"
             href={src}
+            imageSrcSet={srcSet}
+            imageSizes={srcSet ? sizes : undefined}
             media="(orientation: landscape)"
             fetchPriority="high"
           />
           <link
             rel="preload"
             as="image"
-            href={portraitImage.url}
+            href={portraitImage.kind === "local" ? portraitImage.url : undefined}
+            imageSrcSet={
+              portraitImage.kind === "sanity"
+                ? buildSrcSet(portraitImage, slot, portraitImage.width / portraitImage.height)
+                : undefined
+            }
+            imageSizes={portraitImage.kind === "sanity" ? sizes : undefined}
             media="(orientation: portrait)"
             fetchPriority="high"
           />

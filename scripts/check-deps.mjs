@@ -2,6 +2,11 @@
 import fs from "node:fs";
 
 const approved = new Set([
+  "sanity",
+  "@sanity/icons",
+  "@sanity/ui",
+  "@sanity/client",
+  "styled-components",
   "next",
   "react",
   "react-dom",
@@ -31,7 +36,7 @@ const banned =
 const problems = [];
 for (const file of [
   "package.json",
-  "apps/web/package.json",
+  "apps/web/package.json", "apps/studio/package.json",
   "packages/ui/package.json",
   "packages/content/package.json",
 ]) {

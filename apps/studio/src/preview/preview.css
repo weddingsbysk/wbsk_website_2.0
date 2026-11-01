@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@import "@wbsk/ui/styles.css";
+@source "../../../../packages/ui/src";
+
+@font-face {
+  font-family: "WBSK Bodoni";
+  src: url("../../../web/src/fonts/bodoni-moda.woff2") format("woff2");
+  font-weight: 400 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "WBSK Hanken";
+  src: url("../../../web/src/fonts/hanken-grotesk.woff2") format("woff2");
+  font-weight: 400 600;
+  font-display: swap;
+}
+:root {
+  --font-bodoni: "WBSK Bodoni";
+  --font-hanken: "WBSK Hanken";
+  --font-bodoni-amp: "WBSK Bodoni";
+}

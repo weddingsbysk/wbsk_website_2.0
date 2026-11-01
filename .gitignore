@@ -1,6 +1,7 @@
 node_modules/
 .next/
 out/
+apps/studio/dist/
 apps/*/.next/
 apps/*/out/
 test-results/
