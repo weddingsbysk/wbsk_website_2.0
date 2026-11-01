@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import { BackToRecords } from "../../../components/BackToRecords";
 import { DestinationFilms } from "../../../components/DestinationFilms";
 import { EnquireButton } from "../../../components/EnquiryPanel";
-import { getDestinations, getDestinationShoots } from "../../../lib/content";
+import { GoneRedirect } from "../../../components/GoneRedirect";
+import { getDestinationPages, getDestinationShoots, metadataFrom } from "../../../lib/content";
 import { publicAsset } from "../../../lib/site";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -15,20 +16,27 @@ export const dynamicParams = false;
 const GALLERY_SHOWN = 20;
 
 export async function generateStaticParams() {
-  const destinations = await getDestinations();
+  const destinations = await getDestinationPages();
   return destinations.map(({ slug }) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const destination = (await getDestinations()).find((item) => item.slug === slug);
-  return { title: destination ? `${destination.name} pre-wedding films and photos` : "Pre-wedding" };
+  const destination = (await getDestinationPages()).find((item) => item.slug === slug);
+  if (!destination) return {};
+  if (destination.status === "removed") return { robots: { index: false } };
+  return metadataFrom(destination.seo, {
+    title: `${destination.name} pre-wedding films and photos`,
+    description: `Pre-wedding films and photographs from ${destination.name}, by Weddings By Siddhant Kapoor.`,
+    image: destination.cover?.url,
+  });
 }
 
 export default async function Page({ params }: Params) {
   const { slug } = await params;
-  const destination = (await getDestinations()).find((item) => item.slug === slug);
+  const destination = (await getDestinationPages()).find((item) => item.slug === slug);
   if (!destination) notFound();
+  if (destination.status === "removed") return <GoneRedirect to="/pre-wedding/" label="the Pre-wedding page" />;
   const { films, photos } = await getDestinationShoots(destination.id);
   return (
     <>

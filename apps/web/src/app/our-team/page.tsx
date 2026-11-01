@@ -2,9 +2,9 @@ import "@wbsk/ui/css/pages.css";
 import { Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquireButton } from "../../components/EnquiryPanel";
-import { getTeamPage } from "../../lib/content";
+import { getTeamPage, mainPageMetadata } from "../../lib/content";
 
-export const metadata: Metadata = { title: "Our team" };
+export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("teamPage", "Our team");
 
 /** Past about eight people, the rest sit in a smaller row at the end (Decision 07). */
 const CORE_CREW = 8;

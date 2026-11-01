@@ -2,9 +2,9 @@ import "@wbsk/ui/css/pages.css";
 import { Reveal, TitleWords } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquiryForm } from "../../components/EnquiryForm";
-import { getCareersPage } from "../../lib/content";
+import { getCareersPage, mainPageMetadata } from "../../lib/content";
 
-export const metadata: Metadata = { title: "Careers" };
+export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("careersPage", "Careers");
 
 export default async function Page() {
   const { intro, roles, form } = await getCareersPage();

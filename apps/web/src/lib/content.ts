@@ -38,6 +38,8 @@ function toImage(value: ImageResult): WbskImageSource | null {
   };
 }
 
+export type Seo = { title?: string; description?: string; image?: string } | null | undefined;
+
 type DestinationResult = {
   _id: string;
   _createdAt: string;
@@ -52,10 +54,21 @@ type DestinationResult = {
 
 /** A destination shows once it has a published shoot; order and hiding are set in the Studio. */
 export async function getDestinations() {
-  const data = await client.fetch<DestinationResult[]>(/* groq */ `*[
-    _type == "destination" && hidden != true && (!defined(status) || status == "live") &&
+  return (await readDestinations()).filter((item) => item.status === "live");
+}
+
+/** Archived destinations keep their pages; removed ones only redirect (Decision 20). */
+export async function getDestinationPages() {
+  return (await readDestinations()).filter((item) => item.status !== "removed" || item.slug);
+}
+
+async function readDestinations() {
+  const data = await client.fetch<(DestinationResult & { status?: string; seo?: Seo; hidden?: boolean })[]>(/* groq */ `*[
+    _type == "destination" && hidden != true &&
     count(*[_type == "preWeddingShoot" && hidden != true && references(^._id)]) > 0
   ] | order(order asc, _createdAt asc) {
+    status,
+    seo{title, description, "image": image.asset->url},
     _id,
     _createdAt,
     isSample,
@@ -68,6 +81,8 @@ export async function getDestinations() {
   }`);
   return visibleWithSamples(data).map((item) => ({
     id: item._id,
+    status: item.status ?? "live",
+    seo: item.seo,
     isSample: Boolean(item.isSample),
     name: item.name,
     slug: item.slug,
@@ -101,6 +116,7 @@ type WeddingResult = {
   teaser: StoryFilmResult;
   highlight: StoryFilmResult;
   reels: { url: string; label?: string }[] | null;
+  seo: Seo;
 };
 
 const monthYear = (date: string) =>
@@ -131,6 +147,8 @@ function toWedding(item: WeddingResult) {
     second: item.secondName,
     place: `${item.placeLabel} · ${item.city}`.toUpperCase(),
     city: item.city,
+    placeLabel: item.placeLabel,
+    seo: item.seo,
     venue: item.venue,
     monthYear: monthYear(item.weddingDate),
     shortDescription: item.shortDescription,
@@ -148,12 +166,14 @@ function toWedding(item: WeddingResult) {
 let weddingsRead: Promise<{
   listed: ReturnType<typeof toWedding>[];
   pages: ReturnType<typeof toWedding>[];
+  removed: string[];
 }> | null = null;
 
 /** Read once per build: every couple's page needs the whole list for its Next story. */
 export function getWeddings() {
   weddingsRead ??= client
-    .fetch<WeddingResult[]>(/* groq */ `*[_type == "wedding" && status != "removed"] | order(weddingDate desc) {
+    .fetch<WeddingResult[]>(/* groq */ `*[_type == "wedding"] | order(weddingDate desc) {
+      seo{title, description, "image": image.asset->url},
       _id,
       _createdAt,
       isSample,
@@ -177,11 +197,12 @@ export function getWeddings() {
       reels[]{url, label}
     }`)
     .then((data) => {
-      const live = visibleWithSamples(data.filter((item) => item.status !== "archived"));
+      const removed = data.filter((item) => item.status === "removed").map((item) => item.slug);
+      const live = visibleWithSamples(data.filter((item) => !["archived", "removed"].includes(item.status ?? "live")));
       const archived = data.filter((item) => item.status === "archived");
       // Real work lists first, then any samples still showing (Decision 25).
       const listed = live.map(toWedding);
-      return { listed, pages: [...listed, ...archived.map(toWedding)] };
+      return { listed, pages: [...listed, ...archived.map(toWedding)], removed };
     });
   return weddingsRead;
 }
@@ -248,6 +269,8 @@ type Linked = { _type: string; status?: string; slug?: string } | null;
 
 function linkedHref(linked: Linked): string | null {
   if (!linked?.slug || linked.status === "removed") return null;
+  // An archived destination leaves the Films page link, while its page stays (Decision 20).
+  if (linked._type === "destination" && linked.status === "archived") return null;
   return linked._type === "destination" ? `/pre-wedding/${linked.slug}/` : `/client/${linked.slug}/`;
 }
 
@@ -532,5 +555,38 @@ export async function getDestinationShoots(id: string) {
     ),
     photos: visible.flatMap((shoot) => (shoot.photos ?? []).map(toImage).filter(Boolean).map(withoutInlinePreview)) as SanityImage[],
   };
+}
+
+/** Site-wide defaults, and each page's optional overrides (Decision 21). */
+export async function getPageSeo(id: string) {
+  return client.fetch<{
+    page: Seo;
+    defaultDescription?: string;
+    defaultImage?: string;
+    intro?: string;
+  }>(
+    /* groq */ `{
+      "page": *[_id == $id][0].seo{title, description, "image": image.asset->url},
+      "intro": *[_id == $id][0]{"text": coalesce(intro, studioLine)}.text,
+      "defaultDescription": *[_id == "siteSettings"][0].defaultDescription,
+      "defaultImage": *[_id == "siteSettings"][0].defaultShareImage.asset->url
+    }`,
+    { id },
+  );
+}
+
+export function metadataFrom(seo: Seo, fallback: { title: string; description?: string; image?: string }) {
+  const description = seo?.description || fallback.description;
+  const image = seo?.image || fallback.image;
+  return {
+    title: { absolute: seo?.title || `${fallback.title} | WBSK` },
+    description,
+    openGraph: { title: seo?.title || fallback.title, description, images: image ? [`${image}?w=1200&h=630&fit=crop&auto=format`] : undefined },
+  };
+}
+
+export async function mainPageMetadata(id: string, title: string) {
+  const seo = await getPageSeo(id);
+  return metadataFrom(seo.page, { title, description: seo.intro ?? seo.defaultDescription, image: seo.defaultImage });
 }
 

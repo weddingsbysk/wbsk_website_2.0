@@ -2,9 +2,9 @@ import { CoupleNames, Letterbox, TitleWords, WbskImage, WbskLink } from "@wbsk/u
 import type { Metadata } from "next";
 import { EnquireButton } from "../../components/EnquiryPanel";
 import { WeddingsGrid } from "../../components/WeddingsGrid";
-import { getWeddings, getWeddingsIntro } from "../../lib/content";
+import { getWeddings, getWeddingsIntro, mainPageMetadata } from "../../lib/content";
 
-export const metadata: Metadata = { title: "Weddings" };
+export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("weddingsPage", "Weddings");
 
 export default async function Page() {
   const [{ listed }, intro] = await Promise.all([getWeddings(), getWeddingsIntro()]);

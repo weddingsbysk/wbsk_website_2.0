@@ -2,8 +2,11 @@ import { useEffect, useMemo } from "react";
 import { useEditState, useFormValue, type InputProps, type ObjectInputProps, type ObjectSchemaType, type Path } from "sanity";
 import { useDocumentPane } from "sanity/structure";
 import { PREVIEW_INSPECTOR } from "../preview/inspector";
+import { SITE_ADDRESS } from "../brand";
+import { useWebsiteStatus } from "../tools/useWebsiteStatus";
+import { useTryAgain } from "./actions";
 
-const CHROME_TYPES = new Set(["wedding", "destination", "preWeddingShoot", "film", "review", "reactionVideo", "teamMember", "homepage", "preWeddingPage"]);
+const CHROME_TYPES = new Set(["wedding", "destination", "preWeddingShoot", "film", "review", "reactionVideo", "teamMember", "homepage", "preWeddingPage", "enquiryForm", "careerRole"]);
 
 function friendly(path: Path, message: string, schemaType: ObjectSchemaType): string {
   const last = path.filter((p) => typeof p === "string").at(-1);
@@ -73,6 +76,14 @@ function Chrome(props: ObjectInputProps) {
     : list.length
       ? `Before publishing: ${list.slice(0, MAX_LISTED).join(" · ")}${more > 0 ? ` · and ${more} more` : ""}`
       : "Nothing left. Ready to publish.";
+  const website = useWebsiteStatus();
+  const tryAgain = useTryAgain();
+  const publishedAt = (published as { _updatedAt?: string } | null)?._updatedAt;
+  const onSite = Boolean(publishedAt && website.liveSince && website.liveSince > publishedAt);
+  const address = (published as { address?: { current?: string } } | null)?.address?.current;
+  const liveLink = address ? `${SITE_ADDRESS}${type === "wedding" ? "/client" : "/pre-wedding"}/${address}/` : SITE_ADDRESS;
+  // What publishing is doing right now (Decision 19), once there's nothing newer in a draft.
+  const publishing = !draft && published && !onSite && website.state !== "unknown";
   const state = draft ? (published ? "Unpublished changes" : "Draft · not on the website yet") : published ? "On the website" : "New";
 
   return (
@@ -96,7 +107,25 @@ function Chrome(props: ObjectInputProps) {
         }}
       >
         <strong style={{ color: "#7A5C17" }}>{state}</strong>
-        <div>{summary}</div>
+        {publishing && website.state === "failed" ? (
+          <div>
+            The website didn&apos;t update. Your work is safe. Try again, or tell Siddhant.{" "}
+            <button type="button" onClick={() => void tryAgain()} style={{ font: "inherit", textDecoration: "underline", background: "none", border: 0, padding: 0, cursor: "pointer", color: "inherit" }}>
+              Try again
+            </button>
+          </div>
+        ) : publishing ? (
+          <div>Publishing… the website updates in about 10 minutes. You can keep working.</div>
+        ) : !draft && published && onSite ? (
+          <div>
+            Live on the website ✓ ·{" "}
+            <a href={liveLink} target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
+              Open page ↗
+            </a>
+          </div>
+        ) : (
+          <div>{summary}</div>
+        )}
       </div>
     </div>
   );

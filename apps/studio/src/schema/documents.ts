@@ -2,6 +2,7 @@ import { imageRules } from "@wbsk/content";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { hideField, orderField, photoField, sampleField, seoField, statusField, youtubeLinkValidation } from "./fields";
 import { AutoAddressInput } from "../components/AutoAddressInput";
+import { DesktopCoverInput, FilmFromSourceInput, PhoneCoverInput } from "../components/ExtraInputs";
 
 const required = (label: string) => (rule: { required: () => { error: (m: string) => unknown } }) =>
   rule.required().error(`Add ${label}`);
@@ -37,8 +38,8 @@ export const wedding = defineType({
       validation: required("the names, so the address can be made") as never,
     }),
     photoField({ name: "cardPhoto", title: "Card photo 4:5", slot: "card photo", rule: imageRules.card, required: true, group: "photos" }),
-    photoField({ name: "coverDesktop", title: "Desktop cover 21:9", slot: "cover", rule: imageRules.coverDesktop, required: true, group: "photos", description: "At least 2560px wide. Keep faces away from the lower left, where the name label sits." }),
-    photoField({ name: "coverPhone", title: "Phone cover 3:4", slot: "phone cover", rule: imageRules.coverPhone, required: true, group: "photos", description: "At least 1500 × 2000. Keep faces above the name label at the bottom." }),
+    photoField({ name: "coverDesktop", title: "Desktop cover 21:9", slot: "cover", rule: imageRules.coverDesktop, required: true, group: "photos", description: "At least 2560px wide. Keep faces away from the lower left, where the name label sits.", components: { input: DesktopCoverInput } }),
+    photoField({ name: "coverPhone", title: "Phone cover 3:4", slot: "phone cover", rule: imageRules.coverPhone, required: true, group: "photos", description: "At least 1500 × 2000. Keep faces above the name label at the bottom.", components: { input: PhoneCoverInput } }),
     defineField({
       name: "gallery",
       type: "array",
@@ -70,6 +71,7 @@ export const film = defineType({
   type: "document",
   fields: [
     sampleField,
+    defineField({ name: "useFrom", title: "Use a film from this wedding or shoot", type: "string", description: "Fills the link, poster and names, so nothing is typed twice. Optional.", components: { input: FilmFromSourceInput } }),
     defineField({ name: "url", title: "YouTube link", type: "url", validation: (rule) => [rule.required().error("Add the YouTube link"), rule.custom(youtubeLinkValidation)] }),
     photoField({ name: "poster", title: "Poster 16:9", slot: "poster", rule: imageRules.poster, required: true }),
     defineField({ name: "names", title: "Couple's names", type: "string", validation: required("the names") as never }),
@@ -96,10 +98,24 @@ export const destination = defineType({
     sampleField,
     defineField({ name: "name", type: "string", validation: required("the destination name") as never }),
     defineField({ name: "address", title: "Page address", type: "slug", options: { source: "name" }, validation: required("the page address") as never }),
-    defineField({ name: "catalogueNumber", title: "Catalogue number", type: "string", readOnly: true, description: "Given automatically and never reused." }),
+    defineField({
+      name: "catalogueNumber",
+      title: "Catalogue number",
+      type: "string",
+      readOnly: true,
+      description: "Given automatically and never reused.",
+      // Real destinations count from WBSK-PW 001; samples keep their own marks (Decision 09, G7).
+      initialValue: async (_params: unknown, { getClient }: { getClient: (options: { apiVersion: string }) => { fetch: (query: string) => Promise<string[]> } }) => {
+        const numbers = await getClient({ apiVersion: "2026-11-01" }).fetch(
+          `*[_type == "destination" && catalogueNumber match "WBSK-PW*"].catalogueNumber`,
+        );
+        const highest = numbers.reduce((max, value) => Math.max(max, Number(value.replace(/\D/g, "")) || 0), 0);
+        return `WBSK-PW ${String(highest + 1).padStart(3, "0")}`;
+      },
+    }),
     photoField({ name: "artwork", title: "Sleeve artwork: B&W transparent PNG", slot: "sleeve artwork", rule: imageRules.destinationArt, required: true, description: "Square, at least 1600 × 1600, with a transparent background." }),
-    photoField({ name: "coverDesktop", title: "Desktop cover 21:9", slot: "cover", rule: imageRules.coverDesktop, required: true }),
-    photoField({ name: "coverPhone", title: "Phone cover 3:4", slot: "phone cover", rule: imageRules.coverPhone, required: true }),
+    photoField({ name: "coverDesktop", title: "Desktop cover 21:9", slot: "cover", rule: imageRules.coverDesktop, required: true, components: { input: DesktopCoverInput } }),
+    photoField({ name: "coverPhone", title: "Phone cover 3:4", slot: "phone cover", rule: imageRules.coverPhone, required: true, components: { input: PhoneCoverInput } }),
     orderField,
     hideField,
     statusField(),

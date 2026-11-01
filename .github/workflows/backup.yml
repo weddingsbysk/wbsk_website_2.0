@@ -1,0 +1,26 @@
+name: Weekly text backup
+
+# The owner's answer Q3: a weekly copy of all published text, with no photos, kept 90 days. It holds
+# only what's already public on the website, so no token is needed.
+on:
+  schedule:
+    - cron: "30 20 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save the published text
+        run: |
+          curl -sSfG "https://80o0qshj.api.sanity.io/v2026-11-01/data/query/production" \
+            --data-urlencode 'query=*[!(_id in path("drafts.**")) && !(_type match "sanity.*")]' \
+            -o wbsk-text-backup.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wbsk-text-backup
+          path: wbsk-text-backup.json
+          retention-days: 90

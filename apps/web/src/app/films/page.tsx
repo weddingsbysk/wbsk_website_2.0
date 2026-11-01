@@ -3,9 +3,9 @@ import { TitleWords } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquireButton } from "../../components/EnquiryPanel";
 import { FilmsList } from "../../components/FilmsList";
-import { getFilmsPage } from "../../lib/content";
+import { getFilmsPage, mainPageMetadata } from "../../lib/content";
 
-export const metadata: Metadata = { title: "Films" };
+export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("filmsPage", "Films");
 
 export default async function Page() {
   const { intro, films } = await getFilmsPage();

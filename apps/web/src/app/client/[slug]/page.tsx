@@ -3,7 +3,8 @@ import { CoupleNames, FilmPlayer, Gallery, GalleryLightbox, Reveal, StoryCover, 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EnquireButton } from "../../../components/EnquiryPanel";
-import { getWeddings, withoutInlinePreview } from "../../../lib/content";
+import { GoneRedirect } from "../../../components/GoneRedirect";
+import { getWeddings, metadataFrom, withoutInlinePreview } from "../../../lib/content";
 import { publicAsset } from "../../../lib/site";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -11,22 +12,32 @@ type Params = { params: Promise<{ slug: string }> };
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  const { pages } = await getWeddings();
-  return pages.map(({ slug }) => ({ slug }));
+  const { pages, removed } = await getWeddings();
+  return [...pages.map(({ slug }) => ({ slug })), ...removed.map((slug) => ({ slug }))];
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const wedding = (await getWeddings()).pages.find((item) => item.slug === slug);
+  const { pages, removed } = await getWeddings();
+  if (removed.includes(slug)) return { robots: { index: false } };
+  const wedding = pages.find((item) => item.slug === slug);
   if (!wedding) return {};
-  return { title: `${wedding.first} & ${wedding.second}`, description: wedding.shortDescription };
+  // Decision 21: "Meera & Arjun — Destination wedding at The Leela, Goa | WBSK".
+  const kind = wedding.placeLabel === "Destination" ? "Destination wedding" : "Wedding";
+  const image = wedding.cardPhoto?.kind === "sanity" ? wedding.cardPhoto.url : undefined;
+  return metadataFrom(wedding.seo, {
+    title: `${wedding.first} & ${wedding.second} — ${kind} at ${wedding.venue}, ${wedding.city}`,
+    description: wedding.shortDescription,
+    image,
+  });
 }
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
 export default async function Page({ params }: Params) {
   const { slug } = await params;
-  const { pages, listed } = await getWeddings();
+  const { pages, listed, removed } = await getWeddings();
+  if (removed.includes(slug)) return <GoneRedirect to="/weddings/" label="the Weddings page" />;
   const wedding = pages.find((item) => item.slug === slug);
   if (!wedding) notFound();
 

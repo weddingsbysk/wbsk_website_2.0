@@ -3,7 +3,9 @@ import { CoverVideo, Letterbox, Reveal, TitleWords, WbskImage, WbskLink } from "
 import { EnquiryForm } from "../components/EnquiryForm";
 import { Counter, FeaturedRow, FilmStack, ReactionRow, ReviewsLoop } from "../components/HomeSections";
 import { OpeningIntro } from "../components/OpeningIntro";
-import { getHomepageContent } from "../lib/content";
+import { getHomepageContent, mainPageMetadata } from "../lib/content";
+
+export const generateMetadata = () => mainPageMetadata("homepage", "Weddings By Siddhant Kapoor");
 
 export default async function HomePage() {
   const home = await getHomepageContent();

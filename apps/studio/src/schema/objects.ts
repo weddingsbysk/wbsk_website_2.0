@@ -1,5 +1,6 @@
 import { imageRules, imageSizeFromRef, isInstagramLink, meetsSize } from "@wbsk/content";
 import { defineField, defineType } from "sanity";
+import { SeoInput } from "../components/ExtraInputs";
 import { descriptionField, photoField, smallGalleryNote, youtubeLinkValidation } from "./fields";
 
 export const galleryPhoto = defineType({
@@ -83,6 +84,7 @@ export const seo = defineType({
   title: "Google & sharing",
   type: "object",
   description: "Optional. Leave empty and these are written for you.",
+  components: { input: SeoInput },
   fields: [
     defineField({ name: "title", title: "Search title", type: "string", validation: (rule) => rule.max(60).warning("Google usually shows about 60 characters") }),
     defineField({ name: "description", title: "Search description", type: "text", rows: 3, validation: (rule) => rule.max(155).warning("Google usually shows about 155 characters") }),

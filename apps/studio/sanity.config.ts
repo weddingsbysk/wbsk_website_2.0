@@ -1,17 +1,23 @@
 import { sanityProject } from "@wbsk/content";
+import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
 import { HomeIcon } from "@sanity/icons/Home";
+import { ImagesIcon } from "@sanity/icons/Images";
 import { defineConfig, type DocumentActionComponent } from "sanity";
 import { structureTool } from "sanity/structure";
 import { OWNER_USER_IDS, wbskTheme } from "./src/brand";
+import { ArchiveAction, RemoveAction, RestoreAction } from "./src/components/actions";
 import { DocumentInput } from "./src/components/DocumentChrome";
 import { HomeTool } from "./src/components/HomeTool";
 import { WbskNavbar } from "./src/components/Navbar";
 import { previewInspector } from "./src/preview/inspector";
 import { schemaTypes, singletonTypes } from "./src/schema";
 import { structure } from "./src/structure";
+import { GuideTool } from "./src/tools/GuideTool";
+import { PhotoLibrary } from "./src/tools/PhotoLibrary";
 
 const FIXED = new Set([...singletonTypes, "enquiryForm", "weddingPackage"]);
-const PREVIEWED = new Set(["wedding"]);
+const PREVIEWED = new Set(["wedding", "destination", "homepage", "preWeddingPage", "enquiryForm"]);
+const HAS_OWN_PAGE = new Set(["wedding", "destination"]);
 
 export default defineConfig({
   name: "wbsk",
@@ -28,7 +34,12 @@ export default defineConfig({
       structure,
     }),
   ],
-  tools: (prev) => [{ name: "home", title: "Home", icon: HomeIcon, component: HomeTool }, ...prev],
+  tools: (prev) => [
+    { name: "home", title: "Home", icon: HomeIcon, component: HomeTool },
+    ...prev,
+    { name: "photos", title: "Photo library", icon: ImagesIcon, component: PhotoLibrary },
+    { name: "guide", title: "Guide", icon: HelpCircleIcon, component: GuideTool },
+  ],
   schema: {
     types: schemaTypes,
     templates: (prev) => prev.filter((template) => !FIXED.has(template.schemaType)),
@@ -46,11 +57,16 @@ export default defineConfig({
     actions: (prev, context) => {
       const owner = context.currentUser ? OWNER_USER_IDS.has(context.currentUser.id) : false;
       const removeFromFixed = new Set(["delete", "duplicate", "unpublish"]);
-      return prev.filter((action: DocumentActionComponent) => {
+      const kept = prev.filter((action: DocumentActionComponent) => {
+        // Sanity's extras stay out of the way (Decision 17).
+        if (/canvas/i.test(action.displayName ?? action.name ?? "")) return false;
         if (FIXED.has(context.schemaType)) return !removeFromFixed.has(action.action ?? "");
         if (action.action === "delete") return owner;
+        // "Unpublish" would break a page with no warning; Archive and Remove do it kindly (Decision 20).
+        if (HAS_OWN_PAGE.has(context.schemaType) && action.action === "unpublish") return false;
         return true;
       });
+      return HAS_OWN_PAGE.has(context.schemaType) ? [...kept, ArchiveAction, RemoveAction, RestoreAction] : kept;
     },
   },
 });

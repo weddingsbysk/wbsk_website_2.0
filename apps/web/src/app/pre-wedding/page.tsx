@@ -3,10 +3,10 @@ import { CoverVideo, FilmPlayer, Gallery, GalleryLightbox, Reveal, TitleWords, W
 import type { Metadata } from "next";
 import { EnquiryForm } from "../../components/EnquiryForm";
 import { PreWeddingArc } from "../../components/PreWeddingArc";
-import { getPreWeddingPage } from "../../lib/content";
+import { getPreWeddingPage, mainPageMetadata } from "../../lib/content";
 import { publicAsset } from "../../lib/site";
 
-export const metadata: Metadata = { title: "Pre-wedding" };
+export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("preWeddingPage", "Pre-wedding");
 
 const GALLERY_SHOWN = 12;
 

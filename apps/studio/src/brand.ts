@@ -24,6 +24,9 @@ export const wbskTheme = buildLegacyTheme({
   "--focus-color": "#7A5C17",
 });
 
+/** The temporary address until launch. */
+export const SITE_ADDRESS = "https://weddingsbysk.github.io/wbsk_website_2.0";
+
 /** The Studio home greets the manager by name (the plan's Q10). */
 export const MANAGER_NAME = "Siddhant";
 

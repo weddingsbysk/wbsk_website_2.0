@@ -1,3 +1,4 @@
+import type { ComponentType } from "react";
 import {
   describeRule,
   imageSizeFromRef,
@@ -37,15 +38,17 @@ type PhotoOptions = {
   group?: string;
   description?: string;
   hidden?: (context: { document?: Record<string, unknown> }) => boolean;
+  components?: { input: ComponentType<never> };
 };
 
-export function photoField({ name, title, slot, rule, required, group, description, hidden }: PhotoOptions) {
+export function photoField({ name, title, slot, rule, required, group, description, hidden, components }: PhotoOptions) {
   return defineField({
     name,
     title,
     type: "image",
     group,
     hidden,
+    components: components as never,
     description: description ?? `At least ${describeRule(rule)}.`,
     options: { hotspot: true, accept: "image/*" },
     fields: [descriptionField],
