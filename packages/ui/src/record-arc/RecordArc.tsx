@@ -363,7 +363,9 @@ export function RecordArc({ destinations, navigate }: Props) {
       const dockTick = () => {
         dock.x += (dock.target - dock.x) * (1 - Math.pow(1 - 0.18, gsap.ticker.deltaRatio(60)));
         layout();
-        if (!dock.on && dock.amount < 0.001) {
+        // Once the swell has caught up with a still cursor, nothing needs redrawing.
+        const caughtUp = Math.abs(dock.target - dock.x) < 0.5 && dock.amount > 0.999;
+        if (caughtUp || (!dock.on && dock.amount < 0.001)) {
           gsap.ticker.remove(dockTick);
           dock.ticking = false;
         }
