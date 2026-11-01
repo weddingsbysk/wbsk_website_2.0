@@ -50,6 +50,15 @@ function CoverFraming(ratio: string, width: number, band: CSSProperties) {
 export const DesktopCoverInput = CoverFraming("21 / 9", 420, { left: "3%", bottom: 0, width: "42%", height: "22%" });
 export const PhoneCoverInput = CoverFraming("3 / 4", 200, { left: "4%", right: "4%", bottom: 0, height: "16%" });
 
+const PAGE_NAMES: Record<string, string> = {
+  homepage: "Weddings By Siddhant Kapoor",
+  weddingsPage: "Weddings",
+  filmsPage: "Films",
+  preWeddingPage: "Pre-wedding",
+  teamPage: "Our team",
+  careersPage: "Careers",
+};
+
 const COUNT_TITLE = 60;
 const COUNT_DESCRIPTION = 155;
 
@@ -60,7 +69,16 @@ export function SeoInput(props: ObjectInputProps) {
   const secondName = useFormValue(["secondName"]) as string | undefined;
   const name = useFormValue(["name"]) as string | undefined;
   const short = useFormValue(["shortDescription"]) as string | undefined;
-  const fallbackTitle = firstName ? `${firstName} & ${secondName ?? ""} | WBSK` : name ? `${name} pre-wedding films and photos | WBSK` : "WBSK";
+  const place = useFormValue(["placeLabel"]) as string | undefined;
+  const venue = useFormValue(["venue"]) as string | undefined;
+  const city = useFormValue(["city"]) as string | undefined;
+  const pageType = useFormValue(["_type"]) as string | undefined;
+  // The same automatic titles the website writes (Decision 21).
+  const fallbackTitle = firstName
+    ? `${firstName} & ${secondName ?? ""} — ${place === "Destination" ? "Destination wedding" : "Wedding"} at ${venue ?? ""}, ${city ?? ""} | WBSK`
+    : name
+      ? `${name} pre-wedding films and photos | WBSK`
+      : `${PAGE_NAMES[pageType ?? ""] ?? "WBSK"} | WBSK`;
   const title = value?.title || fallbackTitle;
   const description = value?.description || short || "Wedding films and photographs by Weddings By Siddhant Kapoor.";
   return (

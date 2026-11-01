@@ -2,7 +2,7 @@
 
 import { Footer, Header, LinkProvider, type WbskLinkProps } from "@wbsk/ui";
 import { prefersReducedMotion, startWheelSmoothing } from "@wbsk/ui/motion";
-import { navItems, socialLinks } from "@wbsk/content";
+import { navItems } from "@wbsk/content";
 import NextLink from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -42,7 +42,7 @@ function EnquireLink({ href, onClick, ...rest }: WbskLinkProps) {
   );
 }
 
-export function SiteShell({ children }: { children: ReactNode }) {
+export function SiteShell({ children, social }: { children: ReactNode; social: { label: string; href: string }[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const duskRef = useRef<HTMLDivElement>(null);
@@ -112,6 +112,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
       const reversing = move && move.to === here && move.from === going ? move : null;
       root.dataset.pageDirection = "back";
       if (reversing) root.dataset.pageTransition = reversing.kind;
+      // Browser Back from a destination fades like its "Back to the records" link (G9).
+      else if (going.replace(/\/$/, "") === "/pre-wedding" && here.startsWith("/pre-wedding/")) root.dataset.pageTransition = "records";
       else delete root.dataset.pageTransition;
       let frame: HTMLElement | null = null;
       const transition = document.startViewTransition(async () => {
@@ -193,7 +195,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         privacyHref="/privacy/"
         homeHref="/"
         logoSrc={publicAsset("/wbsk-logo.svg")}
-        social={socialLinks}
+        social={social}
       />
       <div ref={duskRef} className="wbsk-dusk" aria-hidden="true" />
       </EnquiryPanelProvider>

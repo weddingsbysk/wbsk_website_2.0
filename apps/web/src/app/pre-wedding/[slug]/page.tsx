@@ -39,11 +39,12 @@ export default async function Page({ params }: Params) {
   if (destination.status === "removed") return <GoneRedirect to="/pre-wedding/" label="the Pre-wedding page" />;
   const { films, photos } = await getDestinationShoots(destination.id);
   return (
-    <>
-      <StoryCover cover={destination.cover} coverPhone={destination.coverPhone} place="PRE-WEDDING" names={destination.name} meta={`${films.length} film${films.length === 1 ? "" : "s"} from here`} />
+    <div className="wbsk-destination">
+      <StoryCover cover={destination.cover} coverPhone={destination.coverPhone} place="PRE-WEDDING" names={destination.name} meta="" />
       <div className="wbsk-container wbsk-backrow">
         <BackToRecords />
       </div>
+      <div className="wbsk-destination__after" />
       {films.length ? (
         <section data-tone="dark" className="wbsk-section wbsk-carouselsection" aria-label="Films">
           <DestinationFilms films={films} />
@@ -66,6 +67,6 @@ export default async function Page({ params }: Params) {
           </EnquireButton>
         </Reveal>
       </section>
-    </>
+    </div>
   );
 }

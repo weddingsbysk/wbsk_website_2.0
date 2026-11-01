@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@wbsk/ui/styles.css";
 @import "@wbsk/ui/css/forms.css";
+@import "@wbsk/ui/css/gallery.css";
 @source "../../../../packages/ui/src";
 
 @font-face {

@@ -64,10 +64,16 @@ function missingAnswers(form, kind, values) {
   var missing = [];
   (form && form.questions ? form.questions : []).forEach(function (question) {
     var shown = question.locked || question.shown !== false;
-    if (shown && question.required && !textOf(values[question.key])) missing.push(question.key);
+    // The list of open roles can be empty, so the role is never what blocks an application.
+    if (shown && question.required && question.kind !== 'role' && !textOf(values[question.key])) missing.push(question.key);
   });
   if (kind !== 'careers' && !textOf(values.phone) && !textOf(values.email)) missing.push('phone or email');
   return missing;
+}
+
+/** The same person sending again within minutes: one row, noted, not a flood (plan, section 6). */
+function isQuickRepeat(earlierReceived, now) {
+  return earlierReceived instanceof Date ? now - earlierReceived.getTime() < REPEAT_WINDOW_MS : false;
 }
 
 function isEmail(value) {
@@ -141,7 +147,8 @@ function handleSubmission_(payload) {
     lock.releaseLock();
   }
 
-  if (reasons.length) return { ok: true };
+  // A likely-spam row or a quick repeat sends no emails, so the Gmail allowance stays safe.
+  if (reasons.length || saved.repeat) return { ok: true };
   try {
     sendEmails_(kind, values, form, saved);
   } catch (error) {
@@ -157,7 +164,7 @@ function publishedForm_(kind) {
   var key = 'form-' + kind;
   var cached = cache.get(key);
   if (cached) return JSON.parse(cached);
-  var query = '*[_id == "' + FORM_IDS[kind] + '"][0]{questions[]{key, label, locked, shown, required}, confirmationEmail}';
+  var query = '*[_id == "' + FORM_IDS[kind] + '"][0]{questions[]{key, label, kind, locked, shown, required}, confirmationEmail}';
   var response = UrlFetchApp.fetch(SANITY_QUERY_URL + '?query=' + encodeURIComponent(query), { muteHttpExceptions: true });
   if (response.getResponseCode() !== 200) return null;
   var form = JSON.parse(response.getContentText()).result;
@@ -176,7 +183,7 @@ function earlierRow_(sheet, phoneColumn, emailColumn, phone, email) {
   var data = sheet.getRange(2, 1, last - 1, sheet.getLastColumn()).getValues();
   var phoneDigits = textOf(phone).replace(/\D/g, '');
   var mail = textOf(email).toLowerCase();
-  for (var i = 0; i < data.length; i += 1) {
+  for (var i = data.length - 1; i >= 0; i -= 1) {
     var samePhone = phoneDigits && textOf(data[i][phoneColumn - 1]).replace(/\D/g, '') === phoneDigits;
     var sameEmail = mail && textOf(data[i][emailColumn - 1]).toLowerCase() === mail;
     if (samePhone || sameEmail) return { row: i + 2, received: data[i][0] };
@@ -188,6 +195,9 @@ function saveEnquiry_(kind, values, openedFrom, reasons) {
   var sheet = sheet_(ENQUIRIES);
   var now = new Date();
   var earlier = earlierRow_(sheet, 11, 12, values.phone, values.email);
+  if (earlier && isQuickRepeat(earlier.received, now.getTime())) {
+    return noteRepeat_(sheet, earlier.row, ENQUIRY_COLUMNS.length, now);
+  }
   var row = [
     now,
     kind === 'preWedding' ? 'Pre-wedding' : 'Wedding',
@@ -221,6 +231,10 @@ function saveEnquiry_(kind, values, openedFrom, reasons) {
 function saveApplication_(values, reasons) {
   var sheet = sheet_(CAREERS);
   var now = new Date();
+  var earlier = earlierRow_(sheet, 6, 7, values.phone, values.email);
+  if (earlier && isQuickRepeat(earlier.received, now.getTime())) {
+    return noteRepeat_(sheet, earlier.row, CAREERS_COLUMNS.length, now);
+  }
   sheet.appendRow([
     now,
     safeCell(values.name),
@@ -235,6 +249,13 @@ function saveApplication_(values, reasons) {
     reasons.length ? 'Likely spam: ' + reasons.join('; ') : '',
   ]);
   return { sheet: CAREERS, row: sheet.getLastRow(), earlier: null };
+}
+
+function noteRepeat_(sheet, row, column, now) {
+  var cell = sheet.getRange(row, column);
+  var existing = textOf(cell.getValue());
+  cell.setValue((existing ? existing + ' · ' : '') + 'Sent again ' + Utilities.formatDate(now, 'Asia/Kolkata', 'd MMM, h:mm a'));
+  return { sheet: sheet.getName(), row: row, earlier: null, repeat: true };
 }
 
 function noteOnRow_(saved, note) {

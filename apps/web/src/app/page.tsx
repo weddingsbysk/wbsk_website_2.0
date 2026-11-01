@@ -1,5 +1,5 @@
 import "@wbsk/ui/css/home.css";
-import { CoverVideo, Letterbox, Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
+import { CoverVideo, HeroDrift, Letterbox, Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
 import { EnquiryForm } from "../components/EnquiryForm";
 import { Counter, FeaturedRow, FilmStack, ReactionRow, ReviewsLoop } from "../components/HomeSections";
 import { OpeningIntro } from "../components/OpeningIntro";
@@ -19,6 +19,7 @@ export default async function HomePage() {
           ) : null}
           <CoverVideo desktop={home.videoDesktop} phone={home.videoPhone} label="the WBSK film" />
         </div>
+        <HeroDrift />
         <div className="wbsk-hero__text wbsk-container">
           <h1 className="wbsk-display wbsk-measure">
             <TitleWords text={home.heroLine ?? "Weddings By Siddhant Kapoor"} />

@@ -114,6 +114,9 @@
     font-size: var(--text-small);
   }
   /* The film stack (Decision 04). */
+  .wbsk-stack {
+    overflow-x: clip;
+  }
   .wbsk-stack__cards {
     position: relative;
     aspect-ratio: 16 / 9;
@@ -125,6 +128,12 @@
     inset: 0;
     transform-origin: left center;
     transition: transform 0.8s var(--travel), opacity 0.6s var(--settle), filter 0.6s var(--settle);
+  }
+  .wbsk-stack[data-settled="false"] .wbsk-stack__card[data-place="1"] {
+    transform: translateX(26%) scale(0.98);
+  }
+  .wbsk-stack[data-settled="false"] .wbsk-stack__card[data-place="2"] {
+    transform: translateX(44%) scale(0.95);
   }
   .wbsk-stack__card[data-place="0"] {
     z-index: 3;

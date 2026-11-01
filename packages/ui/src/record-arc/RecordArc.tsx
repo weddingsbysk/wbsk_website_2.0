@@ -315,7 +315,9 @@ export function RecordArc({ destinations, navigate }: Props) {
       };
 
       const onWheel = (event: WheelEvent) => {
-        if (opened || !introDone) {
+        // Until the arc has introduced itself, scrolling simply moves the page, so nobody is held up.
+        if (!introDone) return;
+        if (opened) {
           event.preventDefault();
           return;
         }

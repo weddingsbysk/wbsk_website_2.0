@@ -45,12 +45,17 @@ const simplePage = (name: string, title: string, fields: ReturnType<typeof defin
 
 export const weddingsPage = simplePage("weddingsPage", "Weddings page", [
   defineField({ name: "intro", title: "Intro sentence", type: "string" }),
+  defineField({ name: "closingLine", title: "Closing line", type: "string", description: 'Empty reads "Tell us about your wedding".' }),
 ]);
 export const filmsPage = simplePage("filmsPage", "Films page", [
   defineField({ name: "intro", title: "Intro line", type: "string" }),
+  defineField({ name: "closingLead", title: "Closing question", type: "string", description: 'Empty reads "Want a film like this?".' }),
+  defineField({ name: "closingLine", title: "Closing line", type: "string", description: 'Empty reads "Tell us about your wedding".' }),
 ]);
 export const teamPage = simplePage("teamPage", "Our team page", [
   defineField({ name: "studioLine", title: "Studio line", type: "string" }),
+  defineField({ name: "joinLine", title: "Careers invitation", type: "string", description: 'Empty reads "Want to join us?".' }),
+  defineField({ name: "closingLine", title: "Closing line", type: "string", description: 'Empty reads "Tell us about your wedding".' }),
 ]);
 export const careersPage = simplePage("careersPage", "Careers page", [
   defineField({ name: "intro", type: "text", rows: 3 }),
@@ -128,6 +133,8 @@ export const siteSettings = defineType({
     defineField({ name: "formEndpoint", title: "Form web address", type: "url", group: "contact", description: "The web app address from the Enquiries Sheet's script, pasted once during setup." }),
     defineField({ name: "backupWhatsApp", title: "Backup WhatsApp number", type: "string", group: "contact", description: "Shown if a form can't send. Filled in by the team." }),
     defineField({ name: "backupEmail", title: "Backup email", type: "string", group: "contact" }),
+    defineField({ name: "publishLinkExpires", title: "Publish link expires", type: "date", group: "general", description: "The GitHub token behind Publish lasts a year. The home screen warns a month before." }),
+    defineField({ name: "catalogueCounter", type: "number", hidden: true, readOnly: true }),
     defineField({ name: "rebuildRequested", type: "datetime", hidden: true, readOnly: true }),
     defineField({ name: "privacyPolicy", title: "Privacy policy", type: "text", rows: 16, group: "privacy" }),
   ],

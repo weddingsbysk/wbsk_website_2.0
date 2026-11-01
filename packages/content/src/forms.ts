@@ -37,7 +37,7 @@ const PHONE_DIGITS = 7;
 const MISSING: Record<string, string> = {
   names: "Add your names.",
   name: "Add your name.",
-  date: "Add a date. A month is enough.",
+  date: "Add your wedding date — a month is enough.",
   place: "Add a place.",
   role: "Choose the role you're applying for.",
   experience: "Choose your years of experience.",
@@ -56,10 +56,15 @@ export function validateForm(config: FormConfig, values: FormValues, consented: 
   for (const question of questions) {
     const value = asText(values[question.key]);
     if (!value) {
-      if (question.required) errors[question.key] = MISSING[question.key] ?? `Add ${question.label.toLowerCase()}.`;
+      if (question.required) {
+        errors[question.key] =
+          question.key === "date" && config.kind === "preWedding"
+            ? "Add when you're thinking — a month is enough."
+            : (MISSING[question.key] ?? `Add ${question.label.toLowerCase()}.`);
+      }
       continue;
     }
-    if (question.kind === "email" && !EMAIL.test(value)) errors[question.key] = "Check the email. It looks incomplete.";
+    if (question.kind === "email" && !EMAIL.test(value)) errors[question.key] = "Check the email — it looks incomplete.";
     if (question.kind === "phone" && value.replace(/\D/g, "").length < PHONE_DIGITS) {
       errors[question.key] = "Check the phone number. It looks too short.";
     }

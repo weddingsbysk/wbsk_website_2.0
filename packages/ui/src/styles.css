@@ -1426,6 +1426,12 @@
     html[data-page-transition]::view-transition-old(story-label) {
       animation: wbsk-out 0.2s var(--travel) both;
     }
+    html[data-page-transition="records"]::view-transition-old(root) {
+      animation: wbsk-out 0.8s ease-in-out both;
+    }
+    html[data-page-transition="records"]::view-transition-new(root) {
+      animation: wbsk-fadein 0.5s 0.6s var(--settle) both;
+    }
     html[data-page-transition="next"]::view-transition-old(root) {
       z-index: 2;
       animation: wbsk-slide-out 0.75s var(--travel) both;
@@ -1488,9 +1494,13 @@
     margin: 0;
   }
 
+  /* A little more picture than frame, so it can drift at 15% of the scroll (Decision 12). */
   .wbsk-hero__media {
     position: absolute;
-    inset: 0;
+    top: -15%;
+    right: 0;
+    bottom: 0;
+    left: 0;
   }
   .wbsk-covervideo {
     position: absolute;
@@ -1527,11 +1537,24 @@
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
       /* The title drifts up and dims as the hero leaves (Decision 12). */
+      .wbsk-hero {
+        view-timeline: --wbsk-hero block;
+      }
       .wbsk-hero__text {
         animation: wbsk-hero-leave linear both;
-        animation-timeline: view();
+        animation-timeline: --wbsk-hero;
         animation-range: exit 0% exit 70%;
       }
+      .wbsk-hero__media {
+        animation: wbsk-hero-drift linear both;
+        animation-timeline: --wbsk-hero;
+        animation-range: exit 0% exit 100%;
+      }
+    }
+  }
+  @keyframes wbsk-hero-drift {
+    to {
+      transform: translateY(13%);
     }
   }
   @keyframes wbsk-hero-leave {

@@ -1,6 +1,7 @@
 import { samplesStillShowing } from "@wbsk/content";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { MANAGER_NAME } from "../brand";
+import { MANAGER_NAME, SITE_ADDRESS } from "../brand";
+import { minutesAgo, useWebsiteStatus } from "../tools/useWebsiteStatus";
 import { useClient, useRouter } from "./studio-hooks";
 
 const API = "2026-11-01";
@@ -36,11 +37,12 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function HomeTool() {
+  const website = useWebsiteStatus();
   const client = useClient({ apiVersion: API });
   const router = useRouter();
   const [waiting, setWaiting] = useState<Row[]>([]);
   const [worth, setWorth] = useState<{ text: string; intent?: [string, string] }[]>([]);
-  const [last, setLast] = useState<{ title: string; at: string } | null>(null);
+  const [last, setLast] = useState<{ title: string; at: string; href: string } | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -50,24 +52,26 @@ export function HomeTool() {
         unapproved: { _id: string; names?: string }[];
         empty: { _id: string; name?: string }[];
         items: { _type: string; _createdAt: string; isSample?: boolean }[];
-        settings: { googleUpdated?: string; backupWhatsApp?: string; backupEmail?: string } | null;
+        settings: { googleUpdated?: string; backupWhatsApp?: string; backupEmail?: string; publishLinkExpires?: string; formEndpoint?: string } | null;
         missing: number;
-        last: { title?: string; _updatedAt: string } | null;
+        missingIn?: string;
+        last: { title?: string; _updatedAt: string; _type?: string; slug?: string } | null;
       }>(
         `{
           "drafts": *[_id in path("drafts.**") && _type in ["wedding","destination","preWeddingShoot","film"]]{_id,_type,"title":coalesce(name,names,firstName+" & "+secondName,"Untitled")}[0...6],
           "unapproved": *[_type=="review" && approved!=true]{_id,names}[0...6],
           "empty": *[_type=="destination" && !(_id in path("drafts.**")) && count(*[_type=="preWeddingShoot" && references(^._id) && hidden!=true && !(_id in path("drafts.**"))])==0]{_id,name}[0...6],
           "items": *[_type in $kinds && !(_id in path("drafts.**")) && hidden!=true]{_type,_createdAt,isSample},
-          "settings": *[_id=="siteSettings"][0]{googleUpdated,backupWhatsApp,backupEmail},
-          "missing": count(*[_id in path("drafts.**") && _type=="wedding"].gallery[!defined(description)]),
-          "last": *[_type in $kinds && !(_id in path("drafts.**"))]|order(_updatedAt desc)[0]{"title":coalesce(name,names,title,firstName+" & "+secondName),_updatedAt}
+          "settings": *[_id=="siteSettings"][0]{googleUpdated,backupWhatsApp,backupEmail,publishLinkExpires,formEndpoint},
+          "missing": count(*[_type=="wedding"].gallery[!defined(description)]),
+          "missingIn": *[_type=="wedding" && count(gallery[!defined(description)]) > 0][0]._id,
+          "last": *[_type in $kinds && !(_id in path("drafts.**"))]|order(_updatedAt desc)[0]{_type,"slug":address.current,_updatedAt,"title":coalesce(name,names,title,firstName+" & "+secondName),_updatedAt}
         }`,
         { kinds: SAMPLE_KINDS },
       );
       if (!live) return;
       setWaiting([
-        ...data.drafts.map((d) => ({ id: d._id.replace(/^drafts\./, ""), type: d._type, title: d.title ?? "Untitled", note: "Draft" })),
+        ...data.drafts.map((d) => ({ id: d._id.replace(/^drafts\./, ""), type: d._type, title: d.title ?? "Untitled", note: "Draft · open it to see what's left" })),
         ...data.unapproved.map((r) => ({ id: r._id.replace(/^drafts\./, ""), type: "review", title: `Review from ${r.names ?? "a couple"}`, note: "Needs approval" })),
         ...data.empty.map((d) => ({ id: d._id, type: "destination", title: d.name ?? "Destination", note: "Shows on the records once it has a shoot" })),
       ]);
@@ -76,11 +80,24 @@ export function HomeTool() {
       if (!updated || Date.now() - new Date(updated).getTime() > 60 * 86400000) notes.push({ text: updated ? "Google rating not updated for 60+ days" : "Google rating not filled in", intent: ["siteSettings", "siteSettings"] });
       if (!data.settings?.backupWhatsApp) notes.push({ text: "Backup WhatsApp number is empty", intent: ["siteSettings", "siteSettings"] });
       if (!data.settings?.backupEmail) notes.push({ text: "Backup email is empty", intent: ["siteSettings", "siteSettings"] });
-      if (data.missing) notes.push({ text: `${data.missing} gallery photos have no description` });
+      const expires = data.settings?.publishLinkExpires;
+      if (expires && new Date(expires).getTime() - Date.now() < 30 * 86400000) notes.push({ text: "The Publish link expires within a month. Ask Siddhant to renew it.", intent: ["siteSettings", "siteSettings"] });
+      if (!data.settings?.formEndpoint) notes.push({ text: "The forms aren't connected to the Sheet yet", intent: ["siteSettings", "siteSettings"] });
+      if (data.missing) notes.push({ text: `${data.missing} gallery photos have no description`, intent: ["wedding", data.missingIn ?? ""] });
       const showing = SAMPLE_KINDS.reduce((sum, kind) => sum + samplesStillShowing(data.items.filter((i) => i._type === kind)), 0);
       if (showing) notes.push({ text: `Samples still showing: ${showing}` });
       setWorth(notes);
-      setLast(data.last ? { title: data.last.title ?? "Item", at: data.last._updatedAt } : null);
+      setLast(
+        data.last
+          ? {
+              title: data.last.title ?? "Item",
+              at: data.last._updatedAt,
+              href: data.last.slug
+                ? `${SITE_ADDRESS}${data.last._type === "wedding" ? "/client" : "/pre-wedding"}/${data.last.slug}/`
+                : SITE_ADDRESS,
+            }
+          : null,
+      );
     })();
     return () => {
       live = false;
@@ -135,7 +152,25 @@ export function HomeTool() {
           </Block>
         </div>
         <Block title="Last published">
-          {last ? <p style={{ margin: 0 }}>{last.title} · {new Date(last.at).toLocaleString()}</p> : <p style={{ margin: 0 }}>Nothing published yet.</p>}
+          {last ? (
+            <p style={{ margin: 0 }}>
+              {last.title} · {minutesAgo(last.at)} ·{" "}
+              {website.liveSince && website.liveSince > last.at ? (
+                <>
+                  Live on the website ✓{" "}
+                  <a href={last.href} target="_blank" rel="noreferrer" style={{ color: "#7A5C17" }}>
+                    Open page ↗
+                  </a>
+                </>
+              ) : website.state === "failed" ? (
+                "The website didn't update. Your work is safe."
+              ) : (
+                "Publishing… the website updates in about 10 minutes."
+              )}
+            </p>
+          ) : (
+            <p style={{ margin: 0 }}>Nothing published yet.</p>
+          )}
         </Block>
       </div>
     </div>

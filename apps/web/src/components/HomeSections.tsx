@@ -3,7 +3,7 @@
 import "@wbsk/ui/css/home.css";
 import { ClientCard, FilmPlayer, SideRow, WbskLink, type WeddingSummary, type WbskImageSource } from "@wbsk/ui";
 import { prefersReducedMotion } from "@wbsk/ui/motion";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 
 const never = () => () => {};
 const readReduced = () => prefersReducedMotion();
@@ -95,7 +95,23 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
   const [front, setFront] = useState(0);
   const [playing, setPlaying] = useState<string | null>(null);
   const drag = useRef<number | null>(null);
+  const stackRef = useRef<HTMLDivElement>(null);
   const count = films.length;
+
+  // The cards settle into the stack as the section comes into view, once (Decision 04).
+  useEffect(() => {
+    const stack = stackRef.current;
+    if (!stack) return;
+    if (stack.getBoundingClientRect().top < window.innerHeight * 0.8) return;
+    stack.dataset.settled = "false";
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting) return;
+      observer.disconnect();
+      delete stack.dataset.settled;
+    }, { threshold: 0.3 });
+    observer.observe(stack);
+    return () => observer.disconnect();
+  }, []);
   const go = (by: number) => {
     setPlaying(null);
     setFront((current) => (current + by + count) % count);
@@ -108,7 +124,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
       <ul className="wbsk-filmrow" aria-label="Featured films">
         {films.map((film) => (
           <li key={film.id}>
-            <FilmPlayer videoId={film.videoId} poster={film.poster} title={film.names} active={playing === film.id} onPlay={() => setPlaying(film.id)} />
+            <FilmPlayer videoId={film.videoId} poster={film.poster} title={film.names} active={playing === film.id} onPlay={() => setPlaying(film.id)} onStop={() => setPlaying((p) => (p === film.id ? null : p))} />
             <FilmCaption film={film} />
           </li>
         ))}
@@ -117,7 +133,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
   }
 
   return (
-    <div className="wbsk-stack" role="group" aria-roledescription="carousel" aria-label="Featured films">
+    <div ref={stackRef} className="wbsk-stack" role="group" aria-roledescription="carousel" aria-label="Featured films">
       <div
         className="wbsk-stack__cards"
         onPointerDown={(event) => {
@@ -147,6 +163,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
                 sizes="(min-width: 1024px) 70vw, 92vw"
                 active={playing === film.id}
                 onPlay={() => setPlaying(film.id)}
+                onStop={() => setPlaying((p) => (p === film.id ? null : p))}
               />
             </div>
           );
@@ -227,6 +244,7 @@ export function ReviewsLoop({ reviews }: { reviews: ReviewItem[] }) {
   const [reading, setReading] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const swipeRef = useRef<number | null>(null);
   const reduced = useReducedMotion();
   const count = reviews.length;
   const running = !reduced && !held && !stopped && !userPaused && !reading && onScreen && count > 1;
@@ -253,6 +271,16 @@ export function ReviewsLoop({ reviews }: { reviews: ReviewItem[] }) {
     setIndex((current) => (current + by + count) % count);
   };
   const needsMore = Boolean(review.highlight) || review.text.length > EXCERPT;
+  const swipe = {
+    onPointerDown: (event: PointerEvent<HTMLElement>) => {
+      swipeRef.current = event.clientX;
+    },
+    onPointerUp: (event: PointerEvent<HTMLElement>) => {
+      const start = swipeRef.current;
+      swipeRef.current = null;
+      if (start !== null && Math.abs(event.clientX - start) > SWIPE) go(event.clientX < start ? 1 : -1);
+    },
+  };
 
   return (
     <div
@@ -263,7 +291,7 @@ export function ReviewsLoop({ reviews }: { reviews: ReviewItem[] }) {
       onFocusCapture={() => setHeld(true)}
       onBlurCapture={() => setHeld(false)}
     >
-      <div className="wbsk-reviews__slide" key={review.id} aria-live={running ? "off" : "polite"}>
+      <div className="wbsk-reviews__slide" key={review.id} aria-live={running ? "off" : "polite"} {...swipe}>
         <Stars rating={review.rating} />
         <blockquote className="wbsk-reviews__quote">{excerpt(review)}</blockquote>
         {needsMore ? (
@@ -271,6 +299,7 @@ export function ReviewsLoop({ reviews }: { reviews: ReviewItem[] }) {
             type="button"
             className="wbsk-link wbsk-morelink wbsk-textbutton"
             onClick={() => {
+              setStopped(true);
               setReading(true);
               dialogRef.current?.showModal();
             }}
@@ -281,6 +310,11 @@ export function ReviewsLoop({ reviews }: { reviews: ReviewItem[] }) {
         <p className="wbsk-reviews__who">
           {review.names} · {review.place}
         </p>
+        {review.href ? (
+          <WbskLink href={review.href} className="wbsk-link wbsk-morelink">
+            Read their story →
+          </WbskLink>
+        ) : null}
       </div>
       <div className="wbsk-reviews__controls">
         <button type="button" className="wbsk-roundbutton" aria-label="Previous review" onClick={() => go(-1)}>
@@ -330,7 +364,7 @@ export function ReviewsLoop({ reviews }: { reviews: ReviewItem[] }) {
         <button type="button" className="wbsk-iconbutton wbsk-readview__close" aria-label="Close review" onClick={() => dialogRef.current?.close()}>
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" /></svg>
         </button>
-        <div className="wbsk-readview__inner" key={review.id}>
+        <div className="wbsk-readview__inner" key={review.id} {...swipe}>
           <Stars rating={review.rating} />
           <p className="wbsk-readview__text">{review.text}</p>
           <p className="wbsk-reviews__who">
@@ -380,6 +414,7 @@ export function ReactionRow({ reactions }: { reactions: ReactionItem[] }) {
             sizes="(min-width: 1024px) 22vw, 60vw"
             active={playing === reaction.id}
             onPlay={() => setPlaying(reaction.id)}
+            onStop={() => setPlaying((p) => (p === reaction.id ? null : p))}
           />
           <p className="wbsk-reaction__who">
             {reaction.names} · {reaction.place}

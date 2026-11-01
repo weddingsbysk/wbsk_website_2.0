@@ -64,8 +64,8 @@ export async function getDestinationPages() {
 
 async function readDestinations() {
   const data = await client.fetch<(DestinationResult & { status?: string; seo?: Seo; hidden?: boolean })[]>(/* groq */ `*[
-    _type == "destination" && hidden != true &&
-    count(*[_type == "preWeddingShoot" && hidden != true && references(^._id)]) > 0
+    _type == "destination" && (status == "removed" || (hidden != true &&
+    count(*[_type == "preWeddingShoot" && hidden != true && references(^._id)]) > 0))
   ] | order(order asc, _createdAt asc) {
     status,
     seo{title, description, "image": image.asset->url},
@@ -87,7 +87,8 @@ async function readDestinations() {
     name: item.name,
     slug: item.slug,
     catalogue: item.catalogueNumber ?? "",
-    artworkUrl: item.artworkUrl,
+    // Sanity serves it in a lighter format and keeps its transparency (Decision 08).
+    artworkUrl: item.artworkUrl ? `${item.artworkUrl}?w=800&auto=format` : undefined,
     cover: toImage(item.coverDesktop),
     coverPhone: toImage(item.coverPhone),
   }));
@@ -208,7 +209,7 @@ export function getWeddings() {
 }
 
 export function getWeddingsIntro() {
-  return client.fetch<string | null>(/* groq */ `*[_id == "weddingsPage"][0].intro`);
+  return client.fetch<{ intro?: string; closingLine?: string } | null>(/* groq */ `*[_id == "weddingsPage"][0]{ intro, closingLine }`);
 }
 
 type FormResult = Omit<FormConfig, "kind">;
@@ -232,6 +233,11 @@ export function getOpenRoles() {
   ).then((roles) => visibleWithSamples(roles));
 }
 
+/** With no open roles the question can't be answered, so it stops being required. */
+function withRoles(questions: FormConfig["questions"], titles: string[]) {
+  return questions.map((q) => (q.kind === "role" ? { ...q, choices: titles, required: q.required && titles.length > 0 } : q));
+}
+
 /** Everything a slide-up panel needs, published as one small file (see app/forms.json). */
 export async function getFormsBundle() {
   const [wedding, preWedding, careers, packages, settings, roles] = await Promise.all([
@@ -251,7 +257,7 @@ export async function getFormsBundle() {
       preWedding,
       careers: {
         ...careers,
-        questions: careers.questions.map((q) => (q.kind === "role" ? { ...q, choices: titles } : q)),
+        questions: withRoles(careers.questions, titles),
       },
     },
     packages,
@@ -306,10 +312,14 @@ async function readFilms() {
 export async function getFilmsPage() {
   const [films, intro] = await Promise.all([
     readFilms(),
-    client.fetch<string | null>(/* groq */ `*[_id == "filmsPage"][0].intro`),
+    client.fetch<{ intro?: string; closingLead?: string; closingLine?: string } | null>(
+      /* groq */ `*[_id == "filmsPage"][0]{ intro, closingLead, closingLine }`,
+    ),
   ]);
   return {
-    intro,
+    intro: intro?.intro,
+    closingLead: intro?.closingLead,
+    closingLine: intro?.closingLine,
     films: films
       .filter((film) => film.showOnFilmsPage !== false)
       .map(({ id, videoId, poster, names, place, kind, line, href }) => ({ id, videoId, poster, names, place, kind, line, href })),
@@ -442,13 +452,17 @@ export async function getHomepageContent() {
 export async function getTeamPage() {
   const data = await client.fetch<{
     line: string | null;
+    page: { joinLine?: string; closingLine?: string } | null;
     members: { _createdAt: string; isSample?: boolean; name: string; role: string; lines?: string; portrait: ImageResult }[];
   }>(/* groq */ `{
     "line": *[_id == "teamPage"][0].studioLine,
+    "page": *[_id == "teamPage"][0]{ joinLine, closingLine },
     "members": *[_type == "teamMember" && hidden != true] | order(order asc){ _createdAt, isSample, name, role, lines, portrait${imageFields} }
   }`);
   return {
     line: data.line,
+    joinLine: data.page?.joinLine,
+    closingLine: data.page?.closingLine,
     members: visibleWithSamples(data.members).map((member) => ({
       name: member.name,
       role: member.role,
@@ -464,7 +478,19 @@ export async function getCareersPage() {
     getOpenRoles(),
     getForm("careers"),
   ]);
-  return { intro, roles, form };
+  const titles = roles.map((role) => role.title);
+  return { intro, roles, form: { ...form, questions: withRoles(form.questions, titles) } };
+}
+
+/** Footer links, from Site settings (Decision 03); each shows once it's filled in. */
+export async function getSocialLinks() {
+  const settings = await client.fetch<{ instagram?: string; youtube?: string } | null>(
+    /* groq */ `*[_id == "siteSettings"][0]{ instagram, youtube }`,
+  );
+  return [
+    settings?.instagram ? { label: "Instagram", href: settings.instagram } : null,
+    settings?.youtube ? { label: "YouTube", href: settings.youtube } : null,
+  ].filter((link): link is { label: string; href: string } => link !== null);
 }
 
 export function getPrivacyPolicy() {

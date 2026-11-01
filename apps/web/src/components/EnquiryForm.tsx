@@ -28,6 +28,10 @@ export function EnquiryForm({ config, roles }: { config: FormConfig; roles?: str
   const trapRef = useRef<HTMLInputElement>(null);
   const noticeRef = useRef<HTMLDivElement>(null);
   const questions = shownQuestions(config.questions);
+  const consentMatch = config.consent.match(/^(.*?)(privacy policy)(.*)$/is);
+  const consentBefore = consentMatch ? consentMatch[1] : `${config.consent} `;
+  const consentLink = consentMatch ? consentMatch[2] : "Privacy policy";
+  const consentAfter = consentMatch ? consentMatch[3] : "";
 
   useEffect(() => {
     startedAt.current = clockNow();
@@ -51,7 +55,10 @@ export function EnquiryForm({ config, roles }: { config: FormConfig; roles?: str
     }
   };
 
-  const focusNotice = () => requestAnimationFrame(() => noticeRef.current?.focus());
+  // The thank-you or failure message takes the focus, once it's on the page (Decision 16).
+  useEffect(() => {
+    if (state === "sent" || state === "failed") noticeRef.current?.focus();
+  }, [state]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -81,7 +88,6 @@ export function EnquiryForm({ config, roles }: { config: FormConfig; roles?: str
       setBackup({ whatsApp: contact?.backupWhatsApp ?? null, email: contact?.backupEmail ?? null });
       setState("failed");
     }
-    focusNotice();
   };
 
   if (state === "sent") {
@@ -125,7 +131,7 @@ export function EnquiryForm({ config, roles }: { config: FormConfig; roles?: str
               const chosen = values[question.key];
               const multiple = question.kind === "many";
               return (
-                <fieldset key={question.key} className="wbsk-field wbsk-field--choices" data-field={question.key} data-wide={wide || undefined} aria-describedby={describedBy}>
+                <fieldset key={question.key} className="wbsk-field wbsk-field--choices" data-field={question.key} data-wide={wide || undefined} data-error={error ? true : undefined} aria-describedby={describedBy}>
                   <legend className="wbsk-field__label">
                     {question.label}
                     {question.required ? <span className="wbsk-sr"> (required)</span> : null}
@@ -205,7 +211,12 @@ export function EnquiryForm({ config, roles }: { config: FormConfig; roles?: str
               }}
             />
             <span>
-              {config.consent} <WbskLink href="/privacy/" className="wbsk-consent__link">Privacy policy</WbskLink>
+              {/* The link sits on the words already in the sentence, so it's never said twice. */}
+              {consentBefore}
+              <WbskLink href="/privacy/" className="wbsk-consent__link">
+                {consentLink}
+              </WbskLink>
+              {consentAfter}
             </span>
           </label>
           {errors.consent ? <p id={`${base}-consent-error`} className="wbsk-field__error">{errors.consent}</p> : null}

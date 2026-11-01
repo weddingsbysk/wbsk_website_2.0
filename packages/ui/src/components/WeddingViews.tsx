@@ -106,7 +106,7 @@ export function StoryCover({
         <div className="wbsk-storycover__label">
           <p className="wbsk-label">{place}</p>
           <h1 className="wbsk-h1">{names}</h1>
-          <p className="wbsk-card__meta">{meta}</p>
+          {meta ? <p className="wbsk-card__meta">{meta}</p> : null}
         </div>
       </div>
     </section>

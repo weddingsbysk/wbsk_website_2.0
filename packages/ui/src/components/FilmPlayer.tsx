@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { WbskImageSource } from "../image";
 import { WbskImage } from "./WbskImage";
+
+const ONE_AT_A_TIME = "wbsk-film-play";
 
 /**
  * An uploaded poster with a play button. YouTube's player and its cookies load only on the press,
@@ -16,6 +18,7 @@ export function FilmPlayer({
   sizes = "(min-width: 1024px) 60vw, 100vw",
   active,
   onPlay,
+  onStop,
   priority,
 }: {
   videoId: string;
@@ -26,17 +29,45 @@ export function FilmPlayer({
   /** Given by a parent that keeps only one film playing at a time. */
   active?: boolean;
   onPlay?: () => void;
+  onStop?: () => void;
   /** The first thing on the page, so its poster loads ahead of everything else. */
   priority?: boolean;
 }) {
   const [own, setOwn] = useState(false);
   const playing = active ?? own;
+  const id = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
   const start = () => {
+    window.dispatchEvent(new CustomEvent(ONE_AT_A_TIME, { detail: id }));
     setOwn(true);
     onPlay?.();
   };
+
+  // Only one film ever plays, and it stops when scrolled away (Decisions 06 and 12).
+  useEffect(() => {
+    if (!playing || !rootRef.current) return;
+    const stop = () => {
+      setOwn(false);
+      onStop?.();
+    };
+    const onOther = (event: Event) => {
+      if ((event as CustomEvent<string>).detail !== id) stop();
+    };
+    window.addEventListener(ONE_AT_A_TIME, onOther);
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting) stop();
+    });
+    observer.observe(rootRef.current);
+    return () => {
+      window.removeEventListener(ONE_AT_A_TIME, onOther);
+      observer.disconnect();
+    };
+    // onStop is a fresh function each render; what matters is whether this film is playing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, id]);
+
   return (
-    <div className="wbsk-film" data-vertical={vertical || undefined}>
+    <div ref={rootRef} className="wbsk-film" data-vertical={vertical || undefined}>
       {playing ? (
         <iframe
           src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&playsinline=1`}

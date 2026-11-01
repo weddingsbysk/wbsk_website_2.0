@@ -157,6 +157,35 @@ test("without scripts every photo still shows", async ({ browser }) => {
   await context.close();
 });
 
+test("only one film plays at a time, across a page", async ({ page }) => {
+  await page.goto("./pre-wedding/");
+  const films = page.locator(".wbsk-offering__films .wbsk-film");
+  await films.nth(0).locator(".wbsk-film__play").click();
+  await expect(films.nth(0).locator("iframe")).toHaveCount(1);
+  await films.nth(1).locator(".wbsk-film__play").click();
+  await expect(films.nth(1).locator("iframe")).toHaveCount(1);
+  await expect(films.nth(0).locator("iframe")).toHaveCount(0);
+});
+
+test("scrolling past the records before they've introduced themselves isn't held up", async ({ page, browserName }) => {
+  test.skip(browserName === "webkit" || (page.viewportSize()?.width ?? 0) < 760, "Mouse wheel, computers.");
+  await page.goto("./pre-wedding/");
+  const box = (await page.locator(".wbsk-arc").boundingBox())!;
+  await page.mouse.move(100, Math.min(box.y + 20, page.viewportSize()!.height - 10));
+  const before = await page.evaluate(() => scrollY);
+  await page.evaluate((top) => scrollTo({ top: top - innerHeight + 60, behavior: "instant" }), box.y);
+  await page.mouse.wheel(0, 120);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(before);
+});
+
+test("the consent line links its own words once, and the footer shows Instagram", async ({ page }) => {
+  await page.goto("./careers/");
+  const consent = page.locator(".wbsk-consent");
+  await expect(consent.getByRole("link")).toHaveCount(1);
+  await expect(consent).not.toContainText(/privacy policy.*privacy policy/i);
+  await expect(page.locator("footer").getByRole("link", { name: /Instagram/ })).toBeVisible();
+});
+
 test("Privacy explains what happens to details", async ({ page }) => {
   await page.goto("./privacy/");
   await expect(page.locator(".wbsk-prose")).toContainText("What we collect");

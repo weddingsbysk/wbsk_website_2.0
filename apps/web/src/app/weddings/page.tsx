@@ -7,7 +7,7 @@ import { getWeddings, getWeddingsIntro, mainPageMetadata } from "../../lib/conte
 export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("weddingsPage", "Weddings");
 
 export default async function Page() {
-  const [{ listed }, intro] = await Promise.all([getWeddings(), getWeddingsIntro()]);
+  const [{ listed }, page] = await Promise.all([getWeddings(), getWeddingsIntro()]);
   const [lead, ...rest] = listed;
   // Cards only get what they show: the full stories and galleries stay out of this page.
   const cards = rest.map(({ slug, href, first, second, place, venue, monthYear, shortDescription, cardPhoto }) => ({
@@ -26,7 +26,7 @@ export default async function Page() {
       <section className="wbsk-container wbsk-weddings__intro">
         <p className="wbsk-label">Weddings</p>
         <h1 className="wbsk-h1 wbsk-measure">
-          <TitleWords text={intro ?? "Every wedding here belongs to two people who trusted us with the quiet parts too."} />
+          <TitleWords text={page?.intro ?? "Every wedding here belongs to two people who trusted us with the quiet parts too."} />
         </h1>
       </section>
       {lead ? (
@@ -50,7 +50,7 @@ export default async function Page() {
         <WeddingsGrid weddings={cards} />
       </section>
       <section className="wbsk-container wbsk-closingline">
-        <EnquireButton statement>Tell us about your wedding</EnquireButton>
+        <EnquireButton statement>{page?.closingLine ?? "Tell us about your wedding"}</EnquireButton>
       </section>
     </>
   );

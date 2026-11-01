@@ -1,5 +1,5 @@
 import "@wbsk/ui/css/pages.css";
-import { CoverVideo, FilmPlayer, Gallery, GalleryLightbox, Reveal, TitleWords, WbskImage } from "@wbsk/ui";
+import { CoverVideo, HeroDrift, FilmPlayer, Gallery, GalleryLightbox, Reveal, TitleWords, WbskImage } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquiryForm } from "../../components/EnquiryForm";
 import { PreWeddingArc } from "../../components/PreWeddingArc";
@@ -21,6 +21,7 @@ export default async function Page() {
           ) : null}
           <CoverVideo desktop={page.videoDesktop} phone={page.videoPhone} label="the pre-wedding film" />
         </div>
+        <HeroDrift />
         <div className="wbsk-hero__text wbsk-container">
           <h1 className="wbsk-display">
             <TitleWords text="Pre-wedding" />

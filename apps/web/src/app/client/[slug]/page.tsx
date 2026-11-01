@@ -89,17 +89,21 @@ export default async function Page({ params }: Params) {
         </section>
       ) : null}
 
-      {highlightId && wedding.highlight?.poster ? (
+      {(highlightId && wedding.highlight?.poster) || wedding.reels.length ? (
         <section data-tone="dark" className="wbsk-section">
           <div className="wbsk-container wbsk-cinema">
-            <Reveal>
-              <h2 className="wbsk-h2">The film</h2>
-            </Reveal>
-            <Reveal delayIndex={1}>
-              <FilmPlayer videoId={highlightId} poster={wedding.highlight.poster} title={`highlight film for ${names}`} />
-            </Reveal>
+            {highlightId && wedding.highlight?.poster ? (
+              <>
+                <Reveal>
+                  <h2 className="wbsk-h2">The film</h2>
+                </Reveal>
+                <Reveal delayIndex={1}>
+                  <FilmPlayer videoId={highlightId} poster={wedding.highlight.poster} title={`highlight film for ${names}`} />
+                </Reveal>
+              </>
+            ) : null}
             {wedding.reels.length ? (
-              <ul className="wbsk-reels">
+              <ul className="wbsk-reels" aria-label="Instagram reels">
                 {wedding.reels.map((reel, index) => (
                   <li key={reel.url}>
                     <a className="wbsk-reel" href={reel.url} target="_blank" rel="noopener noreferrer">

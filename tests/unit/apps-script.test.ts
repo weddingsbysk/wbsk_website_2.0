@@ -33,6 +33,19 @@ describe("Sheet script", () => {
     expect(call<string[]>("missingAnswers", { questions: [] }, "careers", {})).toHaveLength(0);
   });
 
+  it("never lets an empty roles list block an application", () => {
+    const form = { questions: [{ key: "role", kind: "role", required: true }] };
+    expect(call<string[]>("missingAnswers", form, "careers", {})).toHaveLength(0);
+  });
+
+  it("treats a send within minutes from the same person as a repeat", () => {
+    // Dates made in the script's own context, as the Sheet's values are.
+    const earlier = vm.runInContext("new Date(0)", context);
+    expect(call("isQuickRepeat", earlier, 60 * 1000)).toBe(true);
+    expect(call("isQuickRepeat", earlier, 60 * 60 * 1000)).toBe(false);
+    expect(call("isQuickRepeat", "", 1000)).toBe(false);
+  });
+
   it("writes the three subject lines from Decision 27", () => {
     expect(call("alertSubject", "wedding", { names: "Meera & Arjun", date: "February 2027" })).toBe("New WBSK wedding enquiry — Meera & Arjun, February 2027");
     expect(call("alertSubject", "preWedding", { names: "Meera & Arjun", date: "March 2027" })).toBe("New WBSK pre-wedding enquiry — Meera & Arjun, March 2027");

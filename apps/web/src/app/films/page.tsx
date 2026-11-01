@@ -8,7 +8,7 @@ import { getFilmsPage, mainPageMetadata } from "../../lib/content";
 export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("filmsPage", "Films");
 
 export default async function Page() {
-  const { intro, films } = await getFilmsPage();
+  const { intro, closingLead, closingLine, films } = await getFilmsPage();
   return (
     <div data-tone="dark" className="wbsk-filmspage">
       <section className="wbsk-container wbsk-pagehead">
@@ -19,9 +19,9 @@ export default async function Page() {
       </section>
       <FilmsList films={films} />
       <section className="wbsk-container wbsk-closingband">
-        <p className="wbsk-lead">Want a film like this?</p>
+        <p className="wbsk-lead">{closingLead ?? "Want a film like this?"}</p>
         <div>
-          <EnquireButton statement>Tell us about your wedding</EnquireButton>
+          <EnquireButton statement>{closingLine ?? "Tell us about your wedding"}</EnquireButton>
         </div>
       </section>
     </div>

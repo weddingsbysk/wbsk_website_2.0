@@ -1,7 +1,9 @@
 import { sanityProject, shownQuestions, type FormQuestion } from "@wbsk/content";
-import { CoupleNames, Header, LinkProvider, StoryCover, type WbskImageSource, type WbskLinkProps } from "@wbsk/ui";
+import { CoupleNames, Gallery, Header, LinkProvider, StoryCover, type SanityImage, type WbskImageSource, type WbskLinkProps } from "@wbsk/ui";
 import { navItems } from "@wbsk/content";
 import logoUrl from "../../../web/public/wbsk-logo.svg";
+
+const PREVIEW_PHOTOS = 20;
 
 type DraftImage = { asset?: { _ref?: string }; description?: string; hotspot?: { x: number; y: number } } | undefined;
 export type DraftDocument = Record<string, unknown>;
@@ -37,6 +39,8 @@ function Shell({ children }: { children: React.ReactNode }) {
 function WeddingBody({ doc }: { doc: DraftDocument }) {
   const first = (doc.firstName as string) || "First name";
   const second = (doc.secondName as string) || "Second name";
+  const gallery = ((doc.gallery as DraftImage[]) ?? []).map(draftImage).filter((image): image is SanityImage => image?.kind === "sanity");
+  const posters = ["teaser", "highlight"].map((key) => draftImage((doc[key] as { poster?: DraftImage } | undefined)?.poster)).filter(Boolean);
   return (
     <>
       <StoryCover
@@ -49,6 +53,20 @@ function WeddingBody({ doc }: { doc: DraftDocument }) {
       <div className="wbsk-container wbsk-story">
         <p className="wbsk-lead wbsk-measure">{(doc.theirStory as string) || "Their story appears here as you type."}</p>
       </div>
+      {gallery.length ? (
+        <div className="wbsk-container">
+          <Gallery photos={gallery} limit={PREVIEW_PHOTOS} />
+        </div>
+      ) : null}
+      {posters.length ? (
+        <div data-tone="dark" className="wbsk-section">
+          <div className="wbsk-container wbsk-cinema">
+            {posters.map((poster) =>
+              poster?.kind === "sanity" ? <img key={poster.url} src={`${poster.url}?w=1200&auto=format`} alt="" style={{ width: "100%", borderRadius: 8 }} /> : null,
+            )}
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

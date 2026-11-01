@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
 import { SiteShell } from "../components/SiteShell";
+import { getSocialLinks } from "../lib/content";
 import { introDecisionScript } from "../lib/intro";
 import { isProduction, publicAsset, siteUrl } from "../lib/site";
 import "./globals.css";
@@ -38,7 +39,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#1F1914" };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const social = await getSocialLinks();
   return (
     <html
       lang="en"
@@ -51,7 +53,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: introDecisionScript(publicAsset("")) }} />
       </head>
       <body>
-        <SiteShell>{children}</SiteShell>
+        <SiteShell social={social}>{children}</SiteShell>
       </body>
     </html>
   );

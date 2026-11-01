@@ -16,6 +16,7 @@ export type DestinationFilm = {
 export function DestinationFilms({ films }: { films: DestinationFilm[] }) {
   const [playing, setPlaying] = useState<string | null>(null);
   const rowRef = useRef<HTMLUListElement>(null);
+  const dragRef = useRef<{ x: number; start: number; moved: boolean } | null>(null);
   useEffect(() => {
     const row = rowRef.current;
     if (!row) return;
@@ -33,7 +34,32 @@ export function DestinationFilms({ films }: { films: DestinationFilm[] }) {
     return () => observer.disconnect();
   }, []);
   return (
-    <ul ref={rowRef} className="wbsk-carousel" aria-label="Films from this place" tabIndex={0}>
+    <ul
+      ref={rowRef}
+      className="wbsk-carousel"
+      aria-label="Films from this place"
+      tabIndex={0}
+      onPointerDown={(event) => {
+        if (event.pointerType === "mouse" && rowRef.current) {
+          dragRef.current = { x: event.clientX, start: rowRef.current.scrollLeft, moved: false };
+        }
+      }}
+      onPointerMove={(event) => {
+        const drag = dragRef.current;
+        if (!drag || !rowRef.current) return;
+        const distance = event.clientX - drag.x;
+        if (Math.abs(distance) > 6) drag.moved = true;
+        if (drag.moved) rowRef.current.scrollLeft = drag.start - distance;
+      }}
+      onPointerUp={() => window.setTimeout(() => (dragRef.current = null))}
+      onPointerLeave={() => (dragRef.current = null)}
+      onClickCapture={(event) => {
+        if (dragRef.current?.moved) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }}
+    >
       {films.map((film) => (
         <li key={film.id} className="wbsk-carousel__film" data-film={film.id}>
           <div className="wbsk-carousel__frame">
@@ -44,6 +70,7 @@ export function DestinationFilms({ films }: { films: DestinationFilm[] }) {
               sizes="(min-width: 1024px) 80vw, 92vw"
               active={playing === film.id}
               onPlay={() => setPlaying(film.id)}
+              onStop={() => setPlaying((p) => (p === film.id ? null : p))}
             />
             {playing === film.id ? null : (
               <div className="wbsk-carousel__over">

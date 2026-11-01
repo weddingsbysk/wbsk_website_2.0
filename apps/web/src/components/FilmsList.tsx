@@ -66,6 +66,7 @@ export function FilmsList({ films }: { films: ScreeningFilm[] }) {
                 sizes="(min-width: 1440px) 1200px, 100vw"
                 active={playing === film.id}
                 onPlay={() => setPlaying(film.id)}
+                onStop={() => setPlaying((p) => (p === film.id ? null : p))}
                 priority={index === 0}
               />
               <div className="wbsk-screening__text">

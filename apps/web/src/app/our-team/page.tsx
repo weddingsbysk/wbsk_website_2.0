@@ -1,5 +1,5 @@
 import "@wbsk/ui/css/pages.css";
-import { Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
+import { GlideIn, Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquireButton } from "../../components/EnquiryPanel";
 import { getTeamPage, mainPageMetadata } from "../../lib/content";
@@ -10,7 +10,7 @@ export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("teamP
 const CORE_CREW = 8;
 
 export default async function Page() {
-  const { line, members } = await getTeamPage();
+  const { line, joinLine, closingLine, members } = await getTeamPage();
   const [lead, ...crew] = members;
   const core = crew.slice(0, CORE_CREW - 1);
   const others = crew.slice(CORE_CREW - 1);
@@ -29,18 +29,18 @@ export default async function Page() {
             <p className="wbsk-label">{lead.role}</p>
             {lead.lines ? <p className="wbsk-lead">{lead.lines}</p> : null}
           </Reveal>
-          <div className="wbsk-person__photo" data-glide="right">
+          <GlideIn side="right">
             {lead.portrait ? <WbskImage image={lead.portrait} slot="card" sizes="(min-width: 900px) 46vw, 92vw" aspectRatio={4 / 5} /> : null}
-          </div>
+          </GlideIn>
         </section>
       ) : null}
       {core.map((member, index) => {
         const side = index % 2 === 0 ? "left" : "right";
         return (
           <section key={member.name} className="wbsk-container wbsk-person" data-side={side}>
-            <div className="wbsk-person__photo" data-glide={side}>
+            <GlideIn side={side}>
               {member.portrait ? <WbskImage image={member.portrait} slot="card" sizes="(min-width: 900px) 32vw, 92vw" aspectRatio={4 / 5} /> : null}
-            </div>
+            </GlideIn>
             <Reveal className="wbsk-person__text">
               <h2 className="wbsk-h2 wbsk-person__name">{member.name}</h2>
               <p className="wbsk-label">{member.role}</p>
@@ -62,13 +62,13 @@ export default async function Page() {
       ) : null}
       <section className="wbsk-container wbsk-closingband">
         <p className="wbsk-lead">
-          Want to join us?{" "}
+          {joinLine ?? "Want to join us?"}{" "}
           <WbskLink href="/careers/" className="wbsk-link wbsk-morelink">
             Careers →
           </WbskLink>
         </p>
         <div>
-          <EnquireButton statement>Tell us about your wedding</EnquireButton>
+          <EnquireButton statement>{closingLine ?? "Tell us about your wedding"}</EnquireButton>
         </div>
       </section>
     </div>

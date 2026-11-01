@@ -20,6 +20,7 @@ export const structure: StructureResolver = (S, context) =>
   S.list()
     .title("Content")
     .items([
+      S.divider().title("Website pages"),
       single(S, "homepage", "Homepage"),
       S.listItem()
         .title("Weddings")

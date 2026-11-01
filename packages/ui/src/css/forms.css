@@ -1,9 +1,19 @@
 /* The enquiry forms, loaded with the form itself. */
 @layer components {
   /* Forms: quiet underlined fields, tap-to-pick choices (Decision 14). */
+  /* An ivory card on the page; in the panel, the sheet already is the card (Decision 14). */
   .wbsk-form {
     display: grid;
     gap: clamp(40px, 5vw, 80px);
+    padding: clamp(24px, 4vw, 64px);
+    background: rgb(255 253 249 / 0.8);
+    border-radius: var(--radius-wbsk);
+    box-shadow: var(--shadow-rest);
+  }
+  .wbsk-panel .wbsk-form {
+    padding: 0;
+    background: none;
+    box-shadow: none;
   }
   @media (min-width: 900px) {
     .wbsk-form {
@@ -87,6 +97,9 @@
     border-radius: var(--radius-wbsk);
     cursor: pointer;
     transition: color var(--hover) var(--settle), background-color var(--hover) var(--settle), border-color var(--hover) var(--settle);
+  }
+  .wbsk-field[data-error] .wbsk-choice:not([data-on]) {
+    border-color: var(--color-error);
   }
   .wbsk-choice:hover {
     border-color: var(--color-deep-gold);

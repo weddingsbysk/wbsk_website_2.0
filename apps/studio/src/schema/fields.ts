@@ -39,9 +39,11 @@ type PhotoOptions = {
   description?: string;
   hidden?: (context: { document?: Record<string, unknown> }) => boolean;
   components?: { input: ComponentType<never> };
+  /** One more rule for this slot, given the upload's reference. */
+  check?: (ref: string) => true | string;
 };
 
-export function photoField({ name, title, slot, rule, required, group, description, hidden, components }: PhotoOptions) {
+export function photoField({ name, title, slot, rule, required, group, description, hidden, components, check }: PhotoOptions) {
   return defineField({
     name,
     title,
@@ -57,7 +59,7 @@ export function photoField({ name, title, slot, rule, required, group, descripti
         if (!value?.asset) return required ? `Add the ${slot}` : true;
         const size = imageSizeFromRef(value.asset._ref);
         if (size && !meetsSize(size, rule)) return tooSmallMessage(slot, rule, size);
-        return true;
+        return check && value.asset._ref ? check(value.asset._ref) : true;
       }),
   });
 }
