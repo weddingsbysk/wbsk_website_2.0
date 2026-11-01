@@ -1,3 +1,4 @@
+export { CoverVideo } from "./components/CoverVideo";
 export { FilmPlayer } from "./components/FilmPlayer";
 export { Footer } from "./components/Footer";
 export { Gallery } from "./components/Gallery";
@@ -6,6 +7,7 @@ export { Header, type NavItem } from "./components/Header";
 export { ArrowIcon, CloseIcon, MenuIcon } from "./components/icons";
 export { Letterbox } from "./components/Letterbox";
 export { Reveal } from "./components/Reveal";
+export { SideRow } from "./components/SideRow";
 export { WbskImage } from "./components/WbskImage";
 export { ClientCard, CoupleNames, StoryCover, TitleWords, type WeddingSummary } from "./components/WeddingViews";
 export { buildSrcSet, sanityUrl, slotWidths, type SanityImage, type WbskImageSource } from "./image";

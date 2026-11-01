@@ -14,7 +14,7 @@ import {
   type ReactNode,
 } from "react";
 import { publicAsset } from "../lib/site";
-import { EnquiryPanelProvider } from "./EnquiryPanel";
+import { EnquiryPanelProvider, usePanel } from "./EnquiryPanel";
 
 const COMMIT_TIMEOUT_MS = 1500;
 const DUSK_MS = 220;
@@ -25,6 +25,22 @@ const isStoryPage = (path: string) => /^\/(client|pre-wedding)\/[^/]+\/?$/.test(
 const slugOf = (path: string) => path.split("/").filter(Boolean).at(-1) ?? "";
 
 type Signature = "expand" | "next";
+
+/** The header and menu's Enquire link opens the panel; without scripts it goes to the homepage form. */
+function EnquireLink({ href, onClick, ...rest }: WbskLinkProps) {
+  const { open } = usePanel();
+  return (
+    <a
+      href={publicAsset(href)}
+      onClick={(event) => {
+        onClick?.(event);
+        event.preventDefault();
+        open();
+      }}
+      {...rest}
+    />
+  );
+}
 
 export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -90,6 +106,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
       const root = document.documentElement;
       const here = pathRef.current;
       const going = window.location.pathname.replace(publicAsset(""), "") || "/";
+      // The enquiry panel uses history too, so Back can close it; that isn't a page change.
+      if (going === here) return;
       const move = lastMoveRef.current;
       const reversing = move && move.to === here && move.from === going ? move : null;
       root.dataset.pageDirection = "back";
@@ -127,6 +145,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   const renderLink = useCallback(
     ({ href, onClick, ...rest }: WbskLinkProps) => {
+      if (href.endsWith("#enquire")) return <EnquireLink href={href} onClick={onClick} {...rest} />;
       const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
         onClick?.(event);
         if (
@@ -154,7 +173,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   return (
     <LinkProvider value={renderLink}>
-      <EnquiryPanelProvider>
+      <EnquiryPanelProvider pathname={pathname}>
       <a className="wbsk-skip" href="#main">
         Skip to content
       </a>

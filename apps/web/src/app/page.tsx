@@ -1,29 +1,22 @@
-import { ArrowIcon, Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
+import "@wbsk/ui/css/home.css";
+import { CoverVideo, Letterbox, Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
+import { EnquiryForm } from "../components/EnquiryForm";
+import { Counter, FeaturedRow, FilmStack, ReactionRow, ReviewsLoop } from "../components/HomeSections";
 import { OpeningIntro } from "../components/OpeningIntro";
-import { getHomepage } from "../lib/content";
-import { publicAsset } from "../lib/site";
-
-const fallback = (name: string, width: number, height: number) => ({
-  kind: "local" as const,
-  url: publicAsset(`/sample/${name}.jpg`),
-  width,
-  height,
-  alt: "",
-});
+import { getHomepageContent } from "../lib/content";
 
 export default async function HomePage() {
-  const home = await getHomepage();
+  const home = await getHomepageContent();
   return (
     <>
       <OpeningIntro />
       <section id="hero" data-tone="dark" className="wbsk-hero">
-        <WbskImage
-          image={home.posterDesktop ?? fallback("hero-desktop", 2560, 1440)}
-          portraitImage={home.posterPhone ?? fallback("hero-phone", 1350, 2400)}
-          slot="poster"
-          sizes="100vw"
-          priority
-        />
+        <div className="wbsk-hero__media">
+          {home.posterDesktop ? (
+            <WbskImage image={home.posterDesktop} portraitImage={home.posterPhone ?? undefined} slot="poster" sizes="100vw" priority />
+          ) : null}
+          <CoverVideo desktop={home.videoDesktop} phone={home.videoPhone} label="the WBSK film" />
+        </div>
         <div className="wbsk-hero__text wbsk-container">
           <h1 className="wbsk-display wbsk-measure">
             <TitleWords text={home.heroLine ?? "Weddings By Siddhant Kapoor"} />
@@ -31,46 +24,118 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {home.whoWeAre ? (
-        <section className="wbsk-section">
+      <section className="wbsk-section wbsk-container wbsk-who">
+        <Reveal>
+          <p className="wbsk-label">Who we are</p>
+          <h2 className="wbsk-h1 wbsk-who__story">{home.whoWeAre}</h2>
+        </Reveal>
+        {home.counters.length ? (
+          <Reveal delayIndex={1} className="wbsk-who__counters">
+            {home.counters.map((counter) => (
+              <Counter key={counter.label} value={counter.value} label={counter.label} />
+            ))}
+          </Reveal>
+        ) : null}
+      </section>
+
+      {home.weddings.length ? (
+        <section className="wbsk-homesection wbsk-homesection--flush" aria-label="Featured weddings">
           <div className="wbsk-container">
             <Reveal>
-              <h2 className="wbsk-h1 wbsk-measure">{home.whoWeAre}</h2>
+              <p className="wbsk-label wbsk-homesection__label">Recent weddings</p>
             </Reveal>
+            <FeaturedRow weddings={home.weddings} seeAllHref="/weddings/" />
           </div>
         </section>
       ) : null}
 
-      <section data-tone="dark" className="wbsk-section">
-        <div className="wbsk-container">
-          <Reveal>
-            <h2 className="wbsk-h2">{home.teamLine ?? "The people behind your story"}</h2>
-          </Reveal>
-          <Reveal delayIndex={1} className="mt-12">
-            <WbskImage
-              image={home.teamPhoto ?? fallback("team-wide", 3000, 1286)}
-              slot="coverDesktop"
-              sizes="(min-width: 1440px) 1360px, 100vw"
-              aspectRatio={21 / 9}
-              parallax
-            />
-          </Reveal>
-        </div>
+      {home.films.length ? (
+        <section data-tone="dark" className="wbsk-section" aria-label="Featured films">
+          <div className="wbsk-container">
+            <Reveal>
+              <p className="wbsk-label wbsk-homesection__label">On film</p>
+            </Reveal>
+            <FilmStack films={home.films} />
+          </div>
+        </section>
+      ) : null}
+
+      <section className="wbsk-section wbsk-container" aria-label="The team">
+        {home.teamPhoto ? (
+          <Letterbox>
+            <WbskImage image={home.teamPhoto} slot="coverDesktop" sizes="(min-width: 1680px) 1570px, 100vw" aspectRatio={21 / 9} parallax />
+          </Letterbox>
+        ) : null}
+        <Reveal className="wbsk-teamline">
+          <h2 className="wbsk-h2">{home.teamLine ?? "The people behind your story"}</h2>
+          <WbskLink href="/our-team/" className="wbsk-link wbsk-morelink">
+            Meet the people →
+          </WbskLink>
+        </Reveal>
       </section>
 
-      <section id="enquire" className="wbsk-section">
-        <div className="wbsk-container">
+      {home.reviews.length || home.reactions.length ? (
+        <section className="wbsk-homesection" aria-label="What our couples say">
+          <div className="wbsk-container">
+            {home.reviews.length ? (
+              <>
+                <Reveal>
+                  <p className="wbsk-label wbsk-homesection__label">What our couples say</p>
+                </Reveal>
+                <ReviewsLoop reviews={home.reviews} />
+              </>
+            ) : null}
+            {home.google ? (
+              <a className="wbsk-link wbsk-googleline" href={home.google.href} target="_blank" rel="noopener noreferrer">
+                {home.google.rating} on Google · {home.google.count} reviews ↗
+                <span className="wbsk-sr"> (opens in a new tab)</span>
+              </a>
+            ) : null}
+            {home.reactions.length ? (
+              <div className="wbsk-reactions">
+                <Reveal>
+                  <p className="wbsk-label wbsk-homesection__label">Watch them react</p>
+                </Reveal>
+                <ReactionRow reactions={home.reactions} />
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {home.featuredOn.length ? (
+        <section className="wbsk-homesection" aria-label="Featured on">
+          <div className="wbsk-container">
+            <Reveal>
+              <p className="wbsk-label wbsk-homesection__label">Featured on</p>
+            </Reveal>
+            <ul className="wbsk-featuredon">
+              {home.featuredOn.map((item) => (
+                <li key={item.name}>
+                  <a href={item.link} target="_blank" rel="noopener noreferrer" aria-label={`${item.name} (opens in a new tab)`}>
+                    {item.image ? <WbskImage image={item.image} slot="card" sizes="(min-width: 760px) 30vw, 92vw" aspectRatio={3 / 2} /> : null}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
+
+      <section id="enquire" className="wbsk-section wbsk-container wbsk-enquiry">
+        {home.packages.length ? (
           <Reveal>
-            <h2 className="wbsk-h2">Tell us about your wedding</h2>
-            <p className="wbsk-lead wbsk-measure mt-6 mb-10">
-              The enquiry form arrives in a later phase. Until then, this section marks where it sits.
-            </p>
-            <WbskLink href="/weddings/" className="wbsk-button">
-              <span>See the weddings page</span>
-              <ArrowIcon />
-            </WbskLink>
+            <ul className="wbsk-packages">
+              {home.packages.map((item) => (
+                <li key={item.name}>
+                  <strong>{item.name}</strong>
+                  <span>{item.line}</span>
+                </li>
+              ))}
+            </ul>
           </Reveal>
-        </div>
+        ) : null}
+        <EnquiryForm config={home.form} />
       </section>
     </>
   );

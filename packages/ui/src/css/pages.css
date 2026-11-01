@@ -1,0 +1,234 @@
+/* Films, Our team, Careers, Pre-wedding and destination pages. */
+@layer components {
+  /* Films: a screening room (Decision 10). */
+  html:has(.wbsk-filmspage) {
+    scroll-snap-type: y proximity;
+  }
+  .wbsk-screening__film {
+    display: flex;
+    align-items: center;
+    min-height: 100svh;
+    padding-block: calc(var(--header-height) + 16px) 32px;
+    scroll-snap-align: center;
+  }
+  .wbsk-screening__inner {
+    display: grid;
+    gap: 20px;
+    max-width: min(1680px, calc((100svh - var(--header-height) - 170px) * 16 / 9 + var(--gutter) * 2));
+  }
+  .wbsk-screening__text .wbsk-h3 {
+    margin: 6px 0 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .wbsk-screening__film .wbsk-film {
+      opacity: 0.55;
+      transition: opacity 0.9s var(--settle);
+    }
+    .wbsk-screening__film[data-centre="true"] .wbsk-film {
+      opacity: 1;
+    }
+    .wbsk-screening__film .wbsk-screening__text {
+      opacity: 0;
+      transition: opacity 0.9s var(--settle);
+    }
+    .wbsk-screening__film[data-centre="true"] .wbsk-screening__text {
+      opacity: 1;
+    }
+    @media (scripting: none) {
+      .wbsk-screening__film .wbsk-film,
+      .wbsk-screening__film .wbsk-screening__text {
+        opacity: 1;
+      }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html:has(.wbsk-filmspage) {
+      scroll-snap-type: none;
+    }
+  }
+
+  /* Our team: a dark, lit chapter (Decision 07). The grain is part of the page, so nothing repaints. */
+  .wbsk-teampage {
+    padding-bottom: var(--gap-block);
+    overflow-x: clip;
+    background-image: var(--grain);
+  }
+  .wbsk-teampage,
+  .wbsk-filmspage {
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .88 0 0 0 .055 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wbsk-teampage__line {
+    color: var(--color-gold);
+  }
+  .wbsk-person {
+    display: grid;
+    gap: 28px clamp(32px, 6vw, 112px);
+    align-items: center;
+    padding-block: var(--gap-block);
+  }
+  @media (min-width: 900px) {
+    .wbsk-person[data-lead] {
+      grid-template-columns: 1fr 1fr;
+    }
+    .wbsk-person[data-side="left"]:not([data-lead]) {
+      grid-template-columns: 1fr 2fr;
+    }
+    .wbsk-person[data-side="right"]:not([data-lead]) {
+      grid-template-columns: 2fr 1fr;
+    }
+    .wbsk-person[data-side="right"]:not([data-lead]) .wbsk-person__photo {
+      order: 2;
+    }
+  }
+  .wbsk-person__photo {
+    position: relative;
+    isolation: isolate;
+  }
+  /* A soft warm spotlight behind each portrait. */
+  .wbsk-person__photo::before {
+    content: "";
+    position: absolute;
+    inset: -14%;
+    z-index: -1;
+    background: radial-gradient(closest-side, rgb(221 175 58 / 0.2), rgb(221 175 58 / 0));
+    pointer-events: none;
+  }
+  .wbsk-person__photo .wbsk-frame {
+    box-shadow: 0 24px 48px -20px rgb(0 0 0 / 0.7);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .wbsk-person__photo[data-glide] {
+        animation: wbsk-glide-right linear both;
+        animation-timeline: view();
+        animation-range: entry 5% entry 70%;
+      }
+      .wbsk-person__photo[data-glide="left"] {
+        animation-name: wbsk-glide-left;
+      }
+    }
+  }
+  @keyframes wbsk-glide-right {
+    from {
+      opacity: 0;
+      transform: translateX(56px);
+    }
+  }
+  @keyframes wbsk-glide-left {
+    from {
+      opacity: 0;
+      transform: translateX(-56px);
+    }
+  }
+  .wbsk-person__name {
+    margin: 0 0 12px;
+    color: var(--color-gold);
+  }
+  .wbsk-person__text .wbsk-lead,
+  .wbsk-person__lines {
+    margin: 20px 0 0;
+    max-width: 52ch;
+  }
+  .wbsk-crewrow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 32px;
+    padding-block: var(--gap-block);
+  }
+  .wbsk-crewrow .wbsk-person__name {
+    margin-top: 16px;
+  }
+
+  /* Careers. */
+  .wbsk-roles {
+    padding-bottom: var(--gap-block);
+  }
+  .wbsk-roles > ul > li {
+    padding-block: clamp(24px, 3vw, 40px);
+    border-bottom: 1px solid rgb(35 28 22 / 0.16);
+  }
+  .wbsk-roles .wbsk-lead {
+    margin-top: 12px;
+  }
+
+  /* Pre-wedding. */
+  .wbsk-offerings {
+    display: grid;
+    gap: clamp(56px, 7vw, 96px) clamp(32px, 5vw, 80px);
+  }
+  @media (min-width: 900px) {
+    .wbsk-offerings {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .wbsk-offering .wbsk-lead {
+    margin-top: 16px;
+  }
+  .wbsk-offering__films {
+    display: grid;
+    gap: 20px;
+    margin-top: clamp(24px, 3vw, 40px);
+  }
+  .wbsk-offering__gallery {
+    padding-bottom: var(--gap-block);
+  }
+  @media (scripting: enabled) {
+    .wbsk-gallerywrap[data-limited] [data-extra] {
+      display: none;
+    }
+  }
+  .wbsk-gallerywrap__more {
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+  }
+  .wbsk-backrow {
+    padding-top: calc(clamp(96px, 12vw, 176px) + 24px);
+    padding-bottom: 24px;
+  }
+  .wbsk-backrow .wbsk-backlink {
+    color: inherit;
+  }
+  .wbsk-carousel {
+    display: flex;
+    gap: clamp(16px, 2vw, 32px);
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-gold) transparent;
+  }
+  .wbsk-carousel__film {
+    flex: none;
+    width: min(84vw, 1280px);
+    scroll-snap-align: start;
+  }
+  .wbsk-carousel__frame {
+    position: relative;
+  }
+  .wbsk-carousel__over {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    gap: 6px;
+    padding: clamp(14px, 2vw, 28px);
+    color: var(--color-ivory);
+    pointer-events: none;
+  }
+  .wbsk-carousel__tag {
+    justify-self: start;
+    padding: 3px 10px;
+    font-size: var(--text-label);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-dusk);
+    background: var(--color-gold);
+    border-radius: 4px;
+  }
+  .wbsk-carousel__film .wbsk-filmcaption__line {
+    margin-top: 14px;
+  }
+}

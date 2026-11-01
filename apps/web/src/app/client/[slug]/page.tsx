@@ -68,7 +68,11 @@ export default async function Page({ params }: Params) {
 
       {wedding.gallery.length ? (
         <section className="wbsk-container wbsk-story__gallery" aria-label="Photographs">
-          <GalleryLightbox watermarkSrc={publicAsset("/wbsk-logo.svg")}>
+          <div className="wbsk-gallerybar">
+            <h2 className="wbsk-label">The day, in photographs</h2>
+            <p className="wbsk-card__meta">{wedding.gallery.length} photographs · scroll inside the frame</p>
+          </div>
+          <GalleryLightbox watermarkSrc={publicAsset("/wbsk-logo.svg")} scrolling>
             <Gallery photos={wedding.gallery} />
           </GalleryLightbox>
         </section>

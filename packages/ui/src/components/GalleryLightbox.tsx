@@ -1,7 +1,9 @@
 "use client";
 
+import "../css/gallery.css";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { fullscreenSrcSet } from "../image";
+import { createWheelClassifier, prefersReducedMotion } from "../motion";
 import { CloseIcon } from "./icons";
 
 type Photo = { srcSet: string; alt: string; width: number; height: number };
@@ -26,13 +28,29 @@ const sizesFor = (photo: Photo) => `min(100vw, ${Math.ceil((photo.width / photo.
  * The gallery's one script: sharp photos fade in over their blurred previews, and the full-screen
  * view opens over the page (Decision 06). Without scripts each photo is simply a link to its image.
  */
-export function GalleryLightbox({ children, watermarkSrc }: { children: ReactNode; watermarkSrc: string }) {
+export function GalleryLightbox({
+  children,
+  watermarkSrc,
+  scrolling,
+  label = "Photographs",
+  more,
+}: {
+  children: ReactNode;
+  watermarkSrc: string;
+  /** The gallery scrolls inside its own window while the page holds still (owner, 2 November 2026). */
+  scrolling?: boolean;
+  label?: string;
+  /** With a limited gallery: reveal the rest in place, or open them all full-screen (Decision 08). */
+  more?: { kind: "show" | "view"; label: string };
+}) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const returnRef = useRef<HTMLAnchorElement | null>(null);
   const swipeRef = useRef<{ x: number; y: number } | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [index, setIndex] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState(false);
   const links = useCallback(
     () => [...(rootRef.current?.querySelectorAll<HTMLAnchorElement>("a[data-photo]") ?? [])],
     [],
@@ -52,6 +70,64 @@ export function GalleryLightbox({ children, watermarkSrc }: { children: ReactNod
     root.dataset.ready = "true";
     return () => root.removeEventListener("load", onLoad, true);
   }, []);
+
+  // Browsers without scroll-linked animation still get the rise, once per photo.
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scrolling || !scroller || prefersReducedMotion() || CSS.supports("animation-timeline: view()")) return;
+    scroller.dataset.reveal = "manual";
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.setAttribute("data-seen", "true");
+          observer.unobserve(entry.target);
+        }
+      },
+      { root: scroller, rootMargin: "0px 0px -6% 0px" },
+    );
+    scroller.querySelectorAll("a[data-photo]").forEach((photo) => observer.observe(photo));
+    return () => observer.disconnect();
+  }, [scrolling]);
+
+  // A mouse wheel glides inside the window, and hands back to the page at either end.
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scrolling || !scroller || prefersReducedMotion()) return;
+    const isMouse = createWheelClassifier();
+    let target = scroller.scrollTop;
+    let frame = 0;
+    const glide = () => {
+      const distance = target - scroller.scrollTop;
+      if (Math.abs(distance) < 0.5) {
+        scroller.scrollTop = target;
+        frame = 0;
+        return;
+      }
+      scroller.scrollTop += distance * 0.16;
+      frame = requestAnimationFrame(glide);
+    };
+    const onWheel = (event: WheelEvent) => {
+      if (!isMouse(event, event.timeStamp)) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        target = scroller.scrollTop;
+        return;
+      }
+      const max = scroller.scrollHeight - scroller.clientHeight;
+      const step = event.deltaMode === 1 ? event.deltaY * 40 : event.deltaY;
+      const base = frame ? target : scroller.scrollTop;
+      if ((base <= 0 && step < 0) || (base >= max - 1 && step > 0)) return;
+      event.preventDefault();
+      target = Math.max(0, Math.min(max, base + step * 1.4));
+      if (!frame) frame = requestAnimationFrame(glide);
+    };
+    scroller.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      cancelAnimationFrame(frame);
+      scroller.removeEventListener("wheel", onWheel);
+    };
+  }, [scrolling]);
 
   const open = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey) return;
@@ -90,8 +166,48 @@ export function GalleryLightbox({ children, watermarkSrc }: { children: ReactNod
   const current = index === null ? null : photos[index];
 
   return (
-    <div ref={rootRef} className="wbsk-gallerywrap" onClick={open}>
-      {children}
+    <div
+      ref={rootRef}
+      className="wbsk-gallerywrap"
+      data-scrolling={scrolling ? "true" : undefined}
+      data-limited={more && !expanded ? "true" : undefined}
+      onClick={open}
+    >
+      {scrolling ? (
+        <div
+          ref={scrollerRef}
+          className="wbsk-gallerywindow"
+          role="region"
+          aria-label={`${label}, scrollable`}
+          tabIndex={0}
+          data-native-wheel
+        >
+          {children}
+        </div>
+      ) : (
+        children
+      )}
+      {more && !expanded ? (
+        <div className="wbsk-gallerywrap__more">
+          <button
+            type="button"
+            className="wbsk-button"
+            onClick={() => {
+              if (more.kind === "show") {
+                setExpanded(true);
+                return;
+              }
+              const all = links();
+              returnRef.current = all[0] ?? null;
+              setPhotos(all.map(fromLink));
+              setIndex(0);
+              dialogRef.current?.showModal();
+            }}
+          >
+            <span>{more.label}</span>
+          </button>
+        </div>
+      ) : null}
       <dialog
         ref={dialogRef}
         className="wbsk-lightbox"

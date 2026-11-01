@@ -125,6 +125,7 @@ export const siteSettings = defineType({
     defineField({ name: "googleReviewCount", title: "Number of reviews", type: "number", group: "google" }),
     defineField({ name: "googleProfile", title: "Google profile link", type: "url", group: "google" }),
     defineField({ name: "googleUpdated", title: "Last checked", type: "date", group: "google" }),
+    defineField({ name: "formEndpoint", title: "Form web address", type: "url", group: "contact", description: "The web app address from the Enquiries Sheet's script, pasted once during setup." }),
     defineField({ name: "backupWhatsApp", title: "Backup WhatsApp number", type: "string", group: "contact", description: "Shown if a form can't send. Filled in by the team." }),
     defineField({ name: "backupEmail", title: "Backup email", type: "string", group: "contact" }),
     defineField({ name: "privacyPolicy", title: "Privacy policy", type: "text", rows: 16, group: "privacy" }),

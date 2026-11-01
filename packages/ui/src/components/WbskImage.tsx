@@ -93,6 +93,9 @@ export function WbskImage({
       data-parallax={parallax ? "on" : undefined}
       style={{ aspectRatio: String(ratio), backgroundImage: blur ? `url(${blur})` : undefined }}
     >
+      {priority && !portraitImage ? (
+        <link rel="preload" as="image" href={src} imageSrcSet={srcSet} imageSizes={srcSet ? sizes : undefined} fetchPriority="high" />
+      ) : null}
       {priority && portraitImage ? (
         <>
           <link
@@ -144,7 +147,7 @@ export function WbskImage({
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : undefined}
           decoding={priority ? "sync" : "async"}
-          data-loaded={loaded || !blur ? "true" : "false"}
+          data-loaded={loaded || !blur || priority ? "true" : "false"}
           onLoad={() => setLoaded(true)}
         />
       </picture>

@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "npm run dev -w @wbsk/web",
-    "build": "npm run build -w @wbsk/web",
+    "build": "node scripts/fetch-media.mjs && npm run build -w @wbsk/web",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write .",

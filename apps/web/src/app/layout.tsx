@@ -46,6 +46,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <head>
+        {/* Photos all come from here, so the connection is ready before the first one is asked for. */}
+        <link rel="preconnect" href="https://cdn.sanity.io" />
         <script dangerouslySetInnerHTML={{ __html: introDecisionScript(publicAsset("")) }} />
       </head>
       <body>

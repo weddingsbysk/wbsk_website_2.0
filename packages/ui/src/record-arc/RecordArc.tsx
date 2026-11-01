@@ -1,5 +1,6 @@
 "use client";
 
+import "../css/arc.css";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { WbskImage } from "../components/WbskImage";

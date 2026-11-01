@@ -1,12 +1,18 @@
-import { WbskImage } from "@wbsk/ui";
+import "@wbsk/ui/css/pages.css";
+import { Gallery, GalleryLightbox, Reveal, StoryCover } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BackToRecords } from "../../../components/BackToRecords";
-import { getDestinations } from "../../../lib/content";
+import { DestinationFilms } from "../../../components/DestinationFilms";
+import { EnquireButton } from "../../../components/EnquiryPanel";
+import { getDestinations, getDestinationShoots } from "../../../lib/content";
+import { publicAsset } from "../../../lib/site";
 
 type Params = { params: Promise<{ slug: string }> };
 
 export const dynamicParams = false;
+
+const GALLERY_SHOWN = 20;
 
 export async function generateStaticParams() {
   const destinations = await getDestinations();
@@ -16,31 +22,42 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const destination = (await getDestinations()).find((item) => item.slug === slug);
-  return { title: destination?.name ?? "Pre-wedding" };
+  return { title: destination ? `${destination.name} pre-wedding films and photos` : "Pre-wedding" };
 }
 
-/** The cover the record dissolves into. The rest of this page arrives in P8. */
 export default async function Page({ params }: Params) {
   const { slug } = await params;
   const destination = (await getDestinations()).find((item) => item.slug === slug);
   if (!destination) notFound();
+  const { films, photos } = await getDestinationShoots(destination.id);
   return (
-    <section id="hero" data-tone="dark" className="wbsk-hero">
-      {destination.cover ? (
-        <WbskImage
-          image={destination.cover}
-          portraitImage={destination.coverPhone ?? undefined}
-          slot="coverDesktop"
-          sizes="100vw"
-          priority
-        />
-      ) : null}
-      <div className="wbsk-hero__top wbsk-container">
+    <>
+      <StoryCover cover={destination.cover} coverPhone={destination.coverPhone} place="PRE-WEDDING" names={destination.name} meta={`${films.length} film${films.length === 1 ? "" : "s"} from here`} />
+      <div className="wbsk-container wbsk-backrow">
         <BackToRecords />
       </div>
-      <div className="wbsk-hero__text wbsk-container">
-        <h1 className="wbsk-display wbsk-measure">{destination.name}</h1>
-      </div>
-    </section>
+      {films.length ? (
+        <section data-tone="dark" className="wbsk-section wbsk-carouselsection" aria-label="Films">
+          <DestinationFilms films={films} />
+        </section>
+      ) : null}
+      {photos.length ? (
+        <section className="wbsk-section wbsk-container" aria-label="Photographs">
+          <GalleryLightbox
+            watermarkSrc={publicAsset("/wbsk-logo.svg")}
+            more={photos.length > GALLERY_SHOWN ? { kind: "show", label: "Show more" } : undefined}
+          >
+            <Gallery photos={photos} limit={GALLERY_SHOWN} />
+          </GalleryLightbox>
+        </section>
+      ) : null}
+      <section className="wbsk-container wbsk-closingline">
+        <Reveal>
+          <EnquireButton statement kind="preWedding">
+            Book your pre-wedding
+          </EnquireButton>
+        </Reveal>
+      </section>
+    </>
   );
 }

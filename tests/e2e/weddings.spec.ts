@@ -89,6 +89,8 @@ test("couple's page has every section, in order, with no accessibility problems"
 });
 
 test("gallery: agreed columns, Studio order left to right, and no photos overlap", async ({ page }) => {
+  // Motion off, so positions are the true layout rather than a frame of the scroll animation.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(LARGE);
   const data = await page.locator(".wbsk-gallery > li").evaluateAll((items) =>
     items.map((el) => {
@@ -106,11 +108,24 @@ test("gallery: agreed columns, Studio order left to right, and no photos overlap
   }
 });
 
+test("the gallery scrolls in its own window, the page holds still, and the page takes over at the end", async ({ page }) => {
+  await page.goto(LARGE);
+  const frame = page.locator(".wbsk-gallerywindow");
+  await frame.scrollIntoViewIfNeeded();
+  const pageBefore = await page.evaluate(() => scrollY);
+  await frame.evaluate((el) => el.scrollTo(0, 800));
+  await expect.poll(() => frame.evaluate((el) => el.scrollTop)).toBeGreaterThan(700);
+  expect(await page.evaluate(() => scrollY)).toBe(pageBefore);
+  expect(await frame.evaluate((el) => el.scrollHeight > el.clientHeight * 1.5)).toBe(true);
+  expect(await frame.evaluate((el) => getComputedStyle(el).overscrollBehaviorY)).toBe("auto");
+  await expect(frame).toHaveAttribute("tabindex", "0");
+});
+
 test("photos further down wait until they're near, and their space is already reserved", async ({ page }) => {
   await page.goto(LARGE);
   const last = page.locator(".wbsk-gallery__sharp").last();
   expect(await last.getAttribute("loading")).toBe("lazy");
-  const height = await page.locator(".wbsk-gallery").evaluate((el) => el.getBoundingClientRect().height);
+  const height = await page.locator(".wbsk-gallery").evaluate((el) => el.scrollHeight);
   expect(height).toBeGreaterThan(500);
 });
 

@@ -8,7 +8,7 @@ export const GALLERY_COLUMNS = { wide: 5, narrow: 2 };
  * Rendered on the server with no per-photo script. Each photo is a real link to its large version,
  * and one small script (GalleryLightbox) reads these links when a photo is opened.
  */
-export function Gallery({ photos }: { photos: SanityImage[] }) {
+export function Gallery({ photos, limit }: { photos: SanityImage[]; limit?: number }) {
   const ratios = photos.map((photo) => photo.height / photo.width);
   const wide = layoutMasonry(ratios, GALLERY_COLUMNS.wide);
   const narrow = layoutMasonry(ratios, GALLERY_COLUMNS.narrow);
@@ -24,9 +24,11 @@ export function Gallery({ photos }: { photos: SanityImage[] }) {
           "--c2": narrow[index]!.column,
           "--r2": narrow[index]!.row,
           "--s2": narrow[index]!.span,
+          // Neighbouring columns drift in opposite directions as the gallery scrolls.
+          "--d": wide[index]!.column % 2 ? -1 : 1,
         } as CSSProperties;
         return (
-          <li key={photo.url} style={style}>
+          <li key={photo.url} style={style} data-extra={limit !== undefined && index >= limit ? true : undefined}>
             <a
               href={href}
               className="wbsk-gallery__photo"

@@ -89,8 +89,7 @@ test("the menu reaches every page, and the header stays in place", async ({ page
         .click();
     }
     await expect(page).toHaveURL(new RegExp(`${path}$`));
-    // The Weddings page opens on its intro sentence, with "Weddings" as the label above it.
-    await expect(page.locator(label === "Weddings" ? ".wbsk-weddings__intro .wbsk-label" : "h1")).toHaveText(label);
+    await expect(page).toHaveTitle(new RegExp(label));
   }
   await expect(page.locator("header")).toHaveAttribute("data-marker", "kept");
 });
@@ -102,7 +101,7 @@ test("browser Back and Forward change pages with the header held", async ({ page
   await page.locator("footer").getByRole("link", { name: "Films" }).click();
   await expect(page.locator("h1")).toHaveText("Films");
   await page.goBack();
-  await expect(page.locator(".wbsk-weddings__intro .wbsk-label")).toHaveText("Weddings");
+  await expect(page).toHaveTitle(/Weddings/);
   const hasTransitions = await page.evaluate(
     () => typeof document.startViewTransition === "function",
   );
@@ -208,11 +207,12 @@ test("Enquire stays visible, including inside the phone menu", async ({ page }) 
 });
 
 test("spacing utilities win over component styles", async ({ page }) => {
-  await page.goto("");
-  const lead = page.locator("#enquire .wbsk-lead");
-  expect(await lead.evaluate((el) => parseFloat(getComputedStyle(el).marginTop))).toBeGreaterThan(
-    16,
-  );
+  await page.goto("privacy/");
+  const lead = page.locator(".wbsk-prose .wbsk-h1");
+  expect(await lead.evaluate((el) => parseFloat(getComputedStyle(el).marginTop))).toBe(0);
+  await page.goto("careers/");
+  const text = page.locator(".wbsk-roles .wbsk-lead").first();
+  expect(await text.evaluate((el) => parseFloat(getComputedStyle(el).marginTop))).toBeGreaterThanOrEqual(12);
 });
 
 test("the header is clear over the hero, then solid", async ({ page }) => {
@@ -247,7 +247,9 @@ test("parallax moves the picture at 12–18% of scroll, and the frame stays", as
       const i = document.querySelector("[data-parallax] img")!.getBoundingClientRect();
       return { frame: f.top, image: i.top, scroll: window.scrollY };
     });
-  await page.waitForTimeout(800);
+  // The frame sits in a letterbox whose own settle has to finish first.
+  await expect(page.locator(".wbsk-letterbox")).toHaveAttribute("data-letterbox", "open");
+  await page.waitForTimeout(2000);
   const a = await read();
   await page.evaluate(() => window.scrollBy(0, 80));
   await page.waitForTimeout(800);
