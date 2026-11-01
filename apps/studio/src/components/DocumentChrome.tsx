@@ -1,15 +1,22 @@
 import { useEffect, useMemo } from "react";
-import { useEditState, useFormValue, useValidationStatus, type InputProps, type ObjectInputProps, type Path } from "sanity";
+import { useEditState, useFormValue, type InputProps, type ObjectInputProps, type ObjectSchemaType, type Path } from "sanity";
 import { useDocumentPane } from "sanity/structure";
 import { PREVIEW_INSPECTOR } from "../preview/inspector";
 
 const CHROME_TYPES = new Set(["wedding", "destination", "preWeddingShoot", "film", "review", "reactionVideo", "teamMember", "homepage", "preWeddingPage"]);
 
-function friendly(path: Path, message: string): string {
+function friendly(path: Path, message: string, schemaType: ObjectSchemaType): string {
   const last = path.filter((p) => typeof p === "string").at(-1);
   if (last === "description" || message.startsWith("Add a description")) return "a photo description";
+  // A bare "Required" says nothing on its own in the bar, so name the field instead.
+  if (message === "Required") {
+    const field = schemaType.fields.find((f) => f.name === path[0]);
+    return (field?.type.title ?? String(path[0])).toLowerCase();
+  }
   return message.replace(/^Add (the |a |an )?/, "").replace(/\.$/, "");
 }
+
+const MAX_LISTED = 4;
 
 /**
  * Wraps the whole form: ticks on finished step tabs, and the bar listing what's left before
@@ -18,10 +25,11 @@ function friendly(path: Path, message: string): string {
 function Chrome(props: ObjectInputProps) {
   const id = (useFormValue(["_id"]) as string | undefined)?.replace(/^drafts\./, "") ?? "";
   const type = props.schemaType.name;
-  const { validation } = useValidationStatus(id, type, false);
   const { draft, published } = useEditState(id, type);
+  const { inspector, inspectors, openInspector, validation } = useDocumentPane();
   const errors = useMemo(() => validation.filter((m) => m.level === "error"), [validation]);
-  const { inspector, inspectors, openInspector } = useDocumentPane();
+  // Nothing has been checked until the first change saves, so a blank form earns no ticks.
+  const isNew = !draft && !published;
   const hasPreview = inspectors.some((item) => item.name === PREVIEW_INSPECTOR);
 
   // The live preview sits beside the form from the start on wide windows (Decision 22).
@@ -48,16 +56,23 @@ function Chrome(props: ObjectInputProps) {
         .map((g) => {
           const incomplete = errors.some((m) => fieldGroup.get(String(m.path[0]))?.includes(g.name));
           const fieldsInGroup = [...fieldGroup.values()].some((names) => names.includes(g.name));
-          return !incomplete && fieldsInGroup ? { ...g, title: `${g.title} ✓` } : g;
+          return !isNew && !incomplete && fieldsInGroup ? { ...g, title: `${g.title} ✓` } : g;
         }),
-    [props.groups, errors, fieldGroup],
+    [props.groups, errors, fieldGroup, isNew],
   );
 
-  const left = [...new Set(errors.map((m) => friendly(m.path, m.message)))];
-  const descriptionsMissing = errors.filter((m) => friendly(m.path, m.message) === "a photo description").length;
+  const named = errors.map((m) => friendly(m.path, m.message, props.schemaType));
+  const left = [...new Set(named)];
+  const descriptionsMissing = named.filter((item) => item === "a photo description").length;
   const list = left.map((item) =>
     item === "a photo description" ? `${descriptionsMissing} photo description${descriptionsMissing === 1 ? "" : "s"}` : item,
   );
+  const more = list.length - MAX_LISTED;
+  const summary = isNew
+    ? "Fill in each step. This bar lists what's left before you can publish."
+    : list.length
+      ? `Before publishing: ${list.slice(0, MAX_LISTED).join(" · ")}${more > 0 ? ` · and ${more} more` : ""}`
+      : "Nothing left. Ready to publish.";
   const state = draft ? (published ? "Unpublished changes" : "Draft · not on the website yet") : published ? "On the website" : "New";
 
   return (
@@ -81,7 +96,7 @@ function Chrome(props: ObjectInputProps) {
         }}
       >
         <strong style={{ color: "#7A5C17" }}>{state}</strong>
-        <div>{list.length ? `Before publishing: ${list.join(" · ")}` : "Nothing left. Ready to publish."}</div>
+        <div>{summary}</div>
       </div>
     </div>
   );

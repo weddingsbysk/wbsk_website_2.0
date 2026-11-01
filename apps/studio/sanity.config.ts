@@ -33,7 +33,13 @@ export default defineConfig({
     types: schemaTypes,
     templates: (prev) => prev.filter((template) => !FIXED.has(template.schemaType)),
   },
+  // Decision 17 keeps the Studio to its own menu, so Sanity's extras stay out of the way.
+  announcements: { enabled: false },
+  releases: { enabled: false },
+  scheduledDrafts: { enabled: false },
+  tasks: { enabled: false },
   document: {
+    comments: { enabled: false },
     inspectors: (prev, context) =>
       PREVIEWED.has(context.documentType) ? [previewInspector, ...prev] : prev,
     newDocumentOptions: (prev) => prev.filter((item) => !FIXED.has(item.templateId)),

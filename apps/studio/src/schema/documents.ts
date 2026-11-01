@@ -60,7 +60,7 @@ export const wedding = defineType({
     select: { first: "firstName", second: "secondName", city: "city", date: "weddingDate", media: "cardPhoto", sample: "isSample", status: "status", featured: "featured" },
     prepare({ first, second, city, date, media, sample, status, featured }) {
       const notes = [sample ? "Sample" : "", status && status !== "live" ? String(status) : "", featured ? "★" : ""].filter(Boolean).join(" · ");
-      return { title: `${first ?? ""} & ${second ?? ""}`, subtitle: [city, date ? String(date).slice(0, 7) : "", notes].filter(Boolean).join(" · "), media: media as never };
+      return { title: [first, second].filter(Boolean).join(" & ") || "New wedding", subtitle: [city, date ? String(date).slice(0, 7) : "", notes].filter(Boolean).join(" · "), media: media as never };
     },
   },
 });
