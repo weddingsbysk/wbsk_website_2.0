@@ -80,7 +80,8 @@ test("the menu reaches every page, and the header stays in place", async ({ page
         .click();
     }
     await expect(page).toHaveURL(new RegExp(`${path}$`));
-    await expect(page.locator("h1")).toHaveText(label);
+    // The Weddings page opens on its intro sentence, with "Weddings" as the label above it.
+    await expect(page.locator(label === "Weddings" ? ".wbsk-weddings__intro .wbsk-label" : "h1")).toHaveText(label);
   }
   await expect(page.locator("header")).toHaveAttribute("data-marker", "kept");
 });
@@ -92,7 +93,7 @@ test("browser Back and Forward change pages with the header held", async ({ page
   await page.locator("footer").getByRole("link", { name: "Films" }).click();
   await expect(page.locator("h1")).toHaveText("Films");
   await page.goBack();
-  await expect(page.locator("h1")).toHaveText("Weddings");
+  await expect(page.locator(".wbsk-weddings__intro .wbsk-label")).toHaveText("Weddings");
   const hasTransitions = await page.evaluate(
     () => typeof document.startViewTransition === "function",
   );

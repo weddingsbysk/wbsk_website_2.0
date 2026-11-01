@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { buildSrcSet, sanityUrl, type ImageSlot, type WbskImageSource } from "../image";
+import { buildSrcSet, sanityUrl, tinyPreviewUrl, type ImageSlot, type WbskImageSource } from "../image";
 import { loadGsap, prefersReducedMotion, supportsScrollTimeline } from "../motion";
 
 type Props = {
@@ -77,11 +77,14 @@ export function WbskImage({
   }, [parallax]);
 
   const fetchHeight = parallax ? 1 + PARALLAX_EXTRA : 1;
+  // A cover's portrait version is for phones, so it never needs the desktop cover's largest sizes.
+  const portraitSlot: ImageSlot = slot === "coverDesktop" ? "coverPhone" : slot;
   const srcSet =
     image.kind === "sanity" ? buildSrcSet(image, slot, ratio / fetchHeight) : undefined;
   const src =
     image.kind === "sanity" ? sanityUrl(image, { width: Math.min(image.width, 1280) }) : image.url;
-  const blur = image.kind === "sanity" ? image.lqip : undefined;
+  // Only the first thing on a page carries its preview inline; the rest fetch a tiny one.
+  const blur = image.kind === "sanity" ? (priority ? image.lqip : undefined) ?? tinyPreviewUrl(image.url) : undefined;
 
   return (
     <div
@@ -107,7 +110,7 @@ export function WbskImage({
             href={portraitImage.kind === "local" ? portraitImage.url : undefined}
             imageSrcSet={
               portraitImage.kind === "sanity"
-                ? buildSrcSet(portraitImage, slot, portraitImage.width / portraitImage.height)
+                ? buildSrcSet(portraitImage, portraitSlot, portraitImage.width / portraitImage.height)
                 : undefined
             }
             imageSizes={portraitImage.kind === "sanity" ? sizes : undefined}
@@ -122,7 +125,7 @@ export function WbskImage({
             media="(orientation: portrait)"
             srcSet={
               portraitImage.kind === "sanity"
-                ? buildSrcSet(portraitImage, slot, portraitImage.width / portraitImage.height)
+                ? buildSrcSet(portraitImage, portraitSlot, portraitImage.width / portraitImage.height)
                 : portraitImage.url
             }
             sizes={sizes}

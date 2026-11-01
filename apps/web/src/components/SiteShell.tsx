@@ -14,20 +14,30 @@ import {
   type ReactNode,
 } from "react";
 import { publicAsset } from "../lib/site";
+import { EnquiryPanelProvider } from "./EnquiryPanel";
 
 const COMMIT_TIMEOUT_MS = 1500;
 const DUSK_MS = 220;
 
 const pathOf = (href: string) => href.split("#")[0] ?? href;
+const COVER_NAME = "wedding-cover";
+const isStoryPage = (path: string) => /^\/(client|pre-wedding)\/[^/]+\/?$/.test(path);
+const slugOf = (path: string) => path.split("/").filter(Boolean).at(-1) ?? "";
+
+type Signature = "expand" | "next";
 
 export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const duskRef = useRef<HTMLDivElement>(null);
   const commitRef = useRef<(() => void) | null>(null);
+  const pathRef = useRef(pathname);
+  // The last signature move, so browser Back can play the same one in reverse.
+  const lastMoveRef = useRef<{ kind: Signature; from: string; to: string } | null>(null);
 
   // Whatever is waiting on the new page, it has now rendered.
   useLayoutEffect(() => {
+    pathRef.current = pathname;
     commitRef.current?.();
     commitRef.current = null;
     if (duskRef.current) duskRef.current.dataset.active = "false";
@@ -46,16 +56,25 @@ export function SiteShell({ children }: { children: ReactNode }) {
   );
 
   const changePage = useCallback(
-    (navigate: () => void, direction: "forward" | "back") => {
+    (navigate: () => void, direction: "forward" | "back", kind?: Signature, frame?: HTMLElement | null) => {
       if (prefersReducedMotion()) {
         navigate();
         return;
       }
       if (typeof document.startViewTransition === "function") {
-        document.documentElement.dataset.pageDirection = direction;
-        document.startViewTransition(() => {
+        const root = document.documentElement;
+        root.dataset.pageDirection = direction;
+        if (kind) root.dataset.pageTransition = kind;
+        else delete root.dataset.pageTransition;
+        // The card's photo becomes the shared element that grows into the cover (Decision 05).
+        if (frame) frame.style.viewTransitionName = COVER_NAME;
+        const transition = document.startViewTransition(() => {
           navigate();
           return waitForCommit();
+        });
+        void transition.finished.finally(() => {
+          delete root.dataset.pageTransition;
+          if (frame) frame.style.viewTransitionName = "";
         });
         return;
       }
@@ -67,11 +86,28 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const onPopState = () => {
-      if (prefersReducedMotion()) return;
-      if (typeof document.startViewTransition === "function") {
-        document.documentElement.dataset.pageDirection = "back";
-        document.startViewTransition(() => waitForCommit());
-      }
+      if (prefersReducedMotion() || typeof document.startViewTransition !== "function") return;
+      const root = document.documentElement;
+      const here = pathRef.current;
+      const going = window.location.pathname.replace(publicAsset(""), "") || "/";
+      const move = lastMoveRef.current;
+      const reversing = move && move.to === here && move.from === going ? move : null;
+      root.dataset.pageDirection = "back";
+      if (reversing) root.dataset.pageTransition = reversing.kind;
+      else delete root.dataset.pageTransition;
+      let frame: HTMLElement | null = null;
+      const transition = document.startViewTransition(async () => {
+        await waitForCommit();
+        if (reversing?.kind === "expand") {
+          frame = document.querySelector<HTMLElement>(`[data-slug="${slugOf(here)}"] .wbsk-frame`);
+          if (frame) frame.style.viewTransitionName = COVER_NAME;
+        }
+      });
+      void transition.finished.finally(() => {
+        delete root.dataset.pageTransition;
+        if (frame) frame.style.viewTransitionName = "";
+      });
+      if (reversing) lastMoveRef.current = null;
     };
     window.addEventListener("popstate", onPopState, { capture: true });
     return () => window.removeEventListener("popstate", onPopState, { capture: true });
@@ -105,7 +141,11 @@ export function SiteShell({ children }: { children: ReactNode }) {
           return;
         }
         event.preventDefault();
-        changePage(() => router.push(href), "forward");
+        const link = event.currentTarget;
+        const kind = link.dataset.transition as Signature | undefined;
+        if (kind) lastMoveRef.current = { kind, from: pathRef.current, to: pathOf(href) };
+        const frame = kind === "expand" ? link.querySelector<HTMLElement>(".wbsk-frame") : null;
+        changePage(() => router.push(href), "forward", kind, frame);
       };
       return <NextLink href={href} onClick={handleClick} {...rest} />;
     },
@@ -114,6 +154,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   return (
     <LinkProvider value={renderLink}>
+      <EnquiryPanelProvider>
       <a className="wbsk-skip" href="#main">
         Skip to content
       </a>
@@ -122,8 +163,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
         enquireHref="/#enquire"
         homeHref="/"
         logoSrc={publicAsset("/wbsk-logo.svg")}
-        currentPath={pathname}
-        clearOverId={pathname === "/" || /^\/pre-wedding\/[^/]+\/?$/.test(pathname) ? "hero" : undefined}
+        currentPath={pathname.startsWith("/client/") ? "/weddings/" : pathname}
+        clearOverId={pathname === "/" || isStoryPage(pathname) ? "hero" : undefined}
       />
       <main id="main" tabIndex={-1}>
         {children}
@@ -136,6 +177,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         social={socialLinks}
       />
       <div ref={duskRef} className="wbsk-dusk" aria-hidden="true" />
+      </EnquiryPanelProvider>
     </LinkProvider>
   );
 }

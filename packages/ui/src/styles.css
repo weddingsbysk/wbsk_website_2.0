@@ -25,6 +25,9 @@
 
 @layer components {
   :root {
+    --hover: 0.3s;
+    --settle: cubic-bezier(0.22, 1, 0.36, 1);
+    --travel: cubic-bezier(0.65, 0, 0.35, 1);
     --gutter: clamp(16px, 4vw, 40px);
     --section: clamp(96px, 12vw, 160px);
     --text-display: clamp(3rem, 1.6rem + 5.6vw, 6rem);
@@ -997,6 +1000,664 @@
     .wbsk-arc:not([data-mode="row"]) .wbsk-arc__row {
       position: static;
       visibility: visible;
+    }
+  }
+
+  /* Client cards (Decision 05). */
+  .wbsk-card {
+    display: block;
+  }
+  .wbsk-card__link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    transition: transform var(--hover) var(--settle);
+  }
+  .wbsk-card .wbsk-frame {
+    box-shadow: 0 2px 10px rgb(58 36 16 / 0.1);
+    transition: box-shadow var(--hover) var(--settle);
+  }
+  .wbsk-card .wbsk-frame img {
+    transition: transform 1.2s var(--settle), opacity 0.5s var(--settle);
+  }
+  .wbsk-card__place {
+    margin: 18px 0 6px;
+  }
+  .wbsk-card__names {
+    margin: 0;
+  }
+  .wbsk-card__meta {
+    margin: 6px 0 0;
+    font-size: var(--text-small);
+    opacity: 0.78;
+  }
+  .wbsk-card__more {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: var(--text-small);
+    color: var(--color-deep-gold);
+    opacity: 0;
+    transition: opacity var(--hover) var(--settle);
+  }
+  .wbsk-card__description {
+    margin: 10px 0 0;
+    font-size: var(--text-small);
+  }
+  .wbsk-card__link:active {
+    transform: scale(0.99);
+  }
+  @media (hover: hover) {
+    .wbsk-card__description {
+      display: none;
+    }
+    .wbsk-card__link:hover,
+    .wbsk-card__link:focus-visible {
+      transform: translateY(-4px);
+    }
+    .wbsk-card__link:hover .wbsk-frame,
+    .wbsk-card__link:focus-visible .wbsk-frame {
+      box-shadow: 0 18px 40px -12px rgb(58 36 16 / 0.42);
+    }
+    .wbsk-card__link:hover .wbsk-frame img,
+    .wbsk-card__link:focus-visible .wbsk-frame img {
+      transform: scale(1.03);
+    }
+    .wbsk-card__link:hover .wbsk-card__more,
+    .wbsk-card__link:focus-visible .wbsk-card__more {
+      opacity: 1;
+    }
+  }
+  @media (hover: none) {
+    .wbsk-card__more,
+    .wbsk-sharedline {
+      display: none;
+    }
+  }
+
+  /* Weddings page (Decision 05). */
+  .wbsk-weddings__intro {
+    padding-top: calc(var(--header-height) + clamp(48px, 7vw, 96px));
+    padding-bottom: clamp(32px, 4vw, 56px);
+  }
+  .wbsk-weddings__intro .wbsk-h1 {
+    margin-top: 12px;
+  }
+  .wbsk-lead-story,
+  .wbsk-nextstory {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius-wbsk);
+    color: var(--color-ivory);
+    text-decoration: none;
+    background: var(--color-dusk);
+  }
+  .wbsk-lead-story .wbsk-frame,
+  .wbsk-nextstory .wbsk-frame,
+  .wbsk-storycover .wbsk-frame {
+    aspect-ratio: 21 / 9 !important;
+    border-radius: 0;
+  }
+  @media (orientation: portrait) {
+    .wbsk-lead-story .wbsk-frame,
+    .wbsk-nextstory .wbsk-frame,
+    .wbsk-storycover .wbsk-frame {
+      aspect-ratio: 3 / 4 !important;
+    }
+  }
+  .wbsk-lead-story__text,
+  .wbsk-nextstory__text {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+    display: grid;
+    gap: 6px;
+    padding: clamp(40px, 8vw, 96px) clamp(16px, 3vw, 40px) clamp(16px, 3vw, 36px);
+    background: linear-gradient(to top, rgb(31 25 20 / 0.78), rgb(31 25 20 / 0));
+  }
+  .wbsk-lead-story__names {
+    display: block;
+    margin: 0;
+    color: var(--color-ivory);
+  }
+  .wbsk-weddings__grid {
+    padding-top: 12px;
+  }
+  .wbsk-gridwrap {
+    position: relative;
+  }
+  /* One line that stays with the grid, and leaves with it. It can't make any row jump. */
+  .wbsk-sharedline {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 20;
+    min-height: 48px;
+    margin: 0 calc(var(--gutter) * -1) 16px;
+    padding: 12px var(--gutter);
+    font-size: var(--text-small);
+    background: rgb(245 239 230 / 0);
+    transition: background-color var(--hover) var(--settle);
+  }
+  .wbsk-sharedline[data-filled="true"] {
+    background: rgb(245 239 230 / 0.94);
+  }
+  .wbsk-sharedline span {
+    display: block;
+    animation: wbsk-fade var(--hover) var(--settle) both;
+  }
+  .wbsk-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(32px, 4vw, 56px) clamp(20px, 2.4vw, 32px);
+  }
+  @media (max-width: 1023px) {
+    .wbsk-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 699px) {
+    .wbsk-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .wbsk-grid__more,
+  .wbsk-closingline {
+    display: flex;
+    justify-content: center;
+  }
+  .wbsk-grid__more {
+    margin-top: 48px;
+  }
+  .wbsk-closingline {
+    padding-block: var(--section);
+  }
+
+  /* The letterbox reveal (Decision 12). */
+  .wbsk-letterbox {
+    position: relative;
+    overflow: hidden;
+  }
+  .wbsk-letterbox__bar {
+    position: absolute;
+    right: 0;
+    left: 0;
+    z-index: 2;
+    display: none;
+    height: 50.5%;
+    background: #000;
+    transition: transform 1.4s var(--travel);
+  }
+  .wbsk-letterbox__bar[data-edge="top"] {
+    top: 0;
+    transform-origin: top;
+  }
+  .wbsk-letterbox__bar[data-edge="bottom"] {
+    bottom: 0;
+    transform-origin: bottom;
+  }
+  .wbsk-letterbox__picture {
+    transition: transform 1.6s var(--settle);
+  }
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    .wbsk-letterbox__bar {
+      display: block;
+      /* If the page's scripts never arrive, the bars part by themselves. */
+      animation: wbsk-bars-away 0.01s 4s forwards;
+    }
+    .wbsk-letterbox[data-letterbox] .wbsk-letterbox__bar {
+      animation: none;
+    }
+    .wbsk-letterbox[data-letterbox="open"] .wbsk-letterbox__bar {
+      transform: scaleY(0);
+    }
+    .wbsk-letterbox:not([data-letterbox="open"]) .wbsk-letterbox__picture {
+      transform: scale(1.06);
+    }
+  }
+  @keyframes wbsk-bars-away {
+    to {
+      transform: scaleY(0);
+    }
+  }
+  @keyframes wbsk-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* A couple's page (Decision 06). */
+  .wbsk-storycover {
+    position: relative;
+  }
+  .wbsk-storycover .wbsk-frame {
+    border-radius: 0 0 var(--radius-wbsk) var(--radius-wbsk);
+  }
+  .wbsk-storycover__labelwrap {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+    margin-inline: auto;
+    pointer-events: none;
+  }
+  .wbsk-storycover__label {
+    width: min(100%, 560px);
+    padding: clamp(18px, 2vw, 28px) clamp(20px, 2.4vw, 32px);
+    color: var(--color-ink);
+    background: var(--color-ivory);
+    border-radius: var(--radius-wbsk);
+    box-shadow: 0 12px 32px -14px rgb(58 36 16 / 0.35);
+    transform: translateY(50%);
+    pointer-events: auto;
+    view-transition-name: story-label;
+  }
+  .wbsk-storycover__label .wbsk-h1 {
+    margin: 6px 0 0;
+    font-size: var(--text-h2);
+    color: var(--color-ink);
+  }
+  .wbsk-storycover__label .wbsk-label {
+    margin: 0;
+    color: var(--color-deep-gold);
+  }
+  .wbsk-story {
+    display: grid;
+    gap: clamp(32px, 4vw, 64px);
+    align-items: start;
+    padding-top: calc(clamp(96px, 11vw, 150px) + 32px);
+    padding-bottom: clamp(64px, 8vw, 112px);
+  }
+  @media (min-width: 900px) {
+    .wbsk-story[data-film="true"] {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    }
+  }
+  .wbsk-story__text > * + * {
+    margin-top: 16px;
+  }
+  .wbsk-story__text > .wbsk-label {
+    margin: 0;
+  }
+  .wbsk-story__text .wbsk-lead {
+    max-width: 62ch;
+  }
+  .wbsk-story__gallery {
+    padding-bottom: clamp(64px, 8vw, 112px);
+  }
+
+  /* The masonry: tracks scale with the column, so nothing jumps and order stays left to right. */
+  .wbsk-gallerywrap {
+    container-type: inline-size;
+  }
+  .wbsk-gallery {
+    --columns: 2;
+    --col: calc(100cqw / (var(--columns) + (var(--columns) - 1) * 0.06));
+    display: grid;
+    grid-template-columns: repeat(var(--columns), var(--col));
+    grid-auto-rows: calc(var(--col) / 100);
+    column-gap: calc(var(--col) * 0.06);
+  }
+  .wbsk-gallery > li {
+    grid-column: var(--c2);
+    grid-row: var(--r2) / span var(--s2);
+    padding-bottom: calc(var(--col) * 0.06);
+    min-height: 0;
+  }
+  @media (min-width: 1024px) {
+    .wbsk-gallery {
+      --columns: 5;
+    }
+    .wbsk-gallery > li {
+      grid-column: var(--c5);
+      grid-row: var(--r5) / span var(--s5);
+    }
+  }
+  .wbsk-gallery__photo {
+    position: relative;
+    display: block;
+    height: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-wbsk);
+    background-color: #d9cfc0;
+    cursor: zoom-in;
+  }
+  .wbsk-gallery__photo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .wbsk-gallery__sharp {
+    transition: opacity 0.5s var(--settle);
+  }
+  @media (scripting: enabled) {
+    .wbsk-gallery__sharp:not([data-loaded]) {
+      opacity: 0;
+    }
+  }
+
+  /* Full-screen photo. */
+  .wbsk-lightbox {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: var(--color-ivory);
+    background: #0d0a08;
+    touch-action: pan-y pinch-zoom;
+  }
+  .wbsk-lightbox::backdrop {
+    background: #0d0a08;
+  }
+  .wbsk-lightbox__stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .wbsk-lightbox__stage > img:first-child {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 100%;
+    animation: wbsk-fade 0.3s var(--settle) both;
+  }
+  /* Drawn over the photo, not printed into the file (Decision 06). */
+  .wbsk-lightbox__mark {
+    position: absolute;
+    top: 72%;
+    left: 50%;
+    width: clamp(72px, 9vw, 120px);
+    height: auto;
+    opacity: 0.6;
+    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.5));
+    pointer-events: none;
+    translate: -50% -50%;
+  }
+  .wbsk-lightbox__count {
+    position: absolute;
+    top: 18px;
+    left: 20px;
+    margin: 0;
+    font-size: var(--text-small);
+    letter-spacing: 0.08em;
+  }
+  .wbsk-lightbox__close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+  }
+  .wbsk-lightbox__nav {
+    position: absolute;
+    top: 50%;
+    display: none;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    color: var(--color-ivory);
+    background: rgb(13 10 8 / 0.4);
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    translate: 0 -50%;
+    transition: background-color var(--hover) var(--settle);
+  }
+  .wbsk-lightbox__nav:hover {
+    background: rgb(13 10 8 / 0.75);
+  }
+  .wbsk-lightbox__nav[data-side="left"] {
+    left: 16px;
+  }
+  .wbsk-lightbox__nav[data-side="right"] {
+    right: 16px;
+  }
+  @media (hover: hover) {
+    .wbsk-lightbox__nav {
+      display: grid;
+    }
+  }
+  body:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  /* Films on a poster. */
+  .wbsk-film {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-wbsk);
+    background: #000;
+  }
+  .wbsk-film iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .wbsk-film__play {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .wbsk-film__play:focus-visible {
+    outline-offset: -4px;
+  }
+  .wbsk-film__icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    width: 72px;
+    height: 72px;
+    place-items: center;
+    color: var(--color-dusk);
+    background: var(--color-gold);
+    border-radius: 50%;
+    translate: -50% -50%;
+    transition: transform var(--hover) var(--settle);
+  }
+  .wbsk-film__play:hover .wbsk-film__icon {
+    transform: scale(1.06);
+  }
+  .wbsk-cinema {
+    display: grid;
+    gap: 32px;
+  }
+  .wbsk-cinema .wbsk-h2 {
+    margin: 0;
+  }
+
+  /* Instagram reel pills. */
+  .wbsk-reels {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+  }
+  .wbsk-reel {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    min-height: 44px;
+    padding: 8px 20px;
+    font-family: var(--font-serif);
+    white-space: nowrap;
+    color: var(--color-ivory);
+    text-decoration: none;
+    border: 1px solid var(--color-gold);
+    border-radius: 999px;
+    transition: background-color var(--hover) var(--settle), color var(--hover) var(--settle);
+  }
+  .wbsk-reel:hover,
+  .wbsk-reel:focus-visible {
+    color: var(--color-dusk);
+    background: var(--color-gold);
+  }
+  .wbsk-reel__arrow {
+    transition: transform var(--hover) var(--settle);
+  }
+  .wbsk-reel:hover .wbsk-reel__arrow {
+    transform: translate(2px, -2px);
+  }
+
+  .wbsk-closingband {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: clamp(64px, 8vw, 112px);
+  }
+  .wbsk-closingband .wbsk-h3 {
+    margin: 0;
+  }
+  .wbsk-nextstory {
+    border-radius: 0;
+  }
+
+  /* The enquiry panel. */
+  .wbsk-panel {
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    max-height: min(92dvh, 900px);
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    color: var(--color-ink);
+    background: none;
+    border: 0;
+    overscroll-behavior: contain;
+    transform: translateY(100%);
+    transition: transform 0.45s var(--travel);
+  }
+  .wbsk-panel[data-open] {
+    transform: none;
+  }
+  .wbsk-panel::backdrop {
+    background: rgb(31 25 20 / 0.6);
+  }
+  .wbsk-panel__sheet {
+    position: relative;
+    display: grid;
+    gap: 16px;
+    max-width: 880px;
+    min-height: 50dvh;
+    margin-inline: auto;
+    align-content: start;
+    padding: clamp(32px, 5vw, 64px) var(--gutter);
+    background: var(--color-ivory);
+    border-radius: var(--radius-wbsk) var(--radius-wbsk) 0 0;
+  }
+  .wbsk-panel__sheet .wbsk-h2 {
+    margin: 0;
+    padding-right: 48px;
+  }
+  .wbsk-panel__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: var(--color-ink);
+  }
+
+  /* Signature page moves (Decisions 05 and 06). */
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-page-transition="expand"] .wbsk-storycover .wbsk-frame {
+      view-transition-name: wedding-cover;
+    }
+    html[data-page-transition]::view-transition-group(wedding-cover) {
+      z-index: 5;
+      animation-duration: 0.5s;
+      animation-timing-function: var(--travel);
+    }
+    html[data-page-transition]::view-transition-old(wedding-cover),
+    html[data-page-transition]::view-transition-new(wedding-cover) {
+      height: 100%;
+      object-fit: cover;
+      animation-duration: 0.5s;
+    }
+    html[data-page-transition="expand"]::view-transition-old(root) {
+      animation: wbsk-out 0.25s var(--travel) both;
+    }
+    html[data-page-transition="expand"]::view-transition-new(root) {
+      animation: wbsk-fadein 0.4s 0.1s var(--settle) both;
+    }
+    /* The names settle on top of the growing photo, never behind it. */
+    html[data-page-transition]::view-transition-group(story-label) {
+      z-index: 6;
+    }
+    html[data-page-transition]::view-transition-new(story-label) {
+      animation: wbsk-settle 0.5s 0.2s var(--settle) both;
+    }
+    html[data-page-transition]::view-transition-old(story-label) {
+      animation: wbsk-out 0.2s var(--travel) both;
+    }
+    html[data-page-transition="next"]::view-transition-old(root) {
+      z-index: 2;
+      animation: wbsk-slide-out 0.75s var(--travel) both;
+    }
+    html[data-page-transition="next"]::view-transition-new(root) {
+      animation: wbsk-glide-in 0.95s var(--travel) both;
+    }
+    html[data-page-transition="next"][data-page-direction="back"]::view-transition-old(root) {
+      animation: wbsk-slide-out-back 0.75s var(--travel) both;
+    }
+    html[data-page-transition="next"][data-page-direction="back"]::view-transition-new(root) {
+      animation: wbsk-glide-in-back 0.95s var(--travel) both;
+    }
+  }
+  @keyframes wbsk-out {
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes wbsk-fadein {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes wbsk-settle {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+  @keyframes wbsk-slide-out {
+    to {
+      transform: translateX(-100%);
+    }
+  }
+  @keyframes wbsk-glide-in {
+    from {
+      transform: translateX(35%);
+    }
+  }
+  @keyframes wbsk-slide-out-back {
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes wbsk-glide-in-back {
+    from {
+      transform: translateX(-35%);
     }
   }
 }

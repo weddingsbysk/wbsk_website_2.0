@@ -1,6 +1,6 @@
 import { createClient } from "@sanity/client";
 import { sanityProject, visibleWithSamples } from "@wbsk/content";
-import type { WbskImageSource } from "@wbsk/ui";
+import type { SanityImage, WbskImageSource } from "@wbsk/ui";
 
 // Published content only, with no token. A failed read fails the build, so the live site keeps
 // its last good version (Decision 19).
@@ -101,4 +101,110 @@ export async function getDestinations() {
     cover: toImage(item.coverDesktop),
     coverPhone: toImage(item.coverPhone),
   }));
+}
+
+type FilmResult = { url?: string; poster: ImageResult } | null;
+type WeddingResult = {
+  _createdAt: string;
+  isSample?: boolean;
+  status?: string;
+  firstName: string;
+  secondName: string;
+  placeLabel: string;
+  city: string;
+  venue: string;
+  weddingDate: string;
+  slug: string;
+  shortDescription: string;
+  theirStory: string;
+  cardPhoto: ImageResult;
+  coverDesktop: ImageResult;
+  coverPhone: ImageResult;
+  gallery: ImageResult[] | null;
+  teaser: FilmResult;
+  highlight: FilmResult;
+  reels: { url: string; label?: string }[] | null;
+};
+
+const monthYear = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
+/** Most images fetch a tiny preview instead, so their inline one needn't weigh down the page. */
+export function withoutInlinePreview<T extends WbskImageSource | null>(image: T): T {
+  if (!image || image.kind !== "sanity") return image;
+  return { ...image, lqip: undefined };
+}
+
+function toFilm(film: FilmResult) {
+  const poster = withoutInlinePreview(toImage(film?.poster ?? null));
+  return film?.url && poster ? { url: film.url, poster } : null;
+}
+
+function toWedding(item: WeddingResult) {
+  return {
+    slug: item.slug,
+    href: `/client/${item.slug}/`,
+    first: item.firstName,
+    second: item.secondName,
+    place: `${item.placeLabel} · ${item.city}`.toUpperCase(),
+    city: item.city,
+    venue: item.venue,
+    monthYear: monthYear(item.weddingDate),
+    shortDescription: item.shortDescription,
+    theirStory: item.theirStory,
+    cardPhoto: withoutInlinePreview(toImage(item.cardPhoto)),
+    coverDesktop: toImage(item.coverDesktop),
+    coverPhone: toImage(item.coverPhone),
+    gallery: (item.gallery ?? []).map(toImage).filter(Boolean).map(withoutInlinePreview) as SanityImage[],
+    teaser: toFilm(item.teaser),
+    highlight: toFilm(item.highlight),
+    reels: item.reels ?? [],
+  };
+}
+
+let weddingsRead: Promise<{
+  listed: ReturnType<typeof toWedding>[];
+  pages: ReturnType<typeof toWedding>[];
+}> | null = null;
+
+/** Read once per build: every couple's page needs the whole list for its Next story. */
+export function getWeddings() {
+  weddingsRead ??= client
+    .fetch<WeddingResult[]>(/* groq */ `*[_type == "wedding" && status != "removed"] | order(weddingDate desc) {
+      _createdAt,
+      isSample,
+      status,
+      firstName,
+      secondName,
+      placeLabel,
+      city,
+      venue,
+      weddingDate,
+      "slug": address.current,
+      shortDescription,
+      theirStory,
+      cardPhoto${imageFields},
+      coverDesktop${imageFields},
+      coverPhone${imageFields},
+      gallery[]${imageFields},
+      teaser{url, poster${imageFields}},
+      highlight{url, poster${imageFields}},
+      reels[]{url, label}
+    }`)
+    .then((data) => {
+      const live = visibleWithSamples(data.filter((item) => item.status !== "archived"));
+      const archived = data.filter((item) => item.status === "archived");
+      // Real work lists first, then any samples still showing (Decision 25).
+      const listed = live.map(toWedding);
+      return { listed, pages: [...listed, ...archived.map(toWedding)] };
+    });
+  return weddingsRead;
+}
+
+export function getWeddingsIntro() {
+  return client.fetch<string | null>(/* groq */ `*[_id == "weddingsPage"][0].intro`);
 }

@@ -1,5 +1,5 @@
 import { sanityProject } from "@wbsk/content";
-import { Header, LinkProvider, WbskImage, type WbskImageSource, type WbskLinkProps } from "@wbsk/ui";
+import { CoupleNames, Header, LinkProvider, StoryCover, type WbskImageSource, type WbskLinkProps } from "@wbsk/ui";
 import { navItems } from "@wbsk/content";
 import logoUrl from "../../../web/public/wbsk-logo.svg";
 
@@ -26,28 +26,21 @@ const renderLink = ({ href: _href, onClick: _onClick, ...rest }: WbskLinkProps) 
 );
 
 export function WeddingPreview({ doc, phone }: { doc: DraftDocument; phone: boolean }) {
-  const cover = draftImage((phone ? doc.coverPhone : doc.coverDesktop) as DraftImage);
   const first = (doc.firstName as string) || "First name";
   const second = (doc.secondName as string) || "Second name";
   return (
     <LinkProvider value={renderLink}>
       <Header items={navItems} enquireHref="/#enquire" homeHref="/" logoSrc={logoUrl} currentPath="/client/" />
-      <main style={{ paddingTop: 72 }}>
-        {cover ? (
-          <WbskImage image={cover} slot={phone ? "coverPhone" : "coverDesktop"} sizes="100vw" aspectRatio={phone ? 3 / 4 : 21 / 9} priority />
-        ) : (
-          <div style={{ aspectRatio: phone ? "3 / 4" : "21 / 9", background: "#6b5a4a" }} />
-        )}
-        <div className="wbsk-section wbsk-container" style={{ paddingBlock: 48 }}>
-          <p className="wbsk-label">
-            {[doc.placeLabel, doc.city].filter(Boolean).join(" · ") || "Place"}
-          </p>
-          <h1 className="wbsk-h1" style={{ marginTop: 8 }}>
-            {first} <span className="wbsk-amp">&amp;</span> {second}
-          </h1>
-          <p className="wbsk-lead wbsk-measure" style={{ marginTop: 24 }}>
-            {(doc.theirStory as string) || "Their story appears here as you type."}
-          </p>
+      <main>
+        <StoryCover
+          cover={draftImage(doc.coverDesktop as DraftImage)}
+          coverPhone={draftImage(doc.coverPhone as DraftImage)}
+          place={[doc.placeLabel, doc.city].filter(Boolean).join(" · ").toUpperCase() || "PLACE"}
+          names={<CoupleNames first={first} second={second} />}
+          meta={[doc.venue, doc.weddingDate].filter(Boolean).join(" · ")}
+        />
+        <div className="wbsk-container wbsk-story">
+          <p className="wbsk-lead wbsk-measure">{(doc.theirStory as string) || "Their story appears here as you type."}</p>
         </div>
       </main>
     </LinkProvider>

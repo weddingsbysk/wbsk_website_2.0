@@ -2,6 +2,7 @@
   "name": "@wbsk/ui",
   "private": true,
   "version": "0.0.0",
+  "sideEffects": ["*.css"],
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./src/styles.css",

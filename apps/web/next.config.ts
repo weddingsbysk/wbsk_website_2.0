@@ -8,6 +8,8 @@ const config: NextConfig = {
   basePath,
   images: { unoptimized: true },
   transpilePackages: ["@wbsk/ui", "@wbsk/content"],
+  // Each page bundles only the components it uses, not everything the package exports.
+  experimental: { optimizePackageImports: ["@wbsk/ui"] },
   reactStrictMode: true,
 };
 

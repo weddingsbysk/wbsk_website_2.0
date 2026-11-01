@@ -5,7 +5,9 @@
       "url": [
         "http://localhost/index.html",
         "http://localhost/films/index.html",
-        "http://localhost/pre-wedding/index.html"
+        "http://localhost/pre-wedding/index.html",
+        "http://localhost/client/sample-asha-sample-kabir/index.html",
+        "http://localhost/weddings/index.html"
       ],
       "numberOfRuns": 3,
       "settings": {

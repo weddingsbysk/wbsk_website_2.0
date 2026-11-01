@@ -21,7 +21,7 @@ export type LocalImage = {
 export type WbskImageSource = SanityImage | LocalImage;
 
 export const slotWidths = {
-  thumbnail: [300, 450, 600],
+  thumbnail: [300, 600],
   fullscreen: [1600, 2048, 2560],
   card: [400, 640, 800, 1000],
   coverDesktop: [1280, 1920, 2560],
@@ -66,3 +66,24 @@ export function buildSrcSet(image: SanityImage, slot: ImageSlot, aspectRatio?: n
     })
     .join(", ");
 }
+
+/** The largest long edges for the full-screen view, matched to the screen (Decision 06). */
+const FULLSCREEN_EDGES = [1600, 2048, 2560];
+
+export function fullscreenWidths(width: number, height: number): number[] {
+  const scale = Math.min(1, width / height);
+  const widths = FULLSCREEN_EDGES.map((edge) => Math.round(edge * scale)).filter((w) => w <= width);
+  return widths.length ? widths : [width];
+}
+
+/** A full-screen photo's sizes, worked out in the browser so they don't weigh down the page. */
+export function fullscreenSrcSet(baseUrl: string, width: number, height: number): string {
+  const image: SanityImage = { kind: "sanity", url: baseUrl, width, height, alt: "" };
+  return fullscreenWidths(width, height)
+    .map((w) => `${sanityUrl(image, { width: w })} ${w}w`)
+    .join(", ");
+}
+
+/** A tiny blurred version to show first: a separate small request, so it adds nothing to the page. */
+export const tinyPreviewUrl = (url: string) => `${url}?w=32&blur=20&q=30&auto=format`;
+

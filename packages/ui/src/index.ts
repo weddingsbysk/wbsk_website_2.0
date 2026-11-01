@@ -1,7 +1,13 @@
+export { FilmPlayer } from "./components/FilmPlayer";
 export { Footer } from "./components/Footer";
+export { Gallery } from "./components/Gallery";
+export { GalleryLightbox } from "./components/GalleryLightbox";
 export { Header, type NavItem } from "./components/Header";
 export { ArrowIcon, CloseIcon, MenuIcon } from "./components/icons";
+export { Letterbox } from "./components/Letterbox";
 export { Reveal } from "./components/Reveal";
 export { WbskImage } from "./components/WbskImage";
-export { buildSrcSet, sanityUrl, slotWidths, type WbskImageSource } from "./image";
+export { ClientCard, CoupleNames, StoryCover, type WeddingSummary } from "./components/WeddingViews";
+export { buildSrcSet, sanityUrl, slotWidths, type SanityImage, type WbskImageSource } from "./image";
+export { layoutMasonry, MASONRY_GAP, MASONRY_UNITS } from "./masonry";
 export { LinkProvider, WbskLink, type WbskLinkProps } from "./link-context";
