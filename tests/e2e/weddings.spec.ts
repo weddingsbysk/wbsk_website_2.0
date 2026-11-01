@@ -21,7 +21,14 @@ test("Weddings page: lead story, grid, no accessibility problems, no sideways sc
   await expect(page.locator(".wbsk-lead-story")).toContainText("Sample Asha");
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
   await page.locator(".wbsk-letterbox[data-letterbox='open']").waitFor({ timeout: 15000 });
-  await page.waitForTimeout(1700);
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.timeline instanceof DocumentTimeline)
+        .map((a) => a.finished.catch(() => {})),
+    ),
+  );
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations.map((v) => v.id)).toEqual([]);
   expect(errors).toEqual([]);
@@ -51,7 +58,7 @@ test("hovering a card shows its description without moving any row", async ({ pa
 test("a card opens its couple's page, and Back returns", async ({ page }) => {
   await page.goto("./weddings/");
   const card = page.locator(".wbsk-card__link").first();
-  const name = (await card.locator("h2").innerText()).trim();
+  const name = (await card.getByRole("heading").innerText()).trim();
   await card.scrollIntoViewIfNeeded();
   await card.click();
   await expect(page).toHaveURL(/client\/sample-/);

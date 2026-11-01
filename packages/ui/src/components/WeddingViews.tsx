@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { WbskImageSource } from "../image";
 import { WbskLink } from "../link-context";
 import { WbskImage } from "./WbskImage";
@@ -35,23 +35,30 @@ export function ClientCard({ wedding, onShow }: { wedding: WeddingSummary; onSho
         onMouseEnter={show}
         onFocus={show}
       >
-        {wedding.cardPhoto ? (
-          <WbskImage
-            image={wedding.cardPhoto}
-            slot="card"
-            sizes="(min-width: 1024px) 31vw, (min-width: 700px) 47vw, 92vw"
-            aspectRatio={4 / 5}
-          />
-        ) : null}
-        <p className="wbsk-label wbsk-card__place">{wedding.place}</p>
-        <h2 className="wbsk-h3 wbsk-card__names">
-          <CoupleNames first={wedding.first} second={wedding.second} />
-        </h2>
-        <p className="wbsk-card__meta">
-          {wedding.venue} · {wedding.monthYear}
-        </p>
-        <span className="wbsk-card__more" aria-hidden="true">
-          View story →
+        <span className="wbsk-card__photo">
+          {wedding.cardPhoto ? (
+            <WbskImage
+              image={wedding.cardPhoto}
+              slot="card"
+              sizes="(min-width: 1024px) 31vw, (min-width: 700px) 47vw, 92vw"
+              aspectRatio={4 / 5}
+            />
+          ) : null}
+          {/* Clean at rest; on hover, cinema bars close in and carry the invitation (Decision 05). */}
+          <span className="wbsk-card__bar" data-edge="top" aria-hidden="true" />
+          <span className="wbsk-card__bar" data-edge="bottom" aria-hidden="true" />
+          <span className="wbsk-card__more" aria-hidden="true">
+            View story →
+          </span>
+        </span>
+        <span className="wbsk-card__caption">
+          <span className="wbsk-label wbsk-card__place">{wedding.place}</span>
+          <span className="wbsk-h3 wbsk-card__names" role="heading" aria-level={2}>
+            <CoupleNames first={wedding.first} second={wedding.second} />
+          </span>
+          <span className="wbsk-card__meta">
+            {wedding.venue} · {wedding.monthYear}
+          </span>
         </span>
       </WbskLink>
       <p className="wbsk-card__description">{wedding.shortDescription}</p>
@@ -60,6 +67,21 @@ export function ClientCard({ wedding, onShow }: { wedding: WeddingSummary; onSho
 }
 
 /** The cover with its ivory Floating Label, half on the photo, half on the page (Decision 06). */
+/** A page title that arrives word by word out of a mask, like a film's (owner, 2 November 2026). */
+export function TitleWords({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(" ").map((word, index) => (
+        <span key={`${word}-${index}`}>
+          <span className="wbsk-title__word">
+            <span style={{ "--word": index } as CSSProperties}>{word}</span>
+          </span>{" "}
+        </span>
+      ))}
+    </>
+  );
+}
+
 export function StoryCover({
   cover,
   coverPhone,

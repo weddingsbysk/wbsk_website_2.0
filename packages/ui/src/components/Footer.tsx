@@ -18,7 +18,7 @@ export function Footer({ items, privacyHref, homeHref, logoSrc, social }: Props)
           className="wbsk-footer__logo"
           aria-label="Weddings By Siddhant Kapoor, home"
         >
-          <img src={logoSrc} alt="" width="121" height="28" loading="lazy" />
+          <img src={logoSrc} alt="" width="104" height="24" loading="lazy" />
         </WbskLink>
         <nav aria-label="Footer">
           <ul className="wbsk-footer__links">
@@ -44,6 +44,7 @@ export function Footer({ items, privacyHref, homeHref, logoSrc, social }: Props)
             ))}
           </ul>
         </nav>
+        <p className="wbsk-footer__legal">© {new Date().getFullYear()} Weddings By Siddhant Kapoor</p>
       </div>
     </footer>
   );

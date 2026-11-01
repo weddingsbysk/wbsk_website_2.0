@@ -52,10 +52,10 @@ export function EnquiryPanelProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function EnquireButton({ children }: { children: ReactNode }) {
+export function EnquireButton({ children, statement }: { children: ReactNode; statement?: boolean }) {
   const { open } = useContext(PanelContext);
   return (
-    <button type="button" className="wbsk-button" onClick={open}>
+    <button type="button" className={statement ? "wbsk-bigline" : "wbsk-button"} onClick={open}>
       <span>{children}</span>
       <ArrowIcon />
     </button>

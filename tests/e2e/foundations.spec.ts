@@ -23,6 +23,15 @@ for (const path of pages) {
     expect(response?.status()).toBe(200);
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("header img")).toBeVisible();
+    // Contrast is judged on the settled page, not on a title still fading in.
+    await page.evaluate(() =>
+      Promise.all(
+        document
+          .getAnimations()
+          .filter((a) => a.timeline instanceof DocumentTimeline)
+          .map((a) => a.finished.catch(() => {})),
+      ),
+    );
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();

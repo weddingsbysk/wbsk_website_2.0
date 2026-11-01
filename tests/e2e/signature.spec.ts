@@ -15,6 +15,17 @@ const atRest = (page: Page) => expect(page.locator(".wbsk-arc:not([data-moving])
 const MOVE_TIMEOUT = 30000;
 
 test.describe("opening intro", () => {
+  test("the hero title waits for the logo to land, then arrives", async ({ page }) => {
+    await page.goto("./");
+    const word = page.locator(".wbsk-title__word > span").first();
+    await expect(page.locator("html")).toHaveAttribute("data-intro", "play");
+    await expect(word).toHaveCSS("opacity", "0");
+    await expect(page.locator("h1")).toHaveText(/\S/);
+    await expect(page.locator("html")).not.toHaveAttribute("data-intro", "play", { timeout: 9000 });
+    await expect(word).toHaveCSS("opacity", "1", { timeout: 4000 });
+    await expect(word).toHaveCSS("filter", "none", { timeout: 6000 });
+  });
+
   test("plays on the first visit, lands the logo on the header, and only once", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));

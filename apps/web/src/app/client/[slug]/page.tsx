@@ -101,8 +101,10 @@ export default async function Page({ params }: Params) {
       ) : null}
 
       <section className="wbsk-container wbsk-closingband">
-        <p className="wbsk-h3">Planning something like this?</p>
-        <EnquireButton>Tell us about your wedding</EnquireButton>
+        <p className="wbsk-lead">Planning something like this?</p>
+        <div>
+          <EnquireButton statement>Tell us about your wedding</EnquireButton>
+        </div>
       </section>
 
       {next ? (

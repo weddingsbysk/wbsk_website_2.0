@@ -28,21 +28,35 @@
     --hover: 0.3s;
     --settle: cubic-bezier(0.22, 1, 0.36, 1);
     --travel: cubic-bezier(0.65, 0, 0.35, 1);
-    --gutter: clamp(16px, 4vw, 40px);
-    --section: clamp(96px, 12vw, 160px);
-    --text-display: clamp(3rem, 1.6rem + 5.6vw, 6rem);
-    --text-h1: clamp(2.25rem, 1.5rem + 3.2vw, 4rem);
-    --text-h2: clamp(1.75rem, 1.35rem + 1.7vw, 2.75rem);
-    --text-h3: clamp(1.375rem, 1.2rem + 0.75vw, 1.875rem);
-    --text-lead: clamp(1.125rem, 1.08rem + 0.2vw, 1.3125rem);
-    --text-body: clamp(1rem, 0.98rem + 0.07vw, 1.0625rem);
+    --gutter: clamp(20px, 3.6vw, 56px);
+    --section: clamp(112px, 13vw, 208px);
+    --gap-block: clamp(64px, 8vw, 128px);
+    /* A wide scale: the drama comes from the distance between headline and text (Warm Cinema). */
+    --text-display: clamp(3.5rem, 8.4vw, 9rem);
+    --text-h1: clamp(2.75rem, 5.2vw, 6rem);
+    --text-h2: clamp(2.125rem, 3.5vw, 4rem);
+    --text-h3: clamp(1.375rem, 1.85vw, 1.75rem);
+    --text-lead: clamp(1.125rem, 1.45vw, 1.4375rem);
+    --text-body: 1.0625rem;
     --text-small: 0.875rem;
-    --text-label: 0.75rem;
-    --header-height: 72px;
+    --text-label: 0.6875rem;
+    --header-height: 60px;
+  }
+
+  @media (min-width: 900px) {
+    :root {
+      --header-height: 68px;
+    }
+  }
+
+  ::selection {
+    color: var(--color-dusk);
+    background: var(--color-gold);
   }
 
   html {
     -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
     scroll-padding-top: calc(var(--header-height) + 16px);
     background: var(--color-dusk);
   }
@@ -53,7 +67,8 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: var(--text-body);
-    line-height: 1.6;
+    line-height: 1.65;
+    font-kerning: normal;
     font-synthesis: none;
     -webkit-font-smoothing: antialiased;
     --focus: var(--color-deep-gold);
@@ -107,7 +122,7 @@
 
   .wbsk-container {
     width: 100%;
-    max-width: 1440px;
+    max-width: 1680px;
     margin-inline: auto;
     padding-inline: var(--gutter);
   }
@@ -115,7 +130,13 @@
     padding-block: var(--section);
   }
   .wbsk-measure {
-    max-width: 66ch;
+    max-width: 62ch;
+  }
+  /* Headlines set their own width, so they can run long and balance. */
+  .wbsk-h1.wbsk-measure,
+  .wbsk-h2.wbsk-measure,
+  .wbsk-display.wbsk-measure {
+    max-width: 18em;
   }
 
   /* Type */
@@ -132,29 +153,31 @@
   /* Optical sizes are held below Bodoni's finest setting so hairlines and hyphens survive at screen sizes. */
   .wbsk-display {
     font-size: var(--text-display);
-    line-height: 1.02;
-    letter-spacing: -0.015em;
+    line-height: 0.98;
+    letter-spacing: -0.022em;
     font-variation-settings: "opsz" 44;
   }
   .wbsk-h1 {
     font-size: var(--text-h1);
-    line-height: 1.08;
-    letter-spacing: -0.008em;
-    font-variation-settings: "opsz" 30;
+    line-height: 1.02;
+    letter-spacing: -0.018em;
+    font-variation-settings: "opsz" 36;
   }
   .wbsk-h2 {
     font-size: var(--text-h2);
-    line-height: 1.14;
-    font-variation-settings: "opsz" 22;
+    line-height: 1.06;
+    letter-spacing: -0.012em;
+    font-variation-settings: "opsz" 28;
   }
   .wbsk-h3 {
     font-size: var(--text-h3);
-    line-height: 1.2;
-    font-variation-settings: "opsz" 14;
+    line-height: 1.15;
+    letter-spacing: -0.004em;
+    font-variation-settings: "opsz" 18;
   }
   .wbsk-lead {
     font-size: var(--text-lead);
-    line-height: 1.55;
+    line-height: 1.5;
     text-wrap: pretty;
     margin: 0;
   }
@@ -169,13 +192,24 @@
   .wbsk-label {
     font-size: var(--text-label);
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.18em;
+    line-height: 1.4;
     text-transform: uppercase;
     color: var(--color-deep-gold);
     margin: 0;
   }
   [data-tone="dark"] .wbsk-label {
     color: var(--color-gold);
+  }
+  /* The faintest film grain on dark scenes. Never over photographs, which stay untouched. */
+  .wbsk-section[data-tone="dark"],
+  .wbsk-footer,
+  .wbsk-arc {
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .88 0 0 0 .055 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wbsk-section[data-tone="dark"]:not(.wbsk-pageintro),
+  .wbsk-footer {
+    background-image: var(--grain);
   }
 
   /* Links: a gold line draws in from the left (Decision 12) */
@@ -214,8 +248,9 @@
     align-items: center;
     gap: 10px;
     overflow: hidden;
-    min-height: 48px;
-    padding: 0 22px;
+    min-height: 52px;
+    padding: 0 26px;
+    letter-spacing: 0.005em;
     border: 1px solid var(--color-deep-gold);
     border-radius: var(--radius-wbsk);
     font: inherit;
@@ -268,9 +303,14 @@
     color: var(--color-dusk);
   }
   .wbsk-button--small {
-    min-height: 44px;
-    padding: 0 18px;
-    font-size: var(--text-small);
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 0.8125rem;
+  }
+  @media (pointer: coarse) {
+    .wbsk-button--small {
+      min-height: 44px;
+    }
   }
   .wbsk-arrow {
     transition: transform var(--duration-hover) var(--ease-settle);
@@ -314,6 +354,20 @@
   .wbsk-header[data-solid="false"]::before {
     opacity: 0;
   }
+  /* A soft shade over clear photos, so the header reads on even the brightest one. */
+  .wbsk-header::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 -48px;
+    z-index: -1;
+    background: linear-gradient(to bottom, rgb(20 15 11 / 0.5), rgb(20 15 11 / 0));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-hover) var(--ease-settle);
+  }
+  .wbsk-header[data-solid="false"]::after {
+    opacity: 1;
+  }
   .wbsk-header__inner {
     display: flex;
     align-items: center;
@@ -327,7 +381,7 @@
   }
   .wbsk-header__logo img {
     width: auto;
-    height: clamp(30px, 2.8vw, 40px);
+    height: clamp(24px, 2.1vw, 30px);
   }
   .wbsk-header__nav {
     margin-left: auto;
@@ -335,11 +389,12 @@
   }
   .wbsk-header__nav ul {
     display: flex;
-    gap: 32px;
+    gap: clamp(24px, 2.6vw, 40px);
   }
   .wbsk-header__navlink {
-    font-size: var(--text-small);
+    font-size: 0.8125rem;
     font-weight: 500;
+    letter-spacing: 0.012em;
   }
   .wbsk-header__actions {
     margin-left: auto;
@@ -403,24 +458,33 @@
 
   /* Footer */
   .wbsk-footer {
-    padding-block: 64px;
+    padding-block: clamp(64px, 7vw, 112px) 32px;
   }
   .wbsk-footer__inner {
     display: flex;
     flex-wrap: wrap;
-    gap: 32px 64px;
+    gap: 40px 64px;
     align-items: flex-start;
     justify-content: space-between;
   }
   .wbsk-footer__logo img {
     width: auto;
-    height: 28px;
+    height: 24px;
   }
   .wbsk-footer__links {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px 28px;
+    gap: 12px clamp(20px, 2.4vw, 36px);
     font-size: var(--text-small);
+  }
+  .wbsk-footer__legal {
+    flex-basis: 100%;
+    margin: clamp(40px, 5vw, 72px) 0 0;
+    padding-top: 20px;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    opacity: 0.72;
+    border-top: 1px solid rgb(245 239 230 / 0.16);
   }
 
   /* Images */
@@ -592,14 +656,62 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(to top, rgb(31 25 20 / 0.72), rgb(31 25 20 / 0) 55%);
+    background: linear-gradient(to top, rgb(20 15 11 / 0.78), rgb(20 15 11 / 0) 60%);
   }
   .wbsk-hero__text {
     position: absolute;
     z-index: 1;
     left: 0;
     right: 0;
-    bottom: clamp(32px, 7vh, 72px);
+    bottom: clamp(32px, 6vh, 64px);
+  }
+  /*
+   * A title arrives like a film's: word by word, out of a mask. On a first homepage visit it waits
+   * for the logo to land; everywhere else it plays as the page opens.
+   */
+  .wbsk-title__word {
+    display: inline-block;
+    margin: -0.06em -0.05em -0.2em;
+    padding: 0.06em 0.05em 0.2em;
+    overflow: hidden;
+    vertical-align: top;
+  }
+  .wbsk-title__word > span {
+    display: inline-block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-intro], [data-hero]) .wbsk-title__word > span,
+    html[data-hero="enter"] .wbsk-title__word > span {
+      animation: wbsk-title 1.4s var(--settle) both;
+      animation-delay: calc(var(--word) * 70ms);
+    }
+    html[data-intro="play"] .wbsk-title__word > span {
+      opacity: 0;
+      transform: translateY(112%);
+    }
+    html[data-intro="play"] .wbsk-header__nav,
+    html[data-intro="play"] .wbsk-header__actions {
+      opacity: 0;
+    }
+    html[data-hero="enter"] .wbsk-header__nav,
+    html[data-hero="enter"] .wbsk-header__actions {
+      animation: wbsk-fadein 1.2s 0.5s var(--settle) both;
+    }
+  }
+  @keyframes wbsk-title {
+    from {
+      opacity: 0;
+      filter: blur(8px);
+      transform: translateY(112%);
+    }
+    55% {
+      opacity: 1;
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: none;
+    }
   }
 
   .wbsk-hero__top {
@@ -719,12 +831,9 @@
   .wbsk-arc::after {
     content: "";
     position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    inset: 0;
     z-index: 150;
-    height: 16%;
-    background: linear-gradient(to top, var(--color-dusk), rgb(31 25 20 / 0));
+    background: var(--grain), linear-gradient(to top, var(--color-dusk), rgb(31 25 20 / 0) 16%);
     pointer-events: none;
   }
   /* At rest the layers let go of the graphics chip, so the browser redraws them crisp. */
@@ -1011,63 +1120,175 @@
     display: block;
     color: inherit;
     text-decoration: none;
-    transition: transform var(--hover) var(--settle);
   }
-  .wbsk-card .wbsk-frame {
-    box-shadow: 0 2px 10px rgb(58 36 16 / 0.1);
-    transition: box-shadow var(--hover) var(--settle);
+  .wbsk-card__photo {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius-wbsk);
+    box-shadow: var(--shadow-rest);
+    transition: box-shadow 0.6s var(--settle);
   }
-  .wbsk-card .wbsk-frame img {
-    transition: transform 1.2s var(--settle), opacity 0.5s var(--settle);
+  .wbsk-card__photo .wbsk-frame {
+    border-radius: 0;
+  }
+  .wbsk-card__photo .wbsk-frame img {
+    transform: scale(var(--zoom, 1)) translate(var(--mx, 0), var(--my, 0));
+    transition: transform 1.6s var(--settle), opacity 0.5s var(--settle);
+    will-change: transform;
+  }
+  .wbsk-card__bar {
+    position: absolute;
+    right: 0;
+    left: 0;
+    z-index: 2;
+    height: 11%;
+    background: #0d0a08;
+    transition: transform 0.7s var(--travel);
+  }
+  .wbsk-card__bar[data-edge="top"] {
+    top: 0;
+    transform: translateY(-101%);
+  }
+  .wbsk-card__bar[data-edge="bottom"] {
+    bottom: 0;
+    transform: translateY(101%);
+  }
+  .wbsk-card__more {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    height: 11%;
+    padding-inline: 20px;
+    font-size: var(--text-small);
+    letter-spacing: 0.02em;
+    color: var(--color-ivory);
+    opacity: 0;
+    transition: opacity 0.4s var(--settle);
+  }
+  .wbsk-card__caption {
+    display: block;
+  }
+  .wbsk-card__caption > * {
+    display: block;
+  }
+  .wbsk-card__caption > .wbsk-card__names {
+    width: fit-content;
+    background-image: linear-gradient(var(--color-deep-gold), var(--color-deep-gold));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0 1px;
+    transition: background-size 0.9s var(--settle);
+  }
+  /* Entry: an ivory curtain lifts off the photo while it settles, then the caption rises. */
+  .wbsk-cardreveal[data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .wbsk-cardreveal[data-reveal="shown"] .wbsk-card__photo::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: 4;
+    background: var(--color-ivory);
+    transform-origin: top;
+    pointer-events: none;
+    animation: wbsk-curtain 1.15s var(--travel) both;
+    animation-delay: calc(var(--reveal-index, 0) * 130ms);
+  }
+  @keyframes wbsk-curtain {
+    to {
+      transform: scaleY(0);
+    }
+  }
+  .wbsk-cardreveal .wbsk-card__caption > * {
+    transition: opacity 0.9s var(--settle), transform 0.9s var(--settle), background-size 0.9s var(--settle);
+    transition-delay: calc(var(--reveal-index, 0) * 130ms + 450ms);
+  }
+  .wbsk-cardreveal[data-reveal="shown"] .wbsk-card__photo .wbsk-frame img {
+    animation: wbsk-card-settle 1.8s var(--settle) both;
+    animation-delay: calc(var(--reveal-index, 0) * 130ms);
+  }
+  .wbsk-cardreveal[data-reveal="waiting"] .wbsk-card__photo {
+    visibility: hidden;
+  }
+  .wbsk-cardreveal[data-reveal="waiting"] .wbsk-card__caption > * {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: none;
+  }
+  @keyframes wbsk-card-settle {
+    from {
+      transform: scale(1.16);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wbsk-card__bar,
+    .wbsk-card__more {
+      display: none;
+    }
+    .wbsk-card__photo .wbsk-frame img {
+      transform: none;
+    }
   }
   .wbsk-card__place {
-    margin: 18px 0 6px;
+    margin: 20px 0 8px;
   }
   .wbsk-card__names {
     margin: 0;
   }
   .wbsk-card__meta {
-    margin: 6px 0 0;
+    margin: 8px 0 0;
     font-size: var(--text-small);
+    letter-spacing: 0.005em;
     opacity: 0.78;
-  }
-  .wbsk-card__more {
-    display: inline-block;
-    margin-top: 10px;
-    font-size: var(--text-small);
-    color: var(--color-deep-gold);
-    opacity: 0;
-    transition: opacity var(--hover) var(--settle);
   }
   .wbsk-card__description {
     margin: 10px 0 0;
     font-size: var(--text-small);
   }
-  .wbsk-card__link:active {
-    transform: scale(0.99);
+  .wbsk-card__link:active .wbsk-card__photo {
+    transform: scale(0.985);
+  }
+  .wbsk-card__photo {
+    transition: box-shadow 0.6s var(--settle), transform 0.3s var(--settle);
   }
   @media (hover: hover) {
     .wbsk-card__description {
       display: none;
     }
-    .wbsk-card__link:hover,
-    .wbsk-card__link:focus-visible {
-      transform: translateY(-4px);
+    .wbsk-card__link:hover .wbsk-card__photo,
+    .wbsk-card__link:focus-visible .wbsk-card__photo {
+      box-shadow: var(--shadow-lift);
+      --zoom: 1.07;
     }
-    .wbsk-card__link:hover .wbsk-frame,
-    .wbsk-card__link:focus-visible .wbsk-frame {
-      box-shadow: 0 18px 40px -12px rgb(58 36 16 / 0.42);
-    }
-    .wbsk-card__link:hover .wbsk-frame img,
-    .wbsk-card__link:focus-visible .wbsk-frame img {
-      transform: scale(1.03);
+    .wbsk-card__link:hover .wbsk-card__bar,
+    .wbsk-card__link:focus-visible .wbsk-card__bar {
+      transform: none;
     }
     .wbsk-card__link:hover .wbsk-card__more,
     .wbsk-card__link:focus-visible .wbsk-card__more {
       opacity: 1;
+      transition-delay: 0.25s;
+    }
+    .wbsk-card__link:hover .wbsk-card__names,
+    .wbsk-card__link:focus-visible .wbsk-card__names {
+      background-size: 100% 1px;
+    }
+    /* The lead story pushes in on the same terms. */
+    .wbsk-lead-story .wbsk-letterbox__picture {
+      transition: transform 1.6s var(--settle);
+    }
+    .wbsk-lead-story:hover .wbsk-letterbox[data-letterbox="open"] .wbsk-letterbox__picture {
+      transform: scale(1.03);
     }
   }
   @media (hover: none) {
+    .wbsk-card__bar,
     .wbsk-card__more,
     .wbsk-sharedline {
       display: none;
@@ -1076,11 +1297,16 @@
 
   /* Weddings page (Decision 05). */
   .wbsk-weddings__intro {
-    padding-top: calc(var(--header-height) + clamp(48px, 7vw, 96px));
-    padding-bottom: clamp(32px, 4vw, 56px);
+    display: grid;
+    gap: 20px;
+    padding-top: calc(var(--header-height) + clamp(56px, 9vw, 152px));
+    padding-bottom: clamp(40px, 5vw, 80px);
   }
-  .wbsk-weddings__intro .wbsk-h1 {
-    margin-top: 12px;
+  @media (min-width: 1024px) {
+    .wbsk-weddings__intro {
+      grid-template-columns: 2fr 10fr;
+      align-items: baseline;
+    }
   }
   .wbsk-lead-story,
   .wbsk-nextstory {
@@ -1114,12 +1340,17 @@
     z-index: 3;
     display: grid;
     gap: 6px;
-    padding: clamp(40px, 8vw, 96px) clamp(16px, 3vw, 40px) clamp(16px, 3vw, 36px);
-    background: linear-gradient(to top, rgb(31 25 20 / 0.78), rgb(31 25 20 / 0));
+    gap: 10px;
+    padding: clamp(64px, 10vw, 160px) clamp(20px, 3vw, 48px) clamp(20px, 3vw, 44px);
+    background: linear-gradient(to top, rgb(20 15 11 / 0.8), rgb(20 15 11 / 0));
   }
   .wbsk-lead-story__names {
     display: block;
     margin: 0;
+    font-size: var(--text-h1);
+    line-height: 1.02;
+    letter-spacing: -0.018em;
+    font-variation-settings: "opsz" 36;
     color: var(--color-ivory);
   }
   .wbsk-weddings__grid {
@@ -1150,7 +1381,7 @@
   .wbsk-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(32px, 4vw, 56px) clamp(20px, 2.4vw, 32px);
+    gap: clamp(48px, 6vw, 96px) clamp(20px, 2.6vw, 40px);
   }
   @media (max-width: 1023px) {
     .wbsk-grid {
@@ -1162,16 +1393,50 @@
       grid-template-columns: minmax(0, 1fr);
     }
   }
-  .wbsk-grid__more,
-  .wbsk-closingline {
+  .wbsk-grid__more {
     display: flex;
     justify-content: center;
-  }
-  .wbsk-grid__more {
-    margin-top: 48px;
+    margin-top: 64px;
   }
   .wbsk-closingline {
     padding-block: var(--section);
+  }
+  /* A page's last line, set as a statement rather than a small button. */
+  .wbsk-bigline {
+    display: inline-flex;
+    gap: 0.35em;
+    align-items: baseline;
+    padding: 0;
+    font-family: var(--font-serif);
+    font-size: var(--text-h1);
+    font-weight: 400;
+    font-variation-settings: "opsz" 36;
+    line-height: 1.02;
+    letter-spacing: -0.018em;
+    text-align: left;
+    text-wrap: balance;
+    color: inherit;
+    background: none;
+    background-image: linear-gradient(var(--color-deep-gold), var(--color-deep-gold));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0 1px;
+    border: 0;
+    cursor: pointer;
+    transition: background-size 0.7s var(--settle);
+  }
+  .wbsk-bigline:hover,
+  .wbsk-bigline:focus-visible {
+    background-size: 100% 1px;
+  }
+  .wbsk-bigline .wbsk-arrow {
+    flex: none;
+    width: 0.6em;
+    height: 0.6em;
+    color: var(--color-deep-gold);
+  }
+  .wbsk-bigline:hover .wbsk-arrow {
+    transform: translateX(8px);
   }
 
   /* The letterbox reveal (Decision 12). */
@@ -1244,8 +1509,8 @@
     pointer-events: none;
   }
   .wbsk-storycover__label {
-    width: min(100%, 560px);
-    padding: clamp(18px, 2vw, 28px) clamp(20px, 2.4vw, 32px);
+    width: min(100%, 680px);
+    padding: clamp(20px, 2.4vw, 36px) clamp(20px, 2.8vw, 44px);
     color: var(--color-ink);
     background: var(--color-ivory);
     border-radius: var(--radius-wbsk);
@@ -1255,8 +1520,8 @@
     view-transition-name: story-label;
   }
   .wbsk-storycover__label .wbsk-h1 {
-    margin: 6px 0 0;
-    font-size: var(--text-h2);
+    margin: 10px 0 0;
+    font-size: clamp(2.125rem, 3.8vw, 4.25rem);
     color: var(--color-ink);
   }
   .wbsk-storycover__label .wbsk-label {
@@ -1265,10 +1530,10 @@
   }
   .wbsk-story {
     display: grid;
-    gap: clamp(32px, 4vw, 64px);
+    gap: clamp(40px, 5vw, 96px);
     align-items: start;
-    padding-top: calc(clamp(96px, 11vw, 150px) + 32px);
-    padding-bottom: clamp(64px, 8vw, 112px);
+    padding-top: calc(clamp(96px, 12vw, 176px) + var(--gap-block));
+    padding-bottom: var(--gap-block);
   }
   @media (min-width: 900px) {
     .wbsk-story[data-film="true"] {
@@ -1276,7 +1541,7 @@
     }
   }
   .wbsk-story__text > * + * {
-    margin-top: 16px;
+    margin-top: 20px;
   }
   .wbsk-story__text > .wbsk-label {
     margin: 0;
@@ -1285,7 +1550,7 @@
     max-width: 62ch;
   }
   .wbsk-story__gallery {
-    padding-bottom: clamp(64px, 8vw, 112px);
+    padding-bottom: var(--section);
   }
 
   /* The masonry: tracks scale with the column, so nothing jumps and order stays left to right. */
@@ -1477,7 +1742,7 @@
   }
   .wbsk-cinema {
     display: grid;
-    gap: 32px;
+    gap: clamp(32px, 4vw, 64px);
   }
   .wbsk-cinema .wbsk-h2 {
     margin: 0;
@@ -1517,18 +1782,23 @@
   }
 
   .wbsk-closingband {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    align-items: center;
-    justify-content: space-between;
-    padding-block: clamp(64px, 8vw, 112px);
+    display: grid;
+    gap: 16px;
+    padding-block: var(--section);
   }
-  .wbsk-closingband .wbsk-h3 {
-    margin: 0;
+  .wbsk-closingband .wbsk-lead {
+    opacity: 0.78;
   }
   .wbsk-nextstory {
     border-radius: 0;
+  }
+  .wbsk-nextstory .wbsk-frame img {
+    transition: transform 1.4s var(--settle), opacity 0.5s var(--settle);
+  }
+  @media (hover: hover) {
+    .wbsk-nextstory:hover .wbsk-frame img {
+      transform: scale(1.03);
+    }
   }
 
   /* The enquiry panel. */

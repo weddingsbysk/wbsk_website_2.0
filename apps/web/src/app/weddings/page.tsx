@@ -1,4 +1,4 @@
-import { CoupleNames, Letterbox, WbskImage, WbskLink } from "@wbsk/ui";
+import { CoupleNames, Letterbox, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquireButton } from "../../components/EnquiryPanel";
 import { WeddingsGrid } from "../../components/WeddingsGrid";
@@ -25,7 +25,9 @@ export default async function Page() {
     <>
       <section className="wbsk-container wbsk-weddings__intro">
         <p className="wbsk-label">Weddings</p>
-        <h1 className="wbsk-h1 wbsk-measure">{intro ?? "Every wedding here belongs to two people who trusted us with the quiet parts too."}</h1>
+        <h1 className="wbsk-h1 wbsk-measure">
+          <TitleWords text={intro ?? "Every wedding here belongs to two people who trusted us with the quiet parts too."} />
+        </h1>
       </section>
       {lead ? (
         <section className="wbsk-container">
@@ -48,7 +50,7 @@ export default async function Page() {
         <WeddingsGrid weddings={cards} />
       </section>
       <section className="wbsk-container wbsk-closingline">
-        <EnquireButton>Tell us about your wedding</EnquireButton>
+        <EnquireButton statement>Tell us about your wedding</EnquireButton>
       </section>
     </>
   );

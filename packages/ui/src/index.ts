@@ -7,7 +7,7 @@ export { ArrowIcon, CloseIcon, MenuIcon } from "./components/icons";
 export { Letterbox } from "./components/Letterbox";
 export { Reveal } from "./components/Reveal";
 export { WbskImage } from "./components/WbskImage";
-export { ClientCard, CoupleNames, StoryCover, type WeddingSummary } from "./components/WeddingViews";
+export { ClientCard, CoupleNames, StoryCover, TitleWords, type WeddingSummary } from "./components/WeddingViews";
 export { buildSrcSet, sanityUrl, slotWidths, type SanityImage, type WbskImageSource } from "./image";
 export { layoutMasonry, MASONRY_GAP, MASONRY_UNITS } from "./masonry";
 export { LinkProvider, WbskLink, type WbskLinkProps } from "./link-context";

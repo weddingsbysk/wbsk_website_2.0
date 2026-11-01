@@ -46,6 +46,7 @@ const breathe = () =>
   });
 const LAST_OPENED_KEY = "wbsk-arc-last";
 const CARD_STOCKS = 5;
+const DEPTH_BELOW = 760;
 
 function fontFamily(variable: string, fallback: string) {
   const value = getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
@@ -195,25 +196,42 @@ export function RecordArc({ destinations, navigate }: Props) {
         const g = geometry();
         const { s } = g;
         const centreOut = Math.max(0, 1 - Math.abs(state.p - Math.round(state.p)) * 2.2) * state.reveal;
+        // Phones have no room for a curve, so records recede in depth instead (owner, 2 November 2026).
+        const depth = arc.clientWidth < DEPTH_BELOW;
         for (const item of items) {
           const d = item.index - state.p;
           const away = Math.abs(d);
-          const angle = (d / g.cornerD) * g.angle;
-          let x = g.radius * Math.sin(angle);
-          let y = g.radius * (1 - Math.cos(angle)) - g.height * 0.04;
-          x += d > 0 ? Math.min(d, 1) * s * 0.42 * centreOut : Math.max(d, -1) * s * 0.06 * centreOut;
           const out = Math.max(0, 1 - away * 2.2) * state.reveal;
-          x -= out * s * 0.24;
-          let scale = 1 - Math.min(away, g.cornerD + 1) * 0.08;
-          scale *= 1 + 0.14 * Math.exp(-(d * d) / 0.16) * state.reveal;
-          if (dock.amount > 0.001) {
-            const near = (x - dock.x) / (s * 0.85);
-            scale *= 1 + 0.16 * dock.amount * Math.exp(-near * near);
+          let x: number;
+          let y: number;
+          let scale: number;
+          let rotateZ: number;
+          let rotateY: number;
+          let opacity: number;
+          if (depth) {
+            x = Math.sign(d) * (1 - Math.exp(-away * 1.15)) * s * 0.72 - out * s * 0.24;
+            y = -g.height * 0.04 - Math.min(away, 3) * s * 0.035;
+            scale = Math.pow(0.84, Math.min(away, 4)) * (1 + 0.1 * Math.exp(-(d * d) / 0.16) * state.reveal);
+            rotateZ = 0;
+            rotateY = -Math.max(-1, Math.min(1, d)) * 24;
+            opacity = away > 3.2 ? 0 : away > 2.2 ? 3.2 - away : 1;
+          } else {
+            const angle = (d / g.cornerD) * g.angle;
+            x = g.radius * Math.sin(angle);
+            y = g.radius * (1 - Math.cos(angle)) - g.height * 0.04;
+            x += d > 0 ? Math.min(d, 1) * s * 0.42 * centreOut : Math.max(d, -1) * s * 0.06 * centreOut;
+            x -= out * s * 0.24;
+            scale = 1 - Math.min(away, g.cornerD + 1) * 0.08;
+            scale *= 1 + 0.14 * Math.exp(-(d * d) / 0.16) * state.reveal;
+            if (dock.amount > 0.001) {
+              const near = (x - dock.x) / (s * 0.85);
+              scale *= 1 + 0.16 * dock.amount * Math.exp(-near * near);
+            }
+            rotateZ = ((angle * 180) / Math.PI) * 0.85;
+            rotateY = -Math.max(-2, Math.min(2, d)) * 12;
+            const edge = g.cornerD;
+            opacity = away > edge + 1.1 ? 0 : away > edge + 0.4 ? 1 - (away - edge - 0.4) / 0.7 : 1;
           }
-          let rotateZ = ((angle * 180) / Math.PI) * 0.85;
-          let rotateY = -Math.max(-2, Math.min(2, d)) * 12;
-          const edge = g.cornerD;
-          const opacity = away > edge + 1.1 ? 0 : away > edge + 0.4 ? 1 - (away - edge - 0.4) / 0.7 : 1;
           const k = item.fan;
           const stackY = g.height * 0.06 + g.height * 0.28 * (1 - state.stack);
           x *= k;
@@ -233,7 +251,7 @@ export function RecordArc({ destinations, navigate }: Props) {
             item.rec.style.transform = `translate3d(${out * s * 0.5 + s * 0.04}px, 0, 0)`;
           }
           item.el.dataset.centre = String(isCentre);
-          item.dim.style.opacity = String(Math.min(away, 3) * 0.12);
+          item.dim.style.opacity = String(Math.min(away, 3) * (depth ? 0.24 : 0.12));
         }
         // The light follows the tilt on the centre record only (Decision 09).
         const centre = items[Math.round(state.p)]!;

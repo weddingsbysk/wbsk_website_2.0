@@ -1,4 +1,4 @@
-import { ArrowIcon, Reveal, WbskImage, WbskLink } from "@wbsk/ui";
+import { ArrowIcon, Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
 import { OpeningIntro } from "../components/OpeningIntro";
 import { getHomepage } from "../lib/content";
 import { publicAsset } from "../lib/site";
@@ -25,7 +25,9 @@ export default async function HomePage() {
           priority
         />
         <div className="wbsk-hero__text wbsk-container">
-          <h1 className="wbsk-display wbsk-measure">{home.heroLine ?? "Weddings By Siddhant Kapoor"}</h1>
+          <h1 className="wbsk-display wbsk-measure">
+            <TitleWords text={home.heroLine ?? "Weddings By Siddhant Kapoor"} />
+          </h1>
         </div>
       </section>
 

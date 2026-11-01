@@ -7,6 +7,8 @@ import { publicAsset } from "../lib/site";
 /** A clip that hasn't arrived by now gets the still instead, so nobody waits on a slow network. */
 const VIDEO_WAIT_MS = 1800;
 const STILL_MS = 600;
+/** Long enough for the slowest word of the hero title to finish arriving. */
+const TITLE_DONE_MS = 4000;
 
 /** Where the closed-up WBSK sits in the 1920 × 1080 clip. */
 const MARK = { x: 844, y: 512.5, width: 232 };
@@ -54,7 +56,10 @@ export function OpeningIntro() {
       timers.forEach((timer) => window.clearTimeout(timer));
       animations.forEach((animation) => animation.cancel());
       video.pause();
+      // The logo has landed (or been skipped), so now the film's title can arrive.
+      root.dataset.hero = "enter";
       delete root.dataset.intro;
+      window.setTimeout(() => (root.dataset.hero = "done"), TITLE_DONE_MS);
       removeSkip();
     };
     const skip = () => finish();
@@ -122,7 +127,8 @@ export function OpeningIntro() {
         }),
       );
       hero?.animate([{ transform: "scale(1.05)" }, { transform: "scale(1)" }], {
-        duration: 1500,
+        // A slow push-out, running on under the title so the frame is still moving as it lands.
+        duration: 2800,
         delay: 300,
         easing: softSettle,
         fill: "both",
