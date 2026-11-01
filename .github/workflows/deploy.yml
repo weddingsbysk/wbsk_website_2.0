@@ -32,9 +32,12 @@ jobs:
         run: if git ls-files | grep -q 'CNAME$'; then echo "A custom domain needs the owner's separate approval"; exit 1; fi
       - run: npm run check:deps
       - run: npm run scan
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Scan the full history for secrets
+        run: |
+          curl -sSfL -o gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tar.gz" | sha256sum --check
+          tar -xzf gitleaks.tar.gz gitleaks
+          ./gitleaks git --no-banner --redact --exit-code 1
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run test:unit
