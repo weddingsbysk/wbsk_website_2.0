@@ -24,5 +24,8 @@ export const wbskTheme = buildLegacyTheme({
   "--focus-color": "#7A5C17",
 });
 
+/** The Studio home greets the manager by name (the plan's Q10). */
+export const MANAGER_NAME = "Siddhant";
+
 /** Only this Sanity account sees Delete (Decision 20; the plan's Q3). The rest is a guard rail, not a lock. */
 export const OWNER_USER_IDS = new Set(["gultaHcjn", "pXeDJ7ysE"]);

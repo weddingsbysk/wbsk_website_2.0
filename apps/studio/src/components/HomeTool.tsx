@@ -1,6 +1,7 @@
 import { samplesStillShowing } from "@wbsk/content";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { useClient, useCurrentUser, useRouter } from "./studio-hooks";
+import { MANAGER_NAME } from "../brand";
+import { useClient, useRouter } from "./studio-hooks";
 
 const API = "2026-11-01";
 const SAMPLE_KINDS = ["wedding", "destination", "preWeddingShoot", "film", "review", "reactionVideo", "teamMember", "careerRole", "featuredOnItem"];
@@ -36,7 +37,6 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
 
 export function HomeTool() {
   const client = useClient({ apiVersion: API });
-  const user = useCurrentUser();
   const router = useRouter();
   const [waiting, setWaiting] = useState<Row[]>([]);
   const [worth, setWorth] = useState<{ text: string; intent?: [string, string] }[]>([]);
@@ -94,7 +94,7 @@ export function HomeTool() {
     <div style={{ height: "100%", overflow: "auto", background: "#F5EFE6", color: "#231C16" }}>
       <div style={{ maxWidth: 1120, margin: "0 auto", padding: "40px 24px 64px" }}>
         <h1 style={{ fontFamily: serif, fontWeight: 400, fontSize: 40, lineHeight: 1.1, margin: 0 }}>
-          {greeting()}, {user?.name?.split(" ")[0] ?? "there"}
+          {greeting()}, {MANAGER_NAME}
         </h1>
         <p style={{ margin: "8px 0 28px" }}>What would you like to do today?</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 24 }}>
