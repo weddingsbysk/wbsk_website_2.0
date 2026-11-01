@@ -1,0 +1,16 @@
+{
+  "name": "@wbsk/ui",
+  "private": true,
+  "version": "0.0.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css",
+    "./motion": "./src/motion/index.ts",
+    "./tokens": "./src/tokens.ts"
+  },
+  "peerDependencies": {
+    "gsap": "*",
+    "react": "*",
+    "react-dom": "*"
+  }
+}

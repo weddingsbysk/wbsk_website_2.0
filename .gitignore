@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+apps/*/.next/
+apps/*/out/
+test-results/
+playwright-report/
+.lighthouseci/
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+.env*
+# Internal working rules: the master copies live in the private planning repository.
+CLAUDE.md
+.claude/
+apps/web/out-lh/

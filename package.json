@@ -1,0 +1,52 @@
+{
+  "name": "wbsk-website-2",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev -w @wbsk/web",
+    "build": "npm run build -w @wbsk/web",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:links": "node scripts/check-links.mjs",
+    "test:perf": "node scripts/run-lighthouse.mjs",
+    "serve": "node scripts/serve-out.mjs",
+    "scan": "node scripts/scan-public.mjs",
+    "check:deps": "node scripts/check-deps.mjs",
+    "clean": "node scripts/clean.mjs",
+    "check": "npm run check:deps && npm run scan && npm run typecheck && npm run lint && npm run test:unit && npm run build && npm run test:links"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@fontsource-variable/bodoni-moda": "5.3.0",
+    "@fontsource-variable/hanken-grotesk": "5.3.0",
+    "@lhci/cli": "0.15.1",
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "10.14.0",
+    "eslint-config-next": "16.4.3",
+    "prettier": "3.9.10",
+    "sharp": "0.35.5",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  },
+  "browserslist": [
+    "chrome >= 111",
+    "edge >= 111",
+    "safari >= 16.4",
+    "firefox >= 128",
+    "ios_saf >= 16.4"
+  ]
+}
