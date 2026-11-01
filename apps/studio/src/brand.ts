@@ -24,4 +24,4 @@ export const wbskTheme = buildLegacyTheme({
 });
 
 /** Only this Sanity account sees Delete (Decision 20; the plan's Q3). The rest is a guard rail, not a lock. */
-export const OWNER_USER_IDS = new Set(["gultaHcjn"]);
+export const OWNER_USER_IDS = new Set(["gultaHcjn", "pXeDJ7ysE"]);
