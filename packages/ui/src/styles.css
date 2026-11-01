@@ -709,7 +709,7 @@
     box-shadow: none;
   }
   .wbsk-arc[data-state="opening"] .wbsk-arc__hint,
-  .wbsk-arc[data-state="opening"] .wbsk-arc__name {
+  .wbsk-arc[data-state="opening"] .wbsk-arc__item .wbsk-arc__name {
     opacity: 0;
   }
   /* Outer records fade into the dusk rather than ending on a hard line. */
@@ -906,7 +906,7 @@
   }
   .wbsk-arc__hint {
     position: absolute;
-    bottom: 5%;
+    bottom: 12px;
     left: 50%;
     z-index: 200;
     font-size: 12px;

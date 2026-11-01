@@ -89,6 +89,10 @@ export function RecordArc({ destinations, navigate }: Props) {
     const arc = arcRef.current;
     if (!arc || destinations.length === 0 || reduced) return;
 
+    // Straight back to the arc, before anything is drawn, so the page top never flashes up.
+    const lastOpened = takeLastOpened();
+    if (lastOpened) arc.scrollIntoView({ block: "center" });
+
     let disposed = false;
     let cleanup = () => {};
     const urls: string[] = [];
@@ -153,7 +157,6 @@ export function RecordArc({ destinations, navigate }: Props) {
       });
 
       const MAX = items.length - 1;
-      const lastOpened = takeLastOpened();
       const returningTo = lastOpened ? destinations.findIndex((d) => d.id === lastOpened) : -1;
       const startAt = returningTo >= 0 ? returningTo : Math.floor(MAX / 2);
 
@@ -496,7 +499,6 @@ export function RecordArc({ destinations, navigate }: Props) {
 
       setDrawn("arc");
       layout();
-      if (returningTo >= 0) arc.scrollIntoView({ block: "center" });
 
       const observer = new IntersectionObserver(
         (entries) => {
