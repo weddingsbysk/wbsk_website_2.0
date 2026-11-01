@@ -123,7 +123,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         homeHref="/"
         logoSrc={publicAsset("/wbsk-logo.svg")}
         currentPath={pathname}
-        clearOverId={pathname === "/" ? "hero" : undefined}
+        clearOverId={pathname === "/" || /^\/pre-wedding\/[^/]+\/?$/.test(pathname) ? "hero" : undefined}
       />
       <main id="main" tabIndex={-1}>
         {children}

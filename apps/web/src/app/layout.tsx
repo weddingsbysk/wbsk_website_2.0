@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
 import { SiteShell } from "../components/SiteShell";
-import { isProduction, siteUrl } from "../lib/site";
+import { introDecisionScript } from "../lib/intro";
+import { isProduction, publicAsset, siteUrl } from "../lib/site";
 import "./globals.css";
 
 const bodoni = localFont({
@@ -39,7 +40,14 @@ export const viewport: Viewport = { themeColor: "#1F1914" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${bodoni.variable} ${hanken.variable} ${amp.variable}`}>
+    <html
+      lang="en"
+      className={`${bodoni.variable} ${hanken.variable} ${amp.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: introDecisionScript(publicAsset("")) }} />
+      </head>
       <body>
         <SiteShell>{children}</SiteShell>
       </body>

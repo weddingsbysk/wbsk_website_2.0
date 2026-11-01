@@ -1,4 +1,5 @@
 import { ArrowIcon, Reveal, WbskImage, WbskLink } from "@wbsk/ui";
+import { OpeningIntro } from "../components/OpeningIntro";
 import { getHomepage } from "../lib/content";
 import { publicAsset } from "../lib/site";
 
@@ -14,6 +15,7 @@ export default async function HomePage() {
   const home = await getHomepage();
   return (
     <>
+      <OpeningIntro />
       <section id="hero" data-tone="dark" className="wbsk-hero">
         <WbskImage
           image={home.posterDesktop ?? fallback("hero-desktop", 2560, 1440)}

@@ -6,6 +6,7 @@
     ".": "./src/index.ts",
     "./styles.css": "./src/styles.css",
     "./motion": "./src/motion/index.ts",
+    "./record-arc": "./src/record-arc/RecordArc.tsx",
     "./tokens": "./src/tokens.ts"
   },
   "peerDependencies": {

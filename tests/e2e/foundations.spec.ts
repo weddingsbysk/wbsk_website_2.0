@@ -2,6 +2,12 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 const pages = ["", "weddings/", "films/", "pre-wedding/", "our-team/", "careers/", "privacy/"];
+
+// The opening intro has its own tests; here the page underneath is what's being checked.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-seen", "1"));
+});
+
 const isPhone = (page: Page) => (page.viewportSize()?.width ?? 0) < 900;
 
 for (const path of pages) {

@@ -1,5 +1,5 @@
 import { createClient } from "@sanity/client";
-import { sanityProject } from "@wbsk/content";
+import { sanityProject, visibleWithSamples } from "@wbsk/content";
 import type { WbskImageSource } from "@wbsk/ui";
 
 // Published content only, with no token. A failed read fails the build, so the live site keeps
@@ -61,4 +61,44 @@ export async function getHomepage() {
     posterPhone: toImage(data?.heroPosterPhone ?? null),
     teamPhoto: toImage(data?.teamPhoto ?? null),
   };
+}
+
+type DestinationResult = {
+  _id: string;
+  _createdAt: string;
+  isSample?: boolean;
+  name: string;
+  slug: string;
+  catalogueNumber?: string;
+  artworkUrl?: string;
+  coverDesktop: ImageResult;
+  coverPhone: ImageResult;
+};
+
+/** A destination shows once it has a published shoot; order and hiding are set in the Studio. */
+export async function getDestinations() {
+  const data = await client.fetch<DestinationResult[]>(/* groq */ `*[
+    _type == "destination" && hidden != true && (!defined(status) || status == "live") &&
+    count(*[_type == "preWeddingShoot" && hidden != true && references(^._id)]) > 0
+  ] | order(order asc, _createdAt asc) {
+    _id,
+    _createdAt,
+    isSample,
+    name,
+    "slug": address.current,
+    catalogueNumber,
+    "artworkUrl": artwork.asset->url,
+    coverDesktop${imageFields},
+    coverPhone${imageFields}
+  }`);
+  return visibleWithSamples(data).map((item) => ({
+    id: item._id,
+    isSample: Boolean(item.isSample),
+    name: item.name,
+    slug: item.slug,
+    catalogue: item.catalogueNumber ?? "",
+    artworkUrl: item.artworkUrl,
+    cover: toImage(item.coverDesktop),
+    coverPhone: toImage(item.coverPhone),
+  }));
 }
