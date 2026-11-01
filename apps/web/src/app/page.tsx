@@ -14,10 +14,7 @@ export default async function HomePage() {
       <OpeningIntro />
       <section id="hero" data-tone="dark" className="wbsk-hero">
         <div className="wbsk-hero__media">
-          {home.posterDesktop ? (
-            <WbskImage image={home.posterDesktop} portraitImage={home.posterPhone ?? undefined} slot="poster" sizes="100vw" priority />
-          ) : null}
-          <CoverVideo desktop={home.videoDesktop} phone={home.videoPhone} label="the WBSK film" />
+          <CoverVideo desktop={home.videoDesktop} phone={home.videoPhone} posterDesktop={home.posterDesktop} posterPhone={home.posterPhone} label="the WBSK film" />
         </div>
         <HeroDrift />
         <div className="wbsk-hero__text wbsk-container">

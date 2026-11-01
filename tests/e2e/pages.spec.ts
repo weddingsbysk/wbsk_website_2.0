@@ -85,7 +85,10 @@ test("the hero never plays a film for reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("./");
   await page.waitForTimeout(800);
-  expect(await page.locator(".wbsk-covervideo").first().getAttribute("src")).toBeNull();
+  for (const video of await page.locator(".wbsk-covervideo").all()) {
+    expect(await video.getAttribute("src")).toBeNull();
+    expect(await video.getAttribute("poster")).toBeTruthy();
+  }
 });
 
 test("Films: dark, one per screen, with text and no YouTube until pressed", async ({ page }) => {

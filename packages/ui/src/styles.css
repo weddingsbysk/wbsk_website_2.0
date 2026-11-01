@@ -1508,11 +1508,17 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0;
-    transition: opacity 1.2s var(--settle);
   }
-  .wbsk-covervideo[data-on] {
-    opacity: 1;
+  .wbsk-covervideo[data-orient="portrait"] {
+    display: none;
+  }
+  @media (orientation: portrait) {
+    .wbsk-covervideo[data-orient="landscape"] {
+      display: none;
+    }
+    .wbsk-covervideo[data-orient="portrait"] {
+      display: block;
+    }
   }
   .wbsk-covervideo__toggle {
     position: absolute;
