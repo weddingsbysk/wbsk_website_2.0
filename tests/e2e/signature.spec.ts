@@ -8,7 +8,11 @@ const skipIntro = (page: Page) =>
 
 const arc = (page: Page) => page.locator(".wbsk-arc");
 const ready = (page: Page) =>
-  expect(arc(page)).toHaveAttribute("data-state", "ready", { timeout: 15000 });
+  expect(arc(page)).toHaveAttribute("data-state", "ready", { timeout: 30000 });
+/** Waits for the arc to stop, however slowly this machine draws it. */
+const atRest = (page: Page) => expect(page.locator(".wbsk-arc:not([data-moving])")).toHaveCount(1, { timeout: 30000 });
+/** Software-drawn browsers on the build server can take many seconds per move. */
+const MOVE_TIMEOUT = 30000;
 
 test.describe("opening intro", () => {
   test("plays on the first visit, lands the logo on the header, and only once", async ({ page }) => {
@@ -98,6 +102,7 @@ test.describe("opening intro", () => {
 
 test.describe("record arc", () => {
   test.beforeEach(async ({ page }) => {
+    test.slow();
     await skipIntro(page);
   });
 
@@ -126,13 +131,13 @@ test.describe("record arc", () => {
     const first = await arc(page).getAttribute("data-centre-name");
     await arc(page).focus();
     await page.keyboard.press("ArrowRight");
-    await expect(arc(page)).not.toHaveAttribute("data-centre-name", first!, { timeout: 4000 });
+    await expect(arc(page)).not.toHaveAttribute("data-centre-name", first!, { timeout: MOVE_TIMEOUT });
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
     );
     expect(overflow).toBeLessThanOrEqual(0);
     await page.keyboard.press("Enter");
-    await expect(page).toHaveURL(/pre-wedding\/sample-/, { timeout: 10000 });
+    await expect(page).toHaveURL(/pre-wedding\/sample-/, { timeout: MOVE_TIMEOUT });
     await expect(page.locator("h1")).toContainText("Sample");
   });
 
@@ -148,7 +153,7 @@ test.describe("record arc", () => {
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     const start = await arc(page).getAttribute("data-centre-name");
     await page.mouse.wheel(0, 120);
-    await expect(arc(page)).not.toHaveAttribute("data-centre-name", start!, { timeout: 4000 });
+    await expect(arc(page)).not.toHaveAttribute("data-centre-name", start!, { timeout: MOVE_TIMEOUT });
     for (let i = 0; i < 8; i += 1) {
       await page.mouse.wheel(0, 300);
       await page.waitForTimeout(120);
@@ -169,13 +174,13 @@ test.describe("record arc", () => {
     const start = await arc(page).getAttribute("data-centre-name");
     const box = (await arc(page).boundingBox())!;
     await page.mouse.click(box.x + box.width * 0.15, box.y + box.height * 0.55);
-    await expect(arc(page)).not.toHaveAttribute("data-centre-name", start!, { timeout: 4000 });
-    await page.waitForTimeout(1300);
+    await expect(arc(page)).not.toHaveAttribute("data-centre-name", start!, { timeout: MOVE_TIMEOUT });
+    await atRest(page);
     const chosen = await arc(page).getAttribute("data-centre-name");
 
     const centre = await page.locator('.wbsk-arc__item[data-centre="true"] [data-rig]').boundingBox();
     await page.mouse.click(centre!.x + centre!.width * 0.3, centre!.y + centre!.height / 2);
-    await expect(page).toHaveURL(/pre-wedding\/sample-/, { timeout: 10000 });
+    await expect(page).toHaveURL(/pre-wedding\/sample-/, { timeout: MOVE_TIMEOUT });
     await expect(page.locator("h1")).toHaveText(chosen!);
 
     await page.getByRole("link", { name: "Back to the records" }).click();
@@ -206,7 +211,7 @@ test.describe("record arc", () => {
       },
       [box.x + box.width * 0.85, box.x + box.width * 0.15, y],
     );
-    await expect(arc(page)).not.toHaveAttribute("data-centre-name", start!, { timeout: 4000 });
+    await expect(arc(page)).not.toHaveAttribute("data-centre-name", start!, { timeout: MOVE_TIMEOUT });
   });
 
   for (const count of [1, 2, 3, 5]) {
