@@ -57,16 +57,42 @@ test.describe("opening intro", () => {
     await expect(page.locator(".wbsk-header__logo img")).toHaveCSS("opacity", "1");
   });
 
-  test("the clip loads and plays through, with the lighter file on phones", async ({ page }) => {
+  test("the logo closes: video on computers, film strip on phones, and it lands", async ({ page }) => {
     await page.goto("./");
     const phone = (page.viewportSize()?.width ?? 0) < 820;
-    await expect
-      .poll(() => page.locator(".wbsk-intro video").evaluate((el) => (el as HTMLVideoElement).currentSrc), { timeout: 5000 })
-      .toContain(phone ? "intro-reverse-phone.mp4" : "intro-reverse.mp4");
-    await expect
-      .poll(() => page.evaluate(() => { const v = document.querySelector<HTMLVideoElement>(".wbsk-intro video"); return v ? v.currentTime : -1; }), { timeout: 9000 })
-      .toBeGreaterThan(0.3);
-    expect(await page.locator(".wbsk-intro video").evaluate((el) => (el as HTMLVideoElement).error)).toBeNull();
+    if (phone) {
+      const image = page.locator(".wbsk-intro__strip img");
+      await expect(image).toHaveAttribute("src", /intro-strip\.webp/, { timeout: 5000 });
+      await expect.poll(() => image.evaluate((el) => (el as HTMLImageElement).naturalWidth), { timeout: 5000 }).toBeGreaterThan(0);
+      await expect(page.locator(".wbsk-intro video")).not.toHaveAttribute("src", /.+/);
+      await expect
+        .poll(() => image.evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42), { timeout: 9000 })
+        .toBeLessThan(-100);
+    } else {
+      await expect
+        .poll(() => page.evaluate(() => document.querySelector<HTMLVideoElement>(".wbsk-intro video")?.currentTime ?? -1), { timeout: 9000 })
+        .toBeGreaterThan(0.3);
+    }
+    await expect(page.locator("html")).not.toHaveAttribute("data-intro", "play", { timeout: 9000 });
+    await expect(page.locator(".wbsk-header__logo img")).toHaveCSS("opacity", "1");
+  });
+
+  test("on a real touch profile the intro uses the strip, finishes, and a tap fades it away", async ({ browser, browserName }) => {
+    test.skip(browserName === "firefox", "Firefox has no phone profile.");
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: browserName === "chromium", deviceScaleFactor: 3 });
+    const phone = await context.newPage();
+    const errors: string[] = [];
+    phone.on("pageerror", (e) => errors.push(e.message));
+    await phone.goto("http://127.0.0.1:4173/wbsk_website_2.0/");
+    const html = phone.locator("html");
+    await expect(phone.locator(".wbsk-intro__strip")).toHaveCSS("opacity", "1", { timeout: 6000 });
+    await expect(html).not.toHaveAttribute("data-intro", "play", { timeout: 9000 });
+    await phone.reload();
+    await expect(phone.locator(".wbsk-intro__strip")).toHaveCSS("opacity", "1", { timeout: 6000 });
+    await phone.touchscreen.tap(195, 500);
+    await expect(html).not.toHaveAttribute("data-intro", "play", { timeout: 1500 });
+    expect(errors).toEqual([]);
+    await context.close();
   });
 
   test("moving within the site and browser Back don't replay it", async ({ page }) => {
@@ -140,6 +166,7 @@ test.describe("opening intro", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("./");
     await expect(page.locator(".wbsk-intro video")).toHaveCSS("opacity", "0");
+    await expect(page.locator(".wbsk-intro__strip")).toHaveCSS("opacity", "0");
     await expect(page.locator(".wbsk-intro__veil")).toBeHidden({ timeout: 3000 });
   });
 

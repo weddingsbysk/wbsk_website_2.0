@@ -43,7 +43,8 @@ export function WbskImage({
   useEffect(() => {
     const frame = frameRef.current;
     const img = imgRef.current;
-    if (!parallax || !frame || !img || supportsScrollTimeline() || prefersReducedMotion()) return;
+    // Script-driven parallax lags behind a finger, so touch screens only get the browser's own.
+    if (!parallax || !frame || !img || supportsScrollTimeline() || prefersReducedMotion() || window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
     let cleanup = () => {};
     let cancelled = false;
     void loadGsap().then(({ gsap, ScrollTrigger }) => {

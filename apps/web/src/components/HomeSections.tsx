@@ -157,6 +157,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
       draw();
     };
     glideRef.current = bare;
+    const touchScreen = window.matchMedia("(hover: none), (pointer: coarse)").matches;
     const state = { hover: false, focus: false, gliding: false, holding: false, holdUntil: 0, speed: 0, seen: false };
     holdRef.current = state;
     try {
@@ -239,7 +240,8 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
       tickFn = (_time, deltaMs) => {
         if (!state.seen || document.hidden || state.gliding || state.holding) return;
         const dt = Math.min(deltaMs / 1000, 0.1);
-        const free = !pausedRef.current && !playingRef.current && !state.hover && !state.focus && performance.now() >= state.holdUntil && fans.current.every((k) => k > 0.99);
+        // Touch screens move by swipe alone, so a film never slides out from under a finger.
+        const free = !touchScreen && !pausedRef.current && !playingRef.current && !state.hover && !state.focus && performance.now() >= state.holdUntil && fans.current.every((k) => k > 0.99);
         const tau = free ? 0.5 : 0.2;
         state.speed = (free ? 1 : 0) + (state.speed - (free ? 1 : 0)) * Math.exp(-dt / tau);
         if (state.speed < 0.001) return;
@@ -348,7 +350,9 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
           }
           const box = event.currentTarget.getBoundingClientRect();
           const off = (event.clientX - box.left) / box.width - 0.5;
-          if (Math.abs(off) > 0.29) go(off > 0 ? 1 : -1);
+          // Only a press beyond the front film's edge moves on; on the film itself, it plays.
+          const frontEdge = (event.currentTarget.querySelector<HTMLElement>(".wbsk-stack__card")?.offsetWidth ?? box.width / 2) / box.width / 2;
+          if (Math.abs(off) > frontEdge + 0.01) go(off > 0 ? 1 : -1);
         }}
         onPointerCancel={() => {
           pointer.on = false;

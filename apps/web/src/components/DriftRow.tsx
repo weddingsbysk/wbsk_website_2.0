@@ -17,6 +17,7 @@ const RELEASE_RESUME_MS = 80;
 const WHEEL_RESUME_MS = 700;
 const FRAME_CAP = 0.1;
 const PUSH_WAKE_MS = 900;
+const TOUCH_SCROLL_REST_MS = 400;
 const FRESH_MOVE_MS = 80;
 const PAUSED_KEY = "wbsk-drift-paused";
 const RETURN_KEY = "wbsk-drift-return";
@@ -229,11 +230,17 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     // Page scrolling pushes the row a little. A push only: nothing here touches the scroll.
     // The browser putting the scroll back after Back or a reload isn't anyone scrolling.
     const pushFrom = performance.now() + PUSH_WAKE_MS;
+    // While a finger is scrolling the page, the row rests, so the phone has one thing to keep smooth.
+    const touchScreen = window.matchMedia("(hover: none), (pointer: coarse)").matches;
     const push = ScrollTrigger.create({
       trigger: row,
       start: "top bottom",
       end: "bottom top",
       onUpdate: (self) => {
+        if (touchScreen) {
+          f.holdUntil = performance.now() + TOUCH_SCROLL_REST_MS;
+          return;
+        }
         if (!f.userPaused && !f.focus && !f.holding && !f.gliding && performance.now() >= pushFrom) n.pushTarget = scalePush(-self.getVelocity());
       },
     });

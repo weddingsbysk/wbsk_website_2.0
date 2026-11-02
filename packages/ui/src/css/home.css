@@ -220,6 +220,11 @@
     position: relative;
     z-index: 1;
   }
+  /* The description sits on the dark tray here, so it's light. */
+  .wbsk-drift .wbsk-card__description {
+    padding-inline: 4px;
+    color: rgb(245 239 230 / 0.82);
+  }
   .wbsk-drift__line {
     min-height: 1.5em;
     margin-top: 24px;

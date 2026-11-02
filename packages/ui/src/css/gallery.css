@@ -64,6 +64,12 @@
   .wbsk-gallerywindow::-webkit-scrollbar {
     display: none;
   }
+  /* On a touch screen the window stops short of the whole screen, so a thumb can always reach the page. */
+  @media (hover: none), (pointer: coarse), (max-width: 699px) {
+    .wbsk-gallerywindow {
+      height: 62svh;
+    }
+  }
   .wbsk-gallerywindow:focus-visible {
     outline-offset: 4px;
   }

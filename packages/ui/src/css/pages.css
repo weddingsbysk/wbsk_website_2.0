@@ -18,6 +18,14 @@
     scrollbar-width: none;
     border-radius: 10px;
   }
+  @media (hover: none), (pointer: coarse), (max-width: 699px) {
+    .wbsk-filmtray__window {
+      height: 66svh;
+    }
+    .wbsk-offering .wbsk-gallerywindow {
+      height: 52svh;
+    }
+  }
   .wbsk-filmtray__window::-webkit-scrollbar {
     display: none;
   }
@@ -107,6 +115,12 @@
     align-items: center;
     padding-block: var(--gap-block);
   }
+  /* On a phone each portrait comes first, directly above its own name. */
+  @media (max-width: 899px) {
+    .wbsk-person .wbsk-person__photo {
+      order: -1;
+    }
+  }
   @media (min-width: 900px) {
     .wbsk-person[data-lead] {
       grid-template-columns: 1fr 1fr;
@@ -119,14 +133,6 @@
     }
     .wbsk-person[data-side="right"]:not([data-lead]) .wbsk-person__photo {
       order: 2;
-    }
-  }
-  [data-depth] {
-    will-change: transform;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    [data-depth] {
-      will-change: auto;
     }
   }
   .wbsk-person__photo {

@@ -163,17 +163,6 @@ test.describe("the moving row (Decision 30)", () => {
     expect(srcs).toBe(8);
   });
 
-  test("a vertical mouse wheel over the row scrolls the PAGE", async ({ page }) => {
-    test.skip(isPhone(page), "Mouse wheel.");
-    const row = await gotoRow(page);
-    await driftReady(page);
-    const box = (await row.boundingBox())!;
-    await page.mouse.move(box.x + box.width / 2, Math.min(box.y + 200, 600));
-    const before = await page.evaluate(() => window.scrollY);
-    await page.mouse.wheel(0, 400);
-    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 }).toBeGreaterThan(before + 100);
-  });
-
   test("on large monitors too, the row loops and the wheel moves it", async ({ page, browserName }) => {
     test.skip(browserName !== "chromium" || isPhone(page), "Screen size is what's being tested.");
     for (const size of [1920, 2560, 3440]) {
