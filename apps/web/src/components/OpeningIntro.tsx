@@ -53,6 +53,8 @@ export function OpeningIntro() {
     const finish = () => {
       if (ended) return;
       ended = true;
+      // A refresh starts at the top for the intro; from here on, Back keeps a visitor's place again.
+      history.scrollRestoration = "auto";
       timers.forEach((timer) => window.clearTimeout(timer));
       animations.forEach((animation) => animation.cancel());
       video.pause();

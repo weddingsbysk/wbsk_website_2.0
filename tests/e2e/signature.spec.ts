@@ -42,7 +42,7 @@ test.describe("opening intro", () => {
     await page.reload();
     await expect(html).toHaveAttribute("data-intro", "play");
     await expect(page.locator(".wbsk-intro__veil")).toBeVisible();
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   });
 
   test("moving within the site and browser Back don't replay it", async ({ page }) => {
