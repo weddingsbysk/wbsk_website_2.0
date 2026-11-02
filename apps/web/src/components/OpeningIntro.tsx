@@ -9,6 +9,11 @@ const VIDEO_WAIT_MS = 1800;
 const STILL_MS = 600;
 /** Long enough for the slowest word of the hero title to finish arriving. */
 const TITLE_DONE_MS = 4000;
+const GLIDE_DELAY_MS = 120;
+const GLIDE_MS = 1000;
+const REVEAL_OVERLAP_MS = 100;
+const REVEAL_MS = 2600;
+const HERO_SETTLE_EXTRA_MS = 1000;
 
 /** Where the closed-up WBSK sits in the 1920 × 1080 clip. */
 const MARK = { x: 844, y: 512.5, width: 232 };
@@ -114,12 +119,13 @@ export function OpeningIntro() {
       const hero = document.querySelector(".wbsk-hero .wbsk-frame");
 
       // The still is the clip's own last frame. It comes up first and the clip goes after, so nothing dips.
+      // The still is the clip's own last frame. It comes up first and the clip goes after, so nothing dips.
       add(glide.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 80, fill: "forwards" }));
       add(video.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 80, delay: 80, fill: "both" }));
-      const move = add(
+      add(
         glide.animate([{ transform: from }, { transform: to }], {
-          duration: 1000,
-          delay: 200,
+          duration: GLIDE_MS,
+          delay: GLIDE_DELAY_MS,
           easing: travel,
           fill: "forwards",
         }),
@@ -127,26 +133,27 @@ export function OpeningIntro() {
       add(
         bold.animate([{ opacity: 0 }, { opacity: 1 }], {
           duration: 500,
-          delay: 540,
+          delay: GLIDE_DELAY_MS + 400,
           fill: "forwards",
         }),
       );
-      add(
+      // The logo is home on black first; only then does the homepage slowly come up behind it.
+      const revealAt = GLIDE_DELAY_MS + GLIDE_MS - REVEAL_OVERLAP_MS;
+      const reveal = add(
         veil.animate([{ opacity: 1 }, { opacity: 0 }], {
-          duration: 800,
-          delay: 420,
-          easing: softSettle,
+          duration: REVEAL_MS,
+          delay: revealAt,
+          easing: travel,
           fill: "forwards",
         }),
       );
       hero?.animate([{ transform: "scale(1.05)" }, { transform: "scale(1)" }], {
-        // A slow push-out, running on under the title so the frame is still moving as it lands.
-        duration: 2800,
-        delay: 300,
+        duration: REVEAL_MS + HERO_SETTLE_EXTRA_MS,
+        delay: revealAt,
         easing: softSettle,
         fill: "both",
       }).addEventListener("finish", (event) => (event.target as Animation).cancel());
-      move.addEventListener("finish", finish);
+      reveal.addEventListener("finish", finish);
     };
 
     if (reduced) {
