@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useClient } from "sanity";
+import { SearchLine } from "../components/icons";
 
 type Asset = {
   _id: string;
@@ -12,7 +13,6 @@ type Asset = {
 };
 
 const PAGE = 60;
-const input: CSSProperties = { font: "inherit", padding: "10px 12px", border: "1px solid rgb(35 28 22 / 0.3)", borderRadius: 8, background: "#FFFDF9", minHeight: 44 };
 
 /** Every uploaded photo, searchable, showing whether it's in use. Nothing can be deleted here. */
 export function PhotoLibrary() {
@@ -45,34 +45,44 @@ export function PhotoLibrary() {
   }, [assets, search, onlyUnused]);
 
   return (
-    <div style={{ height: "100%", overflow: "auto", background: "#F5EFE6", color: "#231C16" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 24px 64px" }}>
-        <h1 style={{ fontFamily: '"Bodoni Moda", serif', fontWeight: 400, fontSize: 40, margin: "0 0 8px" }}>Photo library</h1>
-        <p style={{ margin: "0 0 20px" }}>
+    <div className="st-page">
+      <div className="st-page__inner">
+        <h1 className="st-title st-rise">Photo library</h1>
+        <p className="st-lede st-rise">
           {assets ? `${assets.length} photos.` : "Loading…"} Add photos from inside a wedding or shoot, so each gets its description.
         </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", marginBottom: 20 }}>
-          <input style={input} type="search" placeholder="Search by file name" aria-label="Search by file name" value={search} onChange={(event) => setSearch(event.target.value)} />
-          <label style={{ display: "flex", gap: 8, alignItems: "center", minHeight: 44 }}>
-            <input type="checkbox" checked={onlyUnused} onChange={(event) => setOnlyUnused(event.target.checked)} />
-            Only photos not in use
+        <div className="st-tools-row st-rise">
+          <label className="st-search">
+            <SearchLine />
+            <input type="search" placeholder="Search by file name" aria-label="Search by file name" value={search} onChange={(event) => setSearch(event.target.value)} />
           </label>
+          <div className="st-segment" role="group" aria-label="Which photos">
+            <button type="button" aria-pressed={!onlyUnused} onClick={() => setOnlyUnused(false)}>
+              All photos
+            </button>
+            <button type="button" aria-pressed={onlyUnused} onClick={() => setOnlyUnused(true)}>
+              Not in use
+            </button>
+          </div>
         </div>
-        <ul style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: 14, margin: 0, padding: 0, listStyle: "none" }}>
-          {matching.slice(0, shown).map((asset) => (
-            <li key={asset._id} style={{ background: "#FFFDF9", borderRadius: 8, overflow: "hidden" }}>
-              <img src={`${asset.url}?w=340&h=240&fit=crop&auto=format`} alt="" loading="lazy" style={{ display: "block", width: "100%", aspectRatio: "17 / 12", objectFit: "cover" }} />
-              <div style={{ padding: "8px 10px", fontSize: 12, lineHeight: 1.4 }}>
-                <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{asset.originalFilename ?? "Photo"}</div>
-                <div style={{ color: "#6B5E50" }}>
+        {assets && !matching.length ? <p className="st-lede">No photos match. Try another name.</p> : null}
+        <ul className="st-photos">
+          {matching.slice(0, shown).map((asset, index) => (
+            <li key={asset._id} className="st-photo" style={{ "--i": Math.min(index, 24) } as CSSProperties}>
+              <div>
+                <img src={`${asset.url}?w=380&h=268&fit=crop&auto=format`} alt="" loading="lazy" />
+              </div>
+              <div className="st-photo__text">
+                <b>{asset.originalFilename ?? "Photo"}</b>
+                <small>
                   {asset.width} × {asset.height} · {asset.used ? `Used in ${asset.used}` : "Not in use"}
-                </div>
+                </small>
               </div>
             </li>
           ))}
         </ul>
         {matching.length > shown ? (
-          <button type="button" style={{ ...input, marginTop: 20, cursor: "pointer" }} onClick={() => setShown(shown + PAGE)}>
+          <button type="button" className="st-morebtn" onClick={() => setShown(shown + PAGE)}>
             Show more
           </button>
         ) : null}

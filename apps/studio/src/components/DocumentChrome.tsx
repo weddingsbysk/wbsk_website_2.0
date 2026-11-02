@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useEditState, useFormValue, type InputProps, type ObjectInputProps, type ObjectSchemaType, type Path } from "sanity";
 import { useDocumentPane } from "sanity/structure";
 import { PREVIEW_INSPECTOR } from "../preview/inspector";
@@ -20,6 +20,7 @@ function friendly(path: Path, message: string, schemaType: ObjectSchemaType): st
 }
 
 const MAX_LISTED = 4;
+const RING = 2 * Math.PI * 15.5;
 
 /**
  * Wraps the whole form: ticks on finished step tabs, and the bar listing what's left before
@@ -30,6 +31,7 @@ function Chrome(props: ObjectInputProps) {
   const type = props.schemaType.name;
   const { draft, published } = useEditState(id, type);
   const { inspector, inspectors, openInspector, validation } = useDocumentPane();
+  const [showAll, setShowAll] = useState(false);
   const errors = useMemo(() => validation.filter((m) => m.level === "error"), [validation]);
   // Nothing has been checked until the first change saves, so a blank form earns no ticks.
   const isNew = !draft && !published;
@@ -64,18 +66,32 @@ function Chrome(props: ObjectInputProps) {
     [props.groups, errors, fieldGroup, isNew],
   );
 
-  const named = errors.map((m) => friendly(m.path, m.message, props.schemaType));
-  const left = [...new Set(named)];
-  const descriptionsMissing = named.filter((item) => item === "a photo description").length;
-  const list = left.map((item) =>
-    item === "a photo description" ? `${descriptionsMissing} photo description${descriptionsMissing === 1 ? "" : "s"}` : item,
+  // What's left, each a chip that jumps to the first place it applies.
+  const left = new Map<string, { label: string; path: Path; count: number }>();
+  for (const message of errors) {
+    // The address is made from the names, so it's never one more thing to do.
+    if (message.path[0] === "address" && errors.length > 1) continue;
+    const name = friendly(message.path, message.message, props.schemaType);
+    const seen = left.get(name);
+    if (seen) seen.count += 1;
+    else left.set(name, { label: name, path: message.path, count: 1 });
+  }
+  const list = [...left.values()].map((item) =>
+    item.label === "a photo description" ? { ...item, label: `${item.count} photo description${item.count === 1 ? "" : "s"}` } : item,
   );
   const more = list.length - MAX_LISTED;
-  const summary = isNew
-    ? "Fill in each step. This bar lists what's left before you can publish."
-    : list.length
-      ? `Before publishing: ${list.slice(0, MAX_LISTED).join(" · ")}${more > 0 ? ` · and ${more} more` : ""}`
-      : "Nothing left. Ready to publish.";
+  // Opens the step a field lives on first; a field on a closed step can't take focus.
+  const jumpTo = (path: Path) => {
+    const step = fieldGroup.get(String(path[0]))?.[0];
+    if (step) props.onFieldGroupSelect(step);
+    requestAnimationFrame(() => props.onPathFocus(path));
+  };
+  const summary = isNew ? "Fill in each step. This bar lists what's left before you can publish." : list.length ? "Before publishing:" : "Nothing left. Ready to publish.";
+
+  // The ring fills as steps finish, or simply when nothing's left on a form without steps.
+  const stepNames = (props.groups ?? []).filter((g) => g.name !== "all-fields").map((g) => g.name);
+  const stepsLeft = stepNames.filter((name) => errors.some((m) => fieldGroup.get(String(m.path[0]))?.includes(name))).length;
+  const progress = isNew ? 0 : stepNames.length ? (stepNames.length - stepsLeft) / stepNames.length : errors.length ? 0.5 : 1;
   const website = useWebsiteStatus();
   const tryAgain = useTryAgain();
   const publishedAt = (published as { _updatedAt?: string } | null)?._updatedAt;
@@ -89,43 +105,50 @@ function Chrome(props: ObjectInputProps) {
   return (
     <div>
       {props.renderDefault({ ...props, groups })}
-      <div
-        role="status"
-        aria-live="polite"
-        style={{
-          position: "sticky",
-          bottom: 0,
-          zIndex: 5,
-          marginTop: 24,
-          padding: "12px 16px",
-          background: "#F5EFE6",
-          borderRadius: 8,
-          boxShadow: "0 -4px 16px rgb(58 36 16 / 0.08)",
-          color: "#231C16",
-          fontSize: 13,
-          lineHeight: 1.5,
-        }}
-      >
-        <strong style={{ color: "#7A5C17" }}>{state}</strong>
-        {publishing && website.state === "failed" ? (
-          <div>
-            The website didn&apos;t update. Your work is safe. Try again, or tell Siddhant.{" "}
-            <button type="button" onClick={() => void tryAgain()} style={{ font: "inherit", textDecoration: "underline", background: "none", border: 0, padding: 0, cursor: "pointer", color: "inherit" }}>
-              Try again
-            </button>
-          </div>
-        ) : publishing ? (
-          <div>Publishing… the website updates in about 10 minutes. You can keep working.</div>
-        ) : !draft && published && onSite ? (
-          <div>
-            Live on the website ✓ ·{" "}
-            <a href={liveLink} target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
-              Open page ↗
-            </a>
-          </div>
-        ) : (
-          <div>{summary}</div>
-        )}
+      <div role="status" aria-live="polite" className="st-bar">
+        <svg className="st-ring" viewBox="0 0 38 38" aria-hidden="true">
+          <circle cx="19" cy="19" r="15.5" />
+          <circle cx="19" cy="19" r="15.5" strokeDasharray={RING} strokeDashoffset={RING * (1 - progress)} />
+          {progress === 1 ? <path d="m13 19.5 4.2 4.2L25.5 15" /> : null}
+        </svg>
+        <div>
+          <strong>{state}</strong>
+          {publishing && website.state === "failed" ? (
+            <div>
+              The website didn&apos;t update. Your work is safe. Try again, or tell Siddhant.{" "}
+              <button type="button" className="st-bar__link" onClick={() => void tryAgain()}>
+                Try again
+              </button>
+            </div>
+          ) : publishing ? (
+            <div>Publishing… the website updates in about 10 minutes. You can keep working.</div>
+          ) : !draft && published && onSite ? (
+            <div>
+              Live on the website ✓ ·{" "}
+              <a href={liveLink} target="_blank" rel="noreferrer">
+                Open page ↗
+              </a>
+            </div>
+          ) : (
+            <div>
+              {summary}
+              {!isNew && list.length ? (
+                <div className="st-chips">
+                  {(showAll ? list : list.slice(0, MAX_LISTED)).map((item) => (
+                    <button key={item.label} type="button" className="st-chip" onClick={() => jumpTo(item.path)}>
+                      {item.label}
+                    </button>
+                  ))}
+                  {more > 0 ? (
+                    <button type="button" className="st-chip st-chip--more" aria-expanded={showAll} onClick={() => setShowAll(!showAll)}>
+                      {showAll ? "Show fewer" : `and ${more} more`}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

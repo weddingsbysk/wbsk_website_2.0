@@ -15,6 +15,8 @@ Everything on wbsk.in is added and changed here, without code. Nothing you do re
   - **Worth a look** — small things to fix, like an old Google rating.
   - **Last published** — your latest change and whether it is live.
 - **Top bar:** shows if the website is live or updating, and has **Guide** (this page and the export guides).
+- **Tutorials:** a short film of the whole Studio. Start here if you're new.
+- **Search:** press **Cmd+K** anywhere and type a task, a page or a couple's name to go straight there.
 
 ## Add a wedding
 
@@ -69,6 +71,7 @@ Nothing you take down is lost; you can switch it back on any time.
 | Add a team member | Our team → + New | B&W 4:5 portrait, already styled in Lightroom |
 | Update open roles | Careers | Roles also appear in the careers form |
 | Update the Google rating | Site settings | Rating, review count and link; check monthly |
+| Change small wording | Homepage (Hero video, Who we are, Get in touch); Weddings → Weddings page text (every couple's closing lines); Careers → Careers page text | Leave a field empty to keep the usual wording |
 
 ## Cover videos
 

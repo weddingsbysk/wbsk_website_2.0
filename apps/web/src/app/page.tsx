@@ -1,4 +1,5 @@
 import "@wbsk/ui/css/home.css";
+import { Fragment } from "react";
 import { CoverVideo, HeroDrift, Letterbox, Reveal, SectionHead, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
 import { EnquiryForm } from "../components/EnquiryForm";
 import { FeaturedRow } from "../components/DriftRow";
@@ -20,10 +21,23 @@ function quoteWords(quote: string, word?: string) {
   });
 }
 
+/** The line beside the form; one chosen word is gold italic. */
+function emphasised(line: string, word: string) {
+  return line.split(" ").map((part, index) => (
+    <Fragment key={`${part}-${index}`}>
+      {index ? " " : null}
+      {part.replace(/[^\p{L}\p{N}'’-]/gu, "") === word ? <em>{part}</em> : part}
+    </Fragment>
+  ));
+}
+
 const TICKER = ["Weddings", "Films", "Candid moments", "Haldi ceremonies", "Portraits", "Destinations", "Pre-weddings"];
+/** Enough words that the strip outruns any screen as it slides, however few the Studio lists. */
+const TICKER_LENGTH = 21;
 
 export default async function HomePage() {
   const home = await getHomepageContent();
+  const ticker = home.tickerWords?.length ? home.tickerWords : TICKER;
   return (
     <>
       <OpeningIntro />
@@ -34,7 +48,7 @@ export default async function HomePage() {
         <HeroDrift />
         <span className="wbsk-hero__cue" aria-hidden="true" />
         <div className="wbsk-hero__text wbsk-container">
-          <p className="wbsk-hero__eyebrow">Photography · Films · Events</p>
+          <p className="wbsk-hero__eyebrow">{home.heroEyebrow ?? "Photography · Films · Events"}</p>
           <h1 className="wbsk-display wbsk-measure">
             <TitleWords text={home.heroLine ?? "Weddings By Siddhant Kapoor"} />
           </h1>
@@ -44,7 +58,7 @@ export default async function HomePage() {
       <section data-tone="dark" className="wbsk-philosophy" aria-labelledby="philosophy-quote">
         <div className="wbsk-ticker" aria-hidden="true">
           <p>
-            {[...TICKER, ...TICKER, ...TICKER].map((word, index) => (
+            {Array.from({ length: Math.ceil(TICKER_LENGTH / ticker.length) }, () => ticker).flat().map((word, index) => (
               <span key={`${word}-${index}`}>{word}</span>
             ))}
           </p>
@@ -157,7 +171,7 @@ export default async function HomePage() {
           <Reveal>
             <p className="wbsk-label">Get in touch</p>
             <h2 className="wbsk-enquiry__title">
-              Let&rsquo;s create something <em>beautiful</em> together
+              {emphasised(home.enquiryTitle ?? "Let’s create something beautiful together", home.enquiryEmphasis ?? "beautiful")}
             </h2>
           </Reveal>
           {home.packages.length ? (

@@ -1,8 +1,8 @@
 import { buildLegacyTheme } from "sanity";
 
-/** Decision 17: warm ivory panels, deep-brown top bar, deep gold for the main button and labels. */
+/** Decision 17: warm ivory panels, deep-brown frame, deep gold for the main button and labels. */
 export const wbskTheme = buildLegacyTheme({
-  "--font-family-base": '"Hanken Grotesk", -apple-system, "Helvetica Neue", Arial, sans-serif',
+  "--font-family-base": '"Outfit", -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif',
   "--black": "#1F1914",
   "--white": "#FFFDF9",
   "--gray-base": "#6B5E50",

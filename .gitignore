@@ -16,3 +16,5 @@ CLAUDE.md
 .claude/
 apps/web/out-lh/
 apps/web/public/media/
+
+apps/studio/tutorial-film/.work/

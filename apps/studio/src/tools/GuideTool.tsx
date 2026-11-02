@@ -29,9 +29,8 @@ function Guide({ text }: { text: string }) {
     const key = index;
     if (/^#{1,4} /.test(line)) {
       const level = line.match(/^#+/)![0].length;
-      const size = [40, 28, 20, 17][level - 1];
       out.push(
-        <p key={key} role="heading" aria-level={level} style={{ fontFamily: level < 3 ? '"Bodoni Moda", serif' : undefined, fontWeight: level < 3 ? 400 : 600, fontSize: size, lineHeight: 1.15, margin: "28px 0 10px" }}>
+        <p key={key} role="heading" aria-level={level} className="st-guide__h">
           {inline(line.replace(/^#+ /, ""))}
         </p>,
       );
@@ -44,14 +43,12 @@ function Guide({ text }: { text: string }) {
       }
       out.push(
         <div key={key} style={{ overflowX: "auto" }}>
-          <table style={{ borderCollapse: "collapse", margin: "12px 0", fontSize: 14 }}>
+          <table>
             <tbody>
               {rows.map((row, rowIndex) => (
                 <tr key={rowIndex}>
                   {row.map((cell, cellIndex) => (
-                    <td key={cellIndex} style={{ padding: "8px 12px", borderBottom: "1px solid rgb(35 28 22 / 0.15)", fontWeight: rowIndex === 0 ? 600 : 400 }}>
-                      {inline(cell)}
-                    </td>
+                    <td key={cellIndex}>{inline(cell)}</td>
                   ))}
                 </tr>
               ))}
@@ -97,23 +94,19 @@ function Guide({ text }: { text: string }) {
 export function GuideTool() {
   const [current, setCurrent] = useState(0);
   return (
-    <div style={{ height: "100%", overflow: "auto", background: "#F5EFE6", color: "#231C16", lineHeight: 1.6 }}>
-      <div style={{ maxWidth: 780, margin: "0 auto", padding: "32px 24px 64px" }}>
-        <div role="tablist" aria-label="Guides" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+    <div className="st-page">
+      <div className="st-guide">
+        <nav role="tablist" aria-label="Guides" className="st-rise">
           {GUIDES.map((guide, index) => (
-            <button
-              key={guide.title}
-              type="button"
-              role="tab"
-              aria-selected={index === current}
-              onClick={() => setCurrent(index)}
-              style={{ minHeight: 44, padding: "0 14px", font: "inherit", cursor: "pointer", borderRadius: 8, border: "1px solid #7A5C17", color: index === current ? "#FFFDF9" : "#231C16", background: index === current ? "#7A5C17" : "transparent" }}
-            >
+            <button key={guide.title} type="button" role="tab" aria-selected={index === current} onClick={() => setCurrent(index)}>
               {guide.title}
             </button>
           ))}
-        </div>
-        <Guide text={GUIDES[current]!.text} />
+        </nav>
+        {/* The key replays the sheet's arrival when another guide opens. */}
+        <article key={current} className="st-guide__sheet">
+          <Guide text={GUIDES[current]!.text} />
+        </article>
       </div>
     </div>
   );

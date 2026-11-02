@@ -1,6 +1,6 @@
 import { sanityProject } from "@wbsk/content";
-import { useCallback, useEffect, useState, type CSSProperties } from "react";
-import { useClient, useDocumentOperation, useFormValue, type ObjectInputProps, type StringInputProps } from "sanity";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { set, useClient, useDocumentOperation, useFormValue, type ObjectInputProps, type StringInputProps } from "sanity";
 
 const note: CSSProperties = { fontSize: 13, lineHeight: 1.5, color: "#6B5E50" };
 
@@ -94,6 +94,32 @@ export function SeoInput(props: ObjectInputProps) {
       {props.renderDefault(props)}
     </div>
   );
+}
+
+/**
+ * Real destinations count from WBSK-PW 001, from a stored counter, so a number is never reused
+ * even if a destination is deleted (Decision 09, G7). The number is taken once a name is typed:
+ * Sanity also works out starting values just to check permissions, so doing it there would use up
+ * a number, and rebuild the website, every time a list opened.
+ */
+export function CatalogueInput(props: StringInputProps) {
+  const client = useClient({ apiVersion: "2026-11-01" });
+  const name = useFormValue(["name"]) as string | undefined;
+  const { onChange, value } = props;
+  const taken = useRef(false);
+
+  useEffect(() => {
+    if (value || !name?.trim() || taken.current) return;
+    taken.current = true;
+    void client
+      .patch("siteSettings")
+      .setIfMissing({ catalogueCounter: 0 })
+      .inc({ catalogueCounter: 1 })
+      .commit<{ catalogueCounter: number }>()
+      .then((settings) => onChange(set(`WBSK-PW ${String(settings.catalogueCounter).padStart(3, "0")}`)));
+  }, [client, name, onChange, value]);
+
+  return props.renderDefault(props);
 }
 
 type Source = { label: string; url: string; poster: unknown; names: string; place?: string; linked?: string };

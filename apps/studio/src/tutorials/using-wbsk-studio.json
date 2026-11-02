@@ -1,0 +1,175 @@
+{
+ "duration": 142.45200000000003,
+ "chapters": [
+  {
+   "title": "Welcome",
+   "at": 0
+  },
+  {
+   "title": "Your home screen",
+   "at": 10.6
+  },
+  {
+   "title": "Search with ⌘K",
+   "at": 30.3
+  },
+  {
+   "title": "Add a wedding",
+   "at": 39.7
+  },
+  {
+   "title": "Photos",
+   "at": 50.6
+  },
+  {
+   "title": "Story, films and Featured",
+   "at": 74.7
+  },
+  {
+   "title": "What’s left",
+   "at": 85.40200000000003
+  },
+  {
+   "title": "Publish",
+   "at": 95.60200000000003
+  },
+  {
+   "title": "Everyday jobs",
+   "at": 110.75200000000002
+  },
+  {
+   "title": "Taking things down",
+   "at": 124.25200000000002
+  },
+  {
+   "title": "Three golden rules",
+   "at": 131.45200000000003
+  }
+ ],
+ "captions": [
+  {
+   "start": 11.7,
+   "text": "Every morning starts here."
+  },
+  {
+   "start": 15,
+   "text": "Six big buttons for what you do most."
+  },
+  {
+   "start": 18.25,
+   "text": "Unfinished things wait here for you."
+  },
+  {
+   "start": 21.15,
+   "text": "Small fixes. No panic."
+  },
+  {
+   "start": 23.95,
+   "text": "And what’s live on the website."
+  },
+  {
+   "start": 26.75,
+   "text": "A green dot up here means all is well."
+  },
+  {
+   "start": 30.3,
+   "text": "Lost? Two keys, anywhere. (Ctrl + K on Windows.)"
+  },
+  {
+   "start": 33.6,
+   "text": "Type a couple’s name…"
+  },
+  {
+   "start": 36.7,
+   "text": "…or a job. Press return, and you’re there."
+  },
+  {
+   "start": 40.1,
+   "text": "Five steps. Any order you like."
+  },
+  {
+   "start": 42.9,
+   "text": "Watch the preview: it types along with you."
+  },
+  {
+   "start": 44.7,
+   "text": "The page address writes itself."
+  },
+  {
+   "start": 47.3,
+   "text": "It saves itself as a draft. Drafts never go live."
+  },
+  {
+   "start": 50.9,
+   "text": "Three photos, each with its own shape."
+  },
+  {
+   "start": 55.2,
+   "text": "Too small? The Studio says no. Politely."
+  },
+  {
+   "start": 60.5,
+   "text": "Click on the couple. Keep faces above the pale band."
+  },
+  {
+   "start": 64.3,
+   "text": "Drop 50 or 60 at once. Then drag to reorder."
+  },
+  {
+   "start": 67.9,
+   "text": "Every photo needs a description. Yes, every one."
+  },
+  {
+   "start": 71.45,
+   "text": "Allow 10 to 15 minutes. Put some music on."
+  },
+  {
+   "start": 75,
+   "text": "A line for the card, and their story."
+  },
+  {
+   "start": 79.02,
+   "text": "Films are YouTube links. Each with its 16:9 poster."
+  },
+  {
+   "start": 82.1,
+   "text": "One switch puts them on the homepage."
+  },
+  {
+   "start": 85.5,
+   "text": "Not sure what’s left? The bar always knows."
+  },
+  {
+   "start": 88.7,
+   "text": "Click anything on it, and it takes you there."
+  },
+  {
+   "start": 91.9,
+   "text": "Then check the desktop view. Only you can see drafts."
+  },
+  {
+   "start": 95.8,
+   "text": "And now, the big moment."
+  },
+  {
+   "start": 98.8,
+   "text": "It takes a few minutes. Keep working if you like."
+  },
+  {
+   "start": 104.7,
+   "text": "Live on the website. Well done, you."
+  },
+  {
+   "start": 107.75,
+   "text": "Then look at it on your phone. Always."
+  },
+  {
+   "start": 124.75,
+   "text": "Nothing you take down is lost. Switch it back on any time."
+  },
+  {
+   "start": 129.15,
+   "text": "That one’s for the owner only."
+  }
+ ]
+}

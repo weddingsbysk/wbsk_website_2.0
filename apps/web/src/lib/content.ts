@@ -212,7 +212,9 @@ export function getWeddings() {
 }
 
 export function getWeddingsIntro() {
-  return client.fetch<{ intro?: string; closingLine?: string } | null>(/* groq */ `*[_id == "weddingsPage"][0]{ intro, closingLine }`);
+  return client.fetch<{ intro?: string; closingLine?: string; storyQuestion?: string; storyLine?: string } | null>(
+    /* groq */ `*[_id == "weddingsPage"][0]{ intro, closingLine, storyQuestion, storyLine }`,
+  );
 }
 
 type FormResult = Omit<FormConfig, "kind">;
@@ -357,6 +359,10 @@ export async function getHomepageContent() {
   const data = await client.fetch<{
     home: {
       heroLine?: string;
+      heroEyebrow?: string;
+      tickerWords?: string[];
+      enquiryTitle?: string;
+      enquiryEmphasis?: string;
       whoWeAre?: string;
       teamLine?: string;
       showFeaturedOn?: boolean;
@@ -378,7 +384,7 @@ export async function getHomepageContent() {
     settings: { googleRating?: number; googleReviewCount?: number; googleProfile?: string } | null;
   }>(/* groq */ `{
     "home": *[_id == "homepage"][0]{
-      heroLine, whoWeAre, quoteEmphasis, quoteBy, weddingsLine, teamLine, showFeaturedOn, counters[]{value, label},
+      heroLine, heroEyebrow, tickerWords, enquiryTitle, enquiryEmphasis, whoWeAre, quoteEmphasis, quoteBy, weddingsLine, teamLine, showFeaturedOn, counters[]{value, label},
       heroPosterDesktop${imageFields}, heroPosterPhone${imageFields}, teamPhoto${imageFields},
       "videoDesktop": heroVideoDesktop.asset->url, "videoPhone": heroVideoPhone.asset->url,
       "weddingOrder": featuredWeddings[]._ref, "filmOrder": featuredFilms[]._ref
@@ -409,6 +415,10 @@ export async function getHomepageContent() {
   const google = data.settings;
   return {
     heroLine: home?.heroLine,
+    heroEyebrow: home?.heroEyebrow,
+    tickerWords: home?.tickerWords,
+    enquiryTitle: home?.enquiryTitle,
+    enquiryEmphasis: home?.enquiryEmphasis,
     whoWeAre: home?.whoWeAre,
     quoteEmphasis: home?.quoteEmphasis,
     quoteBy: home?.quoteBy,
@@ -482,13 +492,13 @@ export async function getTeamPage() {
 }
 
 export async function getCareersPage() {
-  const [intro, roles, form] = await Promise.all([
-    client.fetch<string | null>(/* groq */ `*[_id == "careersPage"][0].intro`),
+  const [page, roles, form] = await Promise.all([
+    client.fetch<{ intro?: string; noRolesLine?: string } | null>(/* groq */ `*[_id == "careersPage"][0]{ intro, noRolesLine }`),
     getOpenRoles(),
     getForm("careers"),
   ]);
   const titles = roles.map((role) => role.title);
-  return { intro, roles, form: { ...form, questions: withRoles(form.questions, titles) } };
+  return { intro: page?.intro, noRolesLine: page?.noRolesLine, roles, form: { ...form, questions: withRoles(form.questions, titles) } };
 }
 
 /** Footer links, from Site settings (Decision 03); each shows once it's filled in. */

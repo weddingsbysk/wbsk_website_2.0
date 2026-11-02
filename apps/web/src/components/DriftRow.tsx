@@ -477,7 +477,8 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       const index = real().indexOf(realItem as HTMLElement);
       f.frozen = true;
       glide?.kill();
-      const offset = source.getBoundingClientRect().left - row.getBoundingClientRect().left - layout.gutter;
+      // Measured from the card's slot: the card itself is swollen under the cursor.
+      const offset = (source.closest("li") ?? source).getBoundingClientRect().left - row.getBoundingClientRect().left - layout.gutter;
       writeSession(RETURN_KEY, JSON.stringify({ index, offset }));
       const go = () => {
         replaying = true;

@@ -448,6 +448,9 @@ test.describe("card to couple's page (Decision 05)", () => {
     await expect(page).toHaveURL(/client\/sample-/);
     await page.goBack();
     await driftReady(page);
+    // The cursor is still where the card was, and a card swells under it (Decision 30). Firefox
+    // applies that straight after Back, so the row is measured with the cursor away.
+    await page.mouse.move(0, 0);
     const again = page.locator(".wbsk-drift li[data-real]").nth(1).locator("a");
     await expect.poll(() => again.evaluate((el) => el.getBoundingClientRect().left), { timeout: 5000 }).toBeCloseTo(left, -1);
   });

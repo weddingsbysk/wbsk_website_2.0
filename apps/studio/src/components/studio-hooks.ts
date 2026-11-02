@@ -1,2 +1,2 @@
-export { useClient } from "sanity";
-export { useRouter } from "sanity/router";
+export { useClient, useCurrentUser, useWorkspace } from "sanity";
+export { useRouter, useRouterState } from "sanity/router";

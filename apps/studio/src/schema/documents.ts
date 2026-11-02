@@ -1,8 +1,8 @@
 import { imageRules } from "@wbsk/content";
-import { defineArrayMember, defineField, defineType, type SanityClient } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity";
 import { hideField, orderField, photoField, sampleField, seoField, statusField, youtubeLinkValidation } from "./fields";
 import { AutoAddressInput } from "../components/AutoAddressInput";
-import { DesktopCoverInput, FilmFromSourceInput, PhoneCoverInput } from "../components/ExtraInputs";
+import { CatalogueInput, DesktopCoverInput, FilmFromSourceInput, PhoneCoverInput } from "../components/ExtraInputs";
 
 const required = (label: string) => (rule: { required: () => { error: (m: string) => unknown } }) =>
   rule.required().error(`Add ${label}`);
@@ -39,7 +39,7 @@ export const wedding = defineType({
       validation: required("the names, so the address can be made") as never,
     }),
     photoField({ name: "cardPhoto", title: "Card photo 4:5", slot: "card photo", rule: imageRules.card, required: true, group: "photos" }),
-    photoField({ name: "coverDesktop", title: "Desktop cover 21:9", slot: "cover", rule: imageRules.coverDesktop, required: true, group: "photos", description: "At least 2560px wide. Keep faces away from the lower left, where the name label sits.", components: { input: DesktopCoverInput } }),
+    photoField({ name: "coverDesktop", title: "Desktop cover 21:9", slot: "desktop cover", rule: imageRules.coverDesktop, required: true, group: "photos", description: "At least 2560px wide. Keep faces away from the lower left, where the name label sits.", components: { input: DesktopCoverInput } }),
     photoField({ name: "coverPhone", title: "Phone cover 3:4", slot: "phone cover", rule: imageRules.coverPhone, required: true, group: "photos", description: "At least 1500 × 2000. Keep faces above the name label at the bottom.", components: { input: PhoneCoverInput } }),
     defineField({
       name: "gallery",
@@ -106,16 +106,7 @@ export const destination = defineType({
       type: "string",
       readOnly: true,
       description: "Given automatically and never reused.",
-      // Real destinations count from WBSK-PW 001, from a stored counter, so a number is never
-      // reused even if a destination is deleted (Decision 09, G7).
-      initialValue: async (_params: unknown, { getClient }: { getClient: (options: { apiVersion: string }) => SanityClient }) => {
-        const settings = await getClient({ apiVersion: "2026-11-01" })
-          .patch("siteSettings")
-          .setIfMissing({ catalogueCounter: 0 })
-          .inc({ catalogueCounter: 1 })
-          .commit<{ catalogueCounter: number }>();
-        return `WBSK-PW ${String(settings.catalogueCounter).padStart(3, "0")}`;
-      },
+      components: { input: CatalogueInput },
     }),
     photoField({ name: "artwork", title: "Sleeve artwork: B&W transparent PNG", slot: "sleeve artwork", rule: imageRules.destinationArt, required: true, description: "Square, at least 1600 × 1600, with a transparent background.", check: (ref) => {
       const match = ref.match(/-(\d+)x(\d+)-([a-z0-9]+)$/);
@@ -123,7 +114,7 @@ export const destination = defineType({
       if (match[1] !== match[2]) return "The sleeve artwork needs to be square.";
       return match[3] === "png" ? true : "The sleeve artwork needs to be a transparent PNG.";
     } }),
-    photoField({ name: "coverDesktop", title: "Desktop cover 21:9", slot: "cover", rule: imageRules.coverDesktop, required: true, components: { input: DesktopCoverInput } }),
+    photoField({ name: "coverDesktop", title: "Desktop cover 21:9", slot: "desktop cover", rule: imageRules.coverDesktop, required: true, components: { input: DesktopCoverInput } }),
     photoField({ name: "coverPhone", title: "Phone cover 3:4", slot: "phone cover", rule: imageRules.coverPhone, required: true, components: { input: PhoneCoverInput } }),
     orderField,
     hideField,

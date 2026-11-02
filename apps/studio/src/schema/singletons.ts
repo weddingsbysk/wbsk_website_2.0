@@ -11,6 +11,7 @@ export const homepage = defineType({
     { name: "order", title: "Featured order" },
     { name: "team", title: "Team" },
     { name: "featuredOn", title: "Featured on" },
+    { name: "enquiry", title: "Get in touch" },
     { name: "seo", title: "Google & sharing" },
   ],
   fields: [
@@ -19,6 +20,8 @@ export const homepage = defineType({
     photoField({ name: "heroPosterDesktop", title: "Desktop poster 16:9", slot: "desktop poster", rule: imageRules.heroPosterDesktop, required: true, group: "hero", description: "The first frame of the desktop video, in the same grade." }),
     photoField({ name: "heroPosterPhone", title: "Phone poster 9:16", slot: "phone poster", rule: imageRules.heroPosterPhone, required: true, group: "hero", description: "The first frame of the phone video, in the same grade." }),
     defineField({ name: "heroLine", title: "Hero line", type: "string", group: "hero", description: "One short line over the film." }),
+    defineField({ name: "heroEyebrow", title: "Small line above the hero line", type: "string", group: "hero", description: 'Empty reads "Photography · Films · Events".' }),
+    defineField({ name: "tickerWords", title: "Moving words", type: "array", group: "who", description: "The strip of words above the quote. Empty shows the usual seven.", of: [defineArrayMember({ type: "string" })], options: { layout: "tags" }, validation: (rule) => rule.min(3).warning("Three or more read best").max(12).warning("Twelve at most read best") }),
     defineField({ name: "whoWeAre", title: "Perspective quote", type: "text", rows: 3, group: "who", description: "The big quote on the dark section. No quotation marks: the site adds them." }),
     defineField({ name: "quoteEmphasis", title: "Word in gold", type: "string", group: "who", description: "One word from the quote, spelt exactly as it is there. It shows in gold italic." }),
     defineField({ name: "quoteBy", title: "Who said it", type: "string", group: "who" }),
@@ -38,6 +41,8 @@ export const homepage = defineType({
     photoField({ name: "teamPhoto", title: "Team photo 21:9", slot: "team photo", rule: imageRules.teamPhoto, group: "team" }),
     defineField({ name: "teamLine", title: "Team line", type: "string", group: "team" }),
     defineField({ name: "showFeaturedOn", title: 'Show "Featured on"', type: "boolean", group: "featuredOn", initialValue: false }),
+    defineField({ name: "enquiryTitle", title: "Line beside the form", type: "string", group: "enquiry", description: "Empty reads \"Let’s create something beautiful together\"." }),
+    defineField({ name: "enquiryEmphasis", title: "Word in gold", type: "string", group: "enquiry", description: 'One word from the line, spelt exactly as it is there. Empty uses "beautiful".' }),
     seoField("seo"),
   ],
   preview: { prepare: () => ({ title: "Homepage" }) },
@@ -49,6 +54,8 @@ const simplePage = (name: string, title: string, fields: ReturnType<typeof defin
 export const weddingsPage = simplePage("weddingsPage", "Weddings page", [
   defineField({ name: "intro", title: "Intro sentence", type: "string" }),
   defineField({ name: "closingLine", title: "Closing line", type: "string", description: 'Empty reads "Tell us about your wedding".' }),
+  defineField({ name: "storyQuestion", title: "Every couple's page: closing question", type: "string", description: 'Empty reads "Planning something like this?".' }),
+  defineField({ name: "storyLine", title: "Every couple's page: closing line", type: "string", description: 'Empty reads "Tell us about your wedding".' }),
 ]);
 export const filmsPage = simplePage("filmsPage", "Films page", [
   defineField({ name: "intro", title: "Intro line", type: "string" }),
@@ -62,6 +69,7 @@ export const teamPage = simplePage("teamPage", "Our team page", [
 ]);
 export const careersPage = simplePage("careersPage", "Careers page", [
   defineField({ name: "intro", type: "text", rows: 3 }),
+  defineField({ name: "noRolesLine", title: "When no roles are open", type: "string", description: "Empty reads \"No open roles right now, but we’d still like to see your work.\"" }),
 ]);
 
 const offering = (name: string, title: string) =>

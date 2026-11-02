@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EnquireButton } from "../../../components/EnquiryPanel";
 import { GoneRedirect } from "../../../components/GoneRedirect";
-import { getWeddings, metadataFrom, withoutInlinePreview } from "../../../lib/content";
+import { getWeddings, getWeddingsIntro, metadataFrom, withoutInlinePreview } from "../../../lib/content";
 import { publicAsset } from "../../../lib/site";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -36,7 +36,7 @@ const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
 export default async function Page({ params }: Params) {
   const { slug } = await params;
-  const { pages, listed, removed } = await getWeddings();
+  const [{ pages, listed, removed }, words] = await Promise.all([getWeddings(), getWeddingsIntro()]);
   if (removed.includes(slug)) return <GoneRedirect to="/weddings/" label="the Weddings page" />;
   const wedding = pages.find((item) => item.slug === slug);
   if (!wedding) notFound();
@@ -120,9 +120,9 @@ export default async function Page({ params }: Params) {
       ) : null}
 
       <section className="wbsk-container wbsk-closingband">
-        <p className="wbsk-lead">Planning something like this?</p>
+        <p className="wbsk-lead">{words?.storyQuestion ?? "Planning something like this?"}</p>
         <div>
-          <EnquireButton statement>Tell us about your wedding</EnquireButton>
+          <EnquireButton statement>{words?.storyLine ?? "Tell us about your wedding"}</EnquireButton>
         </div>
       </section>
 

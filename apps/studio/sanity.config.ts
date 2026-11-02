@@ -1,19 +1,19 @@
 import { sanityProject } from "@wbsk/content";
-import { HelpCircleIcon } from "@sanity/icons/HelpCircle";
-import { HomeIcon } from "@sanity/icons/Home";
-import { ImagesIcon } from "@sanity/icons/Images";
 import { defineConfig, type DocumentActionComponent } from "sanity";
 import { structureTool } from "sanity/structure";
 import { OWNER_USER_IDS, wbskTheme } from "./src/brand";
 import { ArchiveAction, RemoveAction, RestoreAction } from "./src/components/actions";
 import { DocumentInput } from "./src/components/DocumentChrome";
 import { HomeTool } from "./src/components/HomeTool";
+import { GuideLine, HomeLine, PhotosLine, PlayLine } from "./src/components/icons";
 import { WbskNavbar } from "./src/components/Navbar";
+import { StudioShell } from "./src/components/StudioShell";
 import { previewInspector } from "./src/preview/inspector";
 import { schemaTypes, singletonTypes } from "./src/schema";
 import { structure } from "./src/structure";
 import { GuideTool } from "./src/tools/GuideTool";
 import { PhotoLibrary } from "./src/tools/PhotoLibrary";
+import { TutorialsTool } from "./src/tools/TutorialsTool";
 
 const FIXED = new Set([...singletonTypes, "enquiryForm", "weddingPackage"]);
 const PREVIEWED = new Set(["wedding", "destination", "homepage", "preWeddingPage", "enquiryForm"]);
@@ -25,7 +25,7 @@ export default defineConfig({
   projectId: sanityProject.projectId,
   dataset: sanityProject.dataset,
   theme: wbskTheme,
-  studio: { components: { navbar: WbskNavbar } },
+  studio: { components: { layout: StudioShell, navbar: WbskNavbar } },
   form: { components: { input: DocumentInput } },
   plugins: [
     structureTool({
@@ -35,10 +35,11 @@ export default defineConfig({
     }),
   ],
   tools: (prev) => [
-    { name: "home", title: "Home", icon: HomeIcon, component: HomeTool },
+    { name: "home", title: "Home", icon: HomeLine, component: HomeTool },
     ...prev,
-    { name: "photos", title: "Photo library", icon: ImagesIcon, component: PhotoLibrary },
-    { name: "guide", title: "Guide", icon: HelpCircleIcon, component: GuideTool },
+    { name: "photos", title: "Photo library", icon: PhotosLine, component: PhotoLibrary },
+    { name: "guide", title: "Guide", icon: GuideLine, component: GuideTool },
+    { name: "tutorials", title: "Tutorials", icon: PlayLine, component: TutorialsTool },
   ],
   schema: {
     types: schemaTypes,

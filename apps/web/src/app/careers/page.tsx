@@ -7,7 +7,7 @@ import { getCareersPage, mainPageMetadata } from "../../lib/content";
 export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("careersPage", "Careers");
 
 export default async function Page() {
-  const { intro, roles, form } = await getCareersPage();
+  const { intro, noRolesLine, roles, form } = await getCareersPage();
   return (
     <>
       <section className="wbsk-container wbsk-pagehead">
@@ -29,7 +29,7 @@ export default async function Page() {
             ))}
           </ul>
         ) : (
-          <p className="wbsk-lead">No open roles right now, but we&rsquo;d still like to see your work.</p>
+          <p className="wbsk-lead">{noRolesLine ?? "No open roles right now, but we’d still like to see your work."}</p>
         )}
       </section>
       <section className="wbsk-section wbsk-container">

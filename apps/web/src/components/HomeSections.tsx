@@ -348,6 +348,8 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
             glideRef.current(to);
             return;
           }
+          // A film still sliding into place can be off-centre, but a press on it only plays it.
+          if ((event.target as Element).closest('.wbsk-stack__card[data-place="0"]')) return;
           const box = event.currentTarget.getBoundingClientRect();
           const off = (event.clientX - box.left) / box.width - 0.5;
           // Only a press beyond the front film's edge moves on; on the film itself, it plays.
