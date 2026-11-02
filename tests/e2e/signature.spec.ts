@@ -45,6 +45,30 @@ test.describe("opening intro", () => {
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   });
 
+  test("if a phone blocks the clip, the still logo still glides home and the page comes up", async ({ page }) => {
+    await page.addInitScript(() => {
+      HTMLMediaElement.prototype.play = () => Promise.reject(new DOMException("blocked", "NotAllowedError"));
+    });
+    await page.goto("./");
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute("data-intro", "play");
+    await expect(page.locator(".wbsk-intro__glide")).toHaveCSS("opacity", "1", { timeout: 4000 });
+    await expect(html).not.toHaveAttribute("data-intro", "play", { timeout: 9000 });
+    await expect(page.locator(".wbsk-header__logo img")).toHaveCSS("opacity", "1");
+  });
+
+  test("the clip loads and plays through, with the lighter file on phones", async ({ page }) => {
+    await page.goto("./");
+    const phone = (page.viewportSize()?.width ?? 0) < 820;
+    await expect
+      .poll(() => page.locator(".wbsk-intro video").evaluate((el) => (el as HTMLVideoElement).currentSrc), { timeout: 5000 })
+      .toContain(phone ? "intro-reverse-phone.mp4" : "intro-reverse.mp4");
+    await expect
+      .poll(() => page.evaluate(() => { const v = document.querySelector<HTMLVideoElement>(".wbsk-intro video"); return v ? v.currentTime : -1; }), { timeout: 9000 })
+      .toBeGreaterThan(0.3);
+    expect(await page.locator(".wbsk-intro video").evaluate((el) => (el as HTMLVideoElement).error)).toBeNull();
+  });
+
   test("moving within the site and browser Back don't replay it", async ({ page }) => {
     await page.goto("./");
     const html = page.locator("html");

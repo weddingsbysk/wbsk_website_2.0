@@ -42,8 +42,24 @@ http
         .end(fs.readFileSync(path.join(root, "404.html")));
       return;
     }
-    res
-      .writeHead(200, { "content-type": types[path.extname(file)] ?? "application/octet-stream" })
-      .end(fs.readFileSync(file));
+    const type = types[path.extname(file)] ?? "application/octet-stream";
+    const body = fs.readFileSync(file);
+    // Real hosts answer partial requests, and Safari won't play a video from one that doesn't.
+    const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range ?? "");
+    if (range) {
+      const from = range[1] ? Number(range[1]) : Math.max(0, body.length - Number(range[2]));
+      const to = range[1] && range[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1;
+      res
+        .writeHead(206, {
+          "content-type": type,
+          "accept-ranges": "bytes",
+          "content-range": `bytes ${from}-${to}/${body.length}`,
+          "content-length": to - from + 1,
+        })
+        .end(body.subarray(from, to + 1));
+      return;
+    }
+    res.writeHead(200, { "content-type": type, "accept-ranges": "bytes" }).end(body);
   })
-  .listen(port, "127.0.0.1", () => console.log(`Serving on http://127.0.0.1:${port}${base}/`));
+  // HOST=0.0.0.0 lets a phone on the same Wi-Fi open it, for checking on a real device.
+  .listen(port, process.env.HOST ?? "127.0.0.1", () => console.log(`Serving on http://${process.env.HOST ?? "127.0.0.1"}:${port}${base}/`));

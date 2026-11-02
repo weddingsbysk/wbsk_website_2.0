@@ -55,7 +55,7 @@ export function OpeningIntro() {
     (window as Window & { __wbskIntro?: boolean }).__wbskIntro = true;
     // The head script usually has these downloading already; this covers it finishing later than the page's scripts.
     for (const element of [video, mark, bold]) {
-      const address = element.dataset.src;
+      const address = (window.innerWidth < PHONE_BELOW && element.dataset.srcPhone) || element.dataset.src;
       if (address && !element.getAttribute("src")) element.src = address;
     }
 
@@ -65,6 +65,7 @@ export function OpeningIntro() {
     let ended = false;
     let landing = false;
     let clipFade: Animation | undefined;
+    let playedRef = false;
 
     const add = (animation: Animation) => {
       animations.push(animation);
@@ -112,12 +113,50 @@ export function OpeningIntro() {
     const from = `translate(${start.x}px, ${start.y}px) scale(1)`;
     glide.style.transform = from;
 
+    // The homepage starts coming up as soon as the logo begins to move, under the glide.
+    const revealPage = () => {
+      const { softSettle, travel } = motionTokens;
+      const hero = document.querySelector(".wbsk-hero .wbsk-frame");
+      const reveal = add(
+        veil.animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: REVEAL_MS,
+          easing: travel,
+          fill: "both",
+        }),
+      );
+      hero?.animate([{ transform: "scale(1.05)" }, { transform: "scale(1)" }], {
+        duration: REVEAL_MS + HERO_SETTLE_EXTRA_MS,
+        easing: softSettle,
+        fill: "both",
+      }).addEventListener("finish", (event) => (event.target as Animation).cancel());
+      reveal.addEventListener("finish", finish);
+    };
+
+    // No clip to play, such as an iPhone in Low Power Mode: the still logo takes the same journey.
+    const glideStill = () => {
+      if (ended) return;
+      const target = document.querySelector(".wbsk-header__logo img")?.getBoundingClientRect();
+      if (!target) return finish();
+      const to = `translate(${target.left}px, ${target.top}px) scale(${target.width / start.width})`;
+      add(
+        glide.animate([{ transform: from }, { transform: to }], {
+          duration: GLIDE_MS,
+          delay: GLIDE_DELAY_MS,
+          easing: motionTokens.travel,
+          fill: "both",
+        }),
+      );
+      add(bold.animate([{ opacity: 0 }, { opacity: 1 }], { duration: LOGO_MELT_MS, delay: GLIDE_DELAY_MS + LOGO_MELT_AT_MS, fill: "both" }));
+      add(mark.animate([{ opacity: 1 }, { opacity: 0 }], { duration: LOGO_MELT_MS, delay: GLIDE_DELAY_MS + LOGO_MELT_AT_MS + LOGO_MELT_MS / 2, fill: "both" }));
+      revealPage();
+    };
+
     const showStill = () => {
       if (landing) return;
       landing = true;
       add(video.animate([{ opacity: 0 }], { duration: 0, fill: "forwards" }));
       add(glide.animate([{ opacity: 1 }], { duration: 0, fill: "forwards" }));
-      timers.push(window.setTimeout(finish, STILL_MS));
+      timers.push(window.setTimeout(reduced ? finish : glideStill, STILL_MS));
     };
 
     const land = () => {
@@ -126,10 +165,9 @@ export function OpeningIntro() {
       const target = document.querySelector(".wbsk-header__logo img")?.getBoundingClientRect();
       if (!target) return finish();
       const to = `translate(${target.left}px, ${target.top}px) scale(${target.width / start.width})`;
-      const { softSettle, travel } = motionTokens;
+      const { travel } = motionTokens;
       mark.style.opacity = "0";
       bold.style.opacity = "1";
-      const hero = document.querySelector(".wbsk-hero .wbsk-frame");
 
       // The clip itself travels, so there's no swap to see. It melts into the official logo on the way.
       const scale = target.width / start.width;
@@ -167,20 +205,7 @@ export function OpeningIntro() {
           fill: "both",
         }),
       );
-      // The homepage starts coming up as soon as the letters have closed, under the glide.
-      const reveal = add(
-        veil.animate([{ opacity: 1 }, { opacity: 0 }], {
-          duration: REVEAL_MS,
-          easing: travel,
-          fill: "both",
-        }),
-      );
-      hero?.animate([{ transform: "scale(1.05)" }, { transform: "scale(1)" }], {
-        duration: REVEAL_MS + HERO_SETTLE_EXTRA_MS,
-        easing: softSettle,
-        fill: "both",
-      }).addEventListener("finish", (event) => (event.target as Animation).cancel());
-      reveal.addEventListener("finish", finish);
+      revealPage();
     };
 
     if (reduced) {
@@ -203,14 +228,31 @@ export function OpeningIntro() {
         clipFade.addEventListener("finish", () => {
           timers.push(
             window.setTimeout(() => {
+              playedRef = true;
               video.play().catch(showStill);
             }, 500),
           );
         });
       };
       video.addEventListener("ended", land);
-      if (video.readyState >= 2) begin();
-      else video.addEventListener("loadeddata", begin, { once: true });
+      video.addEventListener("error", showStill, { once: true });
+      if (video.error) showStill();
+      else if (video.readyState >= 2) begin();
+      else {
+        video.addEventListener("loadeddata", begin, { once: true });
+        // iPhones may not fetch a video until it's asked to play: ask, then hold it for its moment.
+        video
+          .play()
+          .then(() => {
+            if (!playedRef) {
+              video.pause();
+              video.currentTime = 0;
+            }
+          })
+          .catch((reason: Error) => {
+            if (reason.name === "NotAllowedError") showStill();
+          });
+      }
     }
 
     return () => {
@@ -224,6 +266,7 @@ export function OpeningIntro() {
       <video
         ref={videoRef}
         data-src={publicAsset("/intro/intro-reverse.mp4")}
+        data-src-phone={publicAsset("/intro/intro-reverse-phone.mp4")}
         muted
         playsInline
         preload="auto"
