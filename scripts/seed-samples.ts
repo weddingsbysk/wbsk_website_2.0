@@ -84,7 +84,23 @@ const couples: [string, string, string, string, string, string][] = [
   ["Sample Isha", "Sample Arnav", "Destination", "Jaipur", "Sample Haveli", "2025-12-14"],
   ["Sample Nina", "Sample Vir", "Destination", "Rishikesh", "Sample Riverside Camp", "2025-10-02"],
   ["Sample Zoya", "Sample Kian", "Local", "Gurugram", "Sample Courtyard", "2025-02-22"],
+  // More samples for testing "Show more" and the moving row, with short and very long names.
+  ["Sample Ira", "Sample Jo", "Local", "Noida", "Sample Terrace", "2025-01-18"],
+  ["Sample Anoushka Venkataraghavan", "Sample Siddharth Chakraborty-Menon", "Destination", "Jaisalmer", "Sample Desert Camp and Fort Residency", "2024-12-09"],
+  ["Sample Leela", "Sample Arjun", "Destination", "Kochi", "Sample Backwater Bungalow", "2024-11-22"],
+  ["Sample Meher", "Sample Aarav", "Local", "Delhi", "Sample Lawn", "2024-10-05"],
+  ["Sample Rhea Kothari", "Sample Vivaan Oberoi", "Destination", "Mussoorie", "Sample Hill Lodge", "2024-07-14"],
+  ["Sample Sia", "Sample Om", "Destination", "Pushkar", "Sample Fort", "2024-04-27"],
+  ["Sample Kiara Fernandes", "Sample Neel", "Local", "Faridabad", "Sample Garden", "2024-02-11"],
+  ["Sample Avni", "Sample Reyansh Mukherjee", "Destination", "Coorg", "Sample Coffee Estate", "2023-12-16"],
+  ["Sample Tanvi", "Sample Yash", "Destination", "Shimla", "Sample Old Hotel", "2023-11-03"],
+  ["Sample Pari", "Sample Dhruv", "Local", "Gurugram", "Sample Rooftop", "2023-09-09"],
 ];
+
+/** Which samples show on the homepage row, in order. */
+const FEATURED = [1, 2, 3, 4, 7, 8, 9, 10];
+/** The six original samples are complete; the rest only need enough photos to open properly. */
+const galleryCount = (i: number) => (i === 0 ? 60 : i < 6 ? 20 : 8);
 
 const STORY = (a: string, b: string, city: string) =>
   `This is sample wording, standing in for a real couple's story. ${a} and ${b} wanted a wedding that felt like them, with family close and nobody hurrying anyone along. So we stayed quiet, kept near, and let ${city} do what it does at the end of a long day. Their first look happened on a stairwell nobody had planned for. By the sangeet, we'd stopped being the people with the cameras. The real story is written in WBSK Studio.`;
@@ -99,7 +115,37 @@ const destinations = [
 const wedQ = (key: string, label: string, kind: string, extra: Record<string, unknown> = {}, i = 0) => ({ _type: "formQuestion", _key: key, key, label, kind, shown: true, required: false, ...extra, order: i });
 const CONSENT = "We'll use your names, contact details and wedding details only to reply to your enquiry and plan your wedding with you. Privacy policy · you can ask us to delete them any time. I agree.";
 
+/** Adds only the extra samples and the homepage's order, leaving every other document as it stands. */
+async function addExtraWeddings() {
+  const extra = couples.map((couple, i) => ({ couple, i })).slice(6);
+  await many(extra, async ({ couple: [first, second, label, city, venue, date], i }) => {
+    const n = i + 1;
+    const owner = `Wedding ${n}`;
+    await client.createOrReplace({
+      _id: `sample-wedding-${n}`, _type: "wedding", isSample: true,
+      firstName: first, secondName: second, placeLabel: label, city, venue, weddingDate: date,
+      address: { _type: "slug", current: `${first} ${second}`.toLowerCase().replace(/[^a-z0-9]+/g, "-") },
+      cardPhoto: await image(1600, 2000, `${owner}, card photo`),
+      coverDesktop: await image(3000, 1286, `${owner}, desktop cover`),
+      coverPhone: await image(1500, 2000, `${owner}, phone cover`),
+      gallery: await gallery(galleryCount(i), owner),
+      shortDescription: `Sample wording: a ${label === "Destination" ? "destination wedding" : "wedding at home"} in ${city}, told slowly, with family close.`,
+      theirStory: STORY(first, second, city),
+      teaser: await filmLink(`${owner}, teaser`),
+      highlight: await filmLink(`${owner}, highlight`),
+      reels: [{ _type: "reel", _key: "reel1", url: "https://www.instagram.com/reel/SampleReel1/", label: "Sangeet" }],
+      featured: FEATURED.includes(n), status: "live",
+    });
+  }, 2);
+  await client
+    .patch("homepage")
+    .set({ featuredWeddings: FEATURED.map((n) => ({ _type: "reference", _key: `w${n}`, _ref: `sample-wedding-${n}` })) })
+    .commit();
+  console.log(`Done: ${extra.length} extra weddings, ${counter} images.`);
+}
+
 async function main() {
+  if (process.env.SEED_ONLY === "extra-weddings") return addExtraWeddings();
   console.log("Uploading sample weddings…");
   await many(couples, async ([first, second, label, city, venue, date], i) => {
     const n = i + 1;
@@ -111,13 +157,13 @@ async function main() {
       cardPhoto: await image(1600, 2000, `${owner}, card photo`),
       coverDesktop: await image(3000, 1286, `${owner}, desktop cover`),
       coverPhone: await image(1500, 2000, `${owner}, phone cover`),
-      gallery: await gallery(i === 0 ? 60 : 20, owner),
+      gallery: await gallery(galleryCount(i), owner),
       shortDescription: `Sample wording: a ${label === "Destination" ? "destination wedding" : "wedding at home"} in ${city}, told slowly, with family close.`,
       theirStory: STORY(first, second, city),
       teaser: await filmLink(`${owner}, teaser`),
       highlight: await filmLink(`${owner}, highlight`),
       reels: [{ _type: "reel", _key: "reel1", url: "https://www.instagram.com/reel/SampleReel1/", label: "Sangeet" }],
-      featured: i < 4, status: "live",
+      featured: FEATURED.includes(n), status: "live",
     });
   }, 2);
 
@@ -203,7 +249,7 @@ async function main() {
     heroLine: "Your wedding, the way it felt.",
     whoWeAre: "Sample wording. We make wedding films and photographs that feel like your own story, and we stay close enough along the way that you stop thinking of us as the people with the cameras.",
     counters: [{ _type: "counter", _key: "a", value: "100+", label: "Stories covered (sample)" }, { _type: "counter", _key: "b", value: "10", label: "Years of craft (sample)" }],
-    featuredWeddings: [1, 2, 3, 4].map((n) => ({ _type: "reference", _key: `w${n}`, _ref: `sample-wedding-${n}` })),
+    featuredWeddings: FEATURED.map((n) => ({ _type: "reference", _key: `w${n}`, _ref: `sample-wedding-${n}` })),
     featuredFilms: [1, 2, 3, 4, 5].map((n) => ({ _type: "reference", _key: `f${n}`, _ref: `sample-film-${n}` })),
     teamPhoto: await image(3000, 1286, "Team photo"), teamLine: "The people behind your story", showFeaturedOn: true,
   });

@@ -1,45 +1,56 @@
 "use client";
 
-import { ClientCard, Reveal, type WeddingSummary } from "@wbsk/ui";
-import { useState } from "react";
+import { ArrowIcon, ClientCard, rippleIn, useCardEntrance, useCardMotion, type WeddingSummary } from "@wbsk/ui";
+import { useEffect, useRef, useState } from "react";
+import { CrossfadeLine } from "./CrossfadeLine";
 
 const PAGE = 12;
-const RIPPLE_COLUMNS = 3;
+const GRID_SIZES = "(min-width: 1680px) 500px, (min-width: 1200px) 31vw, (min-width: 700px) 47vw, calc(100vw - 32px)";
 
 /** The grid, with one description line that travels with it (Decision 05). */
-export function WeddingsGrid({ weddings }: { weddings: WeddingSummary[] }) {
+export function WeddingsGrid({ weddings, leadDescription }: { weddings: WeddingSummary[]; leadDescription: string }) {
   const [shown, setShown] = useState(PAGE);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(leadDescription);
+  const listRef = useRef<HTMLUListElement>(null);
+  const firstNewRef = useRef<number | null>(null);
+  useCardMotion(listRef);
+  useCardEntrance(listRef);
+
+  // "Show more": the new cards ripple in, and keyboard focus moves to the first of them.
+  useEffect(() => {
+    const first = firstNewRef.current;
+    const list = listRef.current;
+    if (first === null || !list) return;
+    firstNewRef.current = null;
+    const added = [...list.querySelectorAll<HTMLElement>(":scope > li")].slice(first);
+    rippleIn(added);
+    added[0]?.querySelector<HTMLElement>(".wbsk-card__link")?.focus({ preventScroll: true });
+  }, [shown]);
+
   return (
     <div className="wbsk-gridwrap">
-      <p className="wbsk-sharedline" data-filled={description ? "true" : "false"} aria-live="polite">
-        <span key={description}>{description}</span>
-      </p>
-      <ul
-        className="wbsk-grid"
-        onMouseLeave={() => setDescription("")}
-        onPointerMove={(event) => {
-          // The photo drifts a little with the cursor. Variables only, so the browser just moves it.
-          if (event.pointerType !== "mouse") return;
-          const photo = (event.target as Element).closest<HTMLElement>(".wbsk-card__photo");
-          if (!photo) return;
-          const box = photo.getBoundingClientRect();
-          photo.style.setProperty("--mx", `${((event.clientX - box.left) / box.width - 0.5) * -14}px`);
-          photo.style.setProperty("--my", `${((event.clientY - box.top) / box.height - 0.5) * -14}px`);
-        }}
-      >
-        {weddings.slice(0, shown).map((wedding, index) => (
-          <li key={wedding.slug}>
-            <Reveal delayIndex={index % RIPPLE_COLUMNS} className="wbsk-cardreveal">
-              <ClientCard wedding={wedding} onShow={setDescription} />
-            </Reveal>
+      <div className="wbsk-sharedline">
+        <CrossfadeLine text={description} />
+      </div>
+      <ul ref={listRef} className="wbsk-grid">
+        {weddings.slice(0, shown).map((wedding) => (
+          <li key={wedding.slug} className="wbsk-cardslot">
+            <ClientCard wedding={wedding} onShow={setDescription} sizes={GRID_SIZES} />
           </li>
         ))}
       </ul>
       {weddings.length > shown ? (
         <div className="wbsk-grid__more">
-          <button type="button" className="wbsk-button" onClick={() => setShown(shown + PAGE)}>
+          <button
+            type="button"
+            className="wbsk-button"
+            onClick={() => {
+              firstNewRef.current = shown;
+              setShown(shown + PAGE);
+            }}
+          >
             <span>Show more</span>
+            <ArrowIcon />
           </button>
         </div>
       ) : null}

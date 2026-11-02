@@ -10,6 +10,7 @@ export { HeroDrift } from "./components/HeroDrift";
 export { Letterbox } from "./components/Letterbox";
 export { Reveal } from "./components/Reveal";
 export { SideRow } from "./components/SideRow";
+export { canHover, pressThen, rippleIn, setCardHot, useCardEntrance, useCardMotion } from "./components/cardMotion";
 export { WbskImage } from "./components/WbskImage";
 export { ClientCard, CoupleNames, StoryCover, TitleWords, type WeddingSummary } from "./components/WeddingViews";
 export { buildSrcSet, sanityUrl, slotWidths, type SanityImage, type WbskImageSource } from "./image";

@@ -17,6 +17,7 @@ describe("Colour pairs meet 4.5:1 (Decisions 02, 29)", () => {
   it.each([
     ["ink on ivory", colors.ink, colors.ivory],
     ["deep gold on ivory", colors.deepGold, colors.ivory],
+    ["muted text on ivory", colors.muted, colors.ivory],
     ["gold on dusk", colors.gold, colors.dusk],
     ["ivory on dusk", colors.ivory, colors.dusk],
     ["ivory on deep gold", colors.ivory, colors.deepGold],

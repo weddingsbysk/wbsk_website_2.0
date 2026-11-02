@@ -5,6 +5,7 @@
   --color-ink: #231c16;
   --color-gold: #ddaf3a;
   --color-deep-gold: #7a5c17;
+  --color-muted: #6b5e52;
   --color-error: #a32a1e;
 
   --font-serif: var(--font-bodoni), "Times New Roman", serif;
@@ -14,6 +15,9 @@
 
   --shadow-rest: 0 1px 2px rgb(58 36 16 / 0.06), 0 8px 24px -12px rgb(58 36 16 / 0.14);
   --shadow-lift: 0 2px 4px rgb(58 36 16 / 0.08), 0 24px 48px -16px rgb(58 36 16 / 0.28);
+
+  --shadow-card-rest: 0 1px 2px rgb(35 28 22 / 0.06), 0 10px 28px -14px rgb(35 28 22 / 0.2);
+  --shadow-card-lift: 0 2px 6px rgb(35 28 22 / 0.08), 0 28px 56px -18px rgb(35 28 22 / 0.32);
 
   --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-travel: cubic-bezier(0.65, 0, 0.35, 1);
@@ -40,6 +44,7 @@
     --text-body: 1.0625rem;
     --text-small: 0.875rem;
     --text-label: 0.6875rem;
+    --text-card-names: 1.75rem;
     --header-height: 60px;
   }
 
@@ -793,200 +798,204 @@
     }
   }
 
-  /* Client cards (Decision 05). */
+  /* Client cards: Editorial Caption (Decision 05). A page from a wedding magazine: clean photo, quiet caption. */
   .wbsk-card {
     display: block;
+    container-type: inline-size;
   }
   .wbsk-card__link {
     display: block;
     color: inherit;
     text-decoration: none;
+    border-radius: var(--radius-wbsk);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-drag: none;
   }
+  .wbsk-card__link:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+  }
+  .wbsk-card__link[data-pressed] {
+    transform: scale(0.98);
+    transition: transform 150ms var(--settle);
+  }
+  /* The shadow belongs to the photo alone. Only the second layer's opacity ever animates. */
   .wbsk-card__photo {
+    --card-lift: 0;
     position: relative;
+    display: block;
+    border-radius: var(--radius-wbsk);
+    box-shadow: var(--shadow-card-rest);
+  }
+  .wbsk-card__photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: var(--shadow-card-lift);
+    opacity: var(--card-lift);
+    pointer-events: none;
+  }
+  .wbsk-card__clip {
     display: block;
     overflow: hidden;
     border-radius: var(--radius-wbsk);
-    box-shadow: var(--shadow-rest);
-    transition: box-shadow 0.6s var(--settle);
+    isolation: isolate;
   }
-  .wbsk-card__photo .wbsk-frame {
+  .wbsk-card__clip .wbsk-frame {
     border-radius: 0;
   }
-  .wbsk-card__photo .wbsk-frame img {
-    transform: scale(var(--zoom, 1)) translate(var(--mx, 0), var(--my, 0));
-    transition: transform 1.6s var(--settle), opacity 0.5s var(--settle);
-    will-change: transform;
-  }
-  .wbsk-card__bar {
-    position: absolute;
-    right: 0;
-    left: 0;
-    z-index: 2;
-    height: 11%;
-    background: #0d0a08;
-    transition: transform 0.7s var(--travel);
-  }
-  .wbsk-card__bar[data-edge="top"] {
-    top: 0;
-    transform: translateY(-101%);
-  }
-  .wbsk-card__bar[data-edge="bottom"] {
-    bottom: 0;
-    transform: translateY(101%);
-  }
-  .wbsk-card__more {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    z-index: 3;
-    display: flex;
-    align-items: center;
-    height: 11%;
-    padding-inline: 20px;
-    font-size: var(--text-small);
-    letter-spacing: 0.02em;
-    color: var(--color-ivory);
-    opacity: 0;
-    transition: opacity 0.4s var(--settle);
+  .wbsk-card__clip .wbsk-frame img {
+    -webkit-user-drag: none;
+    transition: opacity 0.6s var(--settle);
   }
   .wbsk-card__caption {
-    display: block;
-  }
-  .wbsk-card__caption > * {
-    display: block;
-  }
-  .wbsk-card__caption > .wbsk-card__names {
-    width: fit-content;
-    background-image: linear-gradient(var(--color-deep-gold), var(--color-deep-gold));
-    background-repeat: no-repeat;
-    background-position: 0 100%;
-    background-size: 0 1px;
-    transition: background-size 0.9s var(--settle);
-  }
-  /* Entry: an ivory curtain lifts off the photo while it settles, then the caption rises. */
-  .wbsk-cardreveal[data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  .wbsk-cardreveal[data-reveal="shown"] .wbsk-card__photo::after {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    z-index: 4;
-    background: var(--color-ivory);
-    transform-origin: top;
-    pointer-events: none;
-    animation: wbsk-curtain 1.15s var(--travel) both;
-    animation-delay: calc(var(--reveal-index, 0) * 130ms);
-  }
-  @keyframes wbsk-curtain {
-    to {
-      transform: scaleY(0);
-    }
-  }
-  .wbsk-cardreveal .wbsk-card__caption > * {
-    transition: opacity 0.9s var(--settle), transform 0.9s var(--settle), background-size 0.9s var(--settle);
-    transition-delay: calc(var(--reveal-index, 0) * 130ms + 450ms);
-  }
-  .wbsk-cardreveal[data-reveal="shown"] .wbsk-card__photo .wbsk-frame img {
-    animation: wbsk-card-settle 1.8s var(--settle) both;
-    animation-delay: calc(var(--reveal-index, 0) * 130ms);
-  }
-  .wbsk-cardreveal[data-reveal="waiting"] .wbsk-card__photo {
-    visibility: hidden;
-  }
-  .wbsk-cardreveal[data-reveal="waiting"] .wbsk-card__caption > * {
-    opacity: 0;
-    transform: translateY(16px);
-    transition: none;
-  }
-  @keyframes wbsk-card-settle {
-    from {
-      transform: scale(1.16);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .wbsk-card__bar,
-    .wbsk-card__more {
-      display: none;
-    }
-    .wbsk-card__photo .wbsk-frame img {
-      transform: none;
-    }
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    text-align: left;
   }
   .wbsk-card__place {
-    margin: 20px 0 8px;
+    display: block;
+    order: -1;
+    margin-bottom: 8px;
   }
   .wbsk-card__names {
-    margin: 0;
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin-bottom: 6px;
+    font-family: var(--font-serif);
+    font-size: var(--text-card-names);
+    font-weight: 400;
+    font-variation-settings: "opsz" 28;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    color: var(--color-ink);
   }
-  .wbsk-card__meta {
-    margin: 8px 0 0;
+  .wbsk-card__metaline {
+    display: flex;
+    gap: 16px;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .wbsk-card .wbsk-card__meta {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
     font-size: var(--text-small);
+    line-height: 1.5;
     letter-spacing: 0.005em;
-    opacity: 0.78;
+    color: var(--color-muted);
+    opacity: 1;
+  }
+  .wbsk-nowrap {
+    white-space: nowrap;
+  }
+  /* On a narrow card the invitation takes its own line, so venue and date never break to make room. */
+  @container (max-width: 339px) {
+    .wbsk-card__metaline {
+      flex-wrap: wrap;
+      row-gap: 2px;
+    }
+    .wbsk-card__more {
+      margin-left: auto;
+    }
+  }
+  .wbsk-card__more {
+    display: inline-flex;
+    flex: none;
+    gap: 6px;
+    padding-right: 4px;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    white-space: nowrap;
+    color: var(--color-deep-gold);
+    opacity: 0;
+  }
+  .wbsk-card__moreword {
+    position: relative;
+    display: inline-block;
+  }
+  .wbsk-card__rule {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: var(--color-deep-gold);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .wbsk-card__arrow {
+    display: inline-block;
+  }
+  .wbsk-card__arrow::before {
+    content: "→" / "";
   }
   .wbsk-card__description {
-    margin: 10px 0 0;
+    margin: 12px 0 0;
     font-size: var(--text-small);
+    line-height: 1.55;
+    color: var(--color-muted);
   }
-  .wbsk-card__link:active .wbsk-card__photo {
-    transform: scale(0.985);
+  /* Arrivals are tucked away only once scripts have taken charge of bringing them back. */
+  .wbsk-cardslot[data-enter="waiting"] {
+    opacity: 0;
+    transform: translateY(24px);
   }
-  .wbsk-card__photo {
-    transition: box-shadow 0.6s var(--settle), transform 0.3s var(--settle);
-  }
-  @media (hover: hover) {
-    .wbsk-card__description {
-      display: none;
-    }
-    .wbsk-card__link:hover .wbsk-card__photo,
-    .wbsk-card__link:focus-visible .wbsk-card__photo {
-      box-shadow: var(--shadow-lift);
-      --zoom: 1.07;
-    }
-    .wbsk-card__link:hover .wbsk-card__bar,
-    .wbsk-card__link:focus-visible .wbsk-card__bar {
-      transform: none;
-    }
+  /* Without scripts or motion the invitation still appears, simply and at once. */
+  @media (scripting: none), (prefers-reduced-motion: reduce) {
     .wbsk-card__link:hover .wbsk-card__more,
     .wbsk-card__link:focus-visible .wbsk-card__more {
       opacity: 1;
-      transition-delay: 0.25s;
     }
-    .wbsk-card__link:hover .wbsk-card__names,
-    .wbsk-card__link:focus-visible .wbsk-card__names {
-      background-size: 100% 1px;
+    .wbsk-card__link:hover .wbsk-card__rule,
+    .wbsk-card__link:focus-visible .wbsk-card__rule {
+      transform: none;
     }
-    /* The lead story pushes in on the same terms. */
+  }
+  @media (max-width: 699px) {
+    :root {
+      --text-card-names: 1.5rem;
+    }
+    .wbsk-card__caption {
+      margin-top: 16px;
+    }
+  }
+  /* Phones and touch screens have no hover: the description sits under the card instead. */
+  @media (hover: none), (pointer: coarse) {
+    .wbsk-card__more {
+      display: none;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
+    .wbsk-card__description {
+      display: none;
+    }
     .wbsk-lead-story .wbsk-letterbox__picture {
-      transition: transform 1.6s var(--settle);
+      transition: transform 1.2s var(--settle);
     }
     .wbsk-lead-story:hover .wbsk-letterbox[data-letterbox="open"] .wbsk-letterbox__picture {
       transform: scale(1.03);
     }
   }
-  @media (hover: none) {
-    .wbsk-card__bar,
-    .wbsk-card__more,
-    .wbsk-sharedline {
-      display: none;
-    }
-  }
 
   /* Weddings page (Decision 05). */
-  .wbsk-weddings__intro {
-    display: grid;
-    gap: 20px;
-    padding-top: calc(var(--header-height) + clamp(56px, 9vw, 152px));
-    padding-bottom: clamp(40px, 5vw, 80px);
+  .wbsk-weddings {
+    --gutter-phone: 16px;
   }
-  @media (min-width: 1024px) {
-    .wbsk-weddings__intro {
-      grid-template-columns: 2fr 10fr;
-      align-items: baseline;
+  .wbsk-weddings__intro {
+    padding-top: calc(var(--header-height) + clamp(72px, 10vw, 168px));
+    padding-bottom: clamp(56px, 7vw, 112px);
+  }
+  @media (max-width: 699px) {
+    .wbsk-weddings .wbsk-container {
+      padding-inline: var(--gutter-phone);
+    }
+    .wbsk-weddings {
+      --gutter: var(--gutter-phone);
     }
   }
   .wbsk-lead-story,
@@ -1022,8 +1031,20 @@
     display: grid;
     gap: 6px;
     gap: 10px;
-    padding: clamp(64px, 10vw, 160px) clamp(20px, 3vw, 48px) clamp(20px, 3vw, 44px);
-    background: linear-gradient(to top, rgb(20 15 11 / 0.8), rgb(20 15 11 / 0));
+    --lead-fade: clamp(96px, 11vw, 176px);
+    padding: var(--lead-fade) clamp(20px, 3vw, 48px) clamp(20px, 3vw, 44px);
+    /* Behind the words it stays dark enough for 4.5:1 on even a white photo; above them it eases away. */
+    background: linear-gradient(
+      to top,
+      rgb(31 25 20 / 0.86) 0,
+      rgb(31 25 20 / 0.68) calc(100% - var(--lead-fade)),
+      rgb(31 25 20 / 0.42) calc(100% - var(--lead-fade) * 0.62),
+      rgb(31 25 20 / 0.14) calc(100% - var(--lead-fade) * 0.26),
+      rgb(31 25 20 / 0) 100%
+    );
+  }
+  .wbsk-lead-story__text .wbsk-label {
+    color: var(--color-ivory);
   }
   .wbsk-lead-story__names {
     display: block;
@@ -1034,50 +1055,88 @@
     font-variation-settings: "opsz" 36;
     color: var(--color-ivory);
   }
-  .wbsk-weddings__grid {
-    padding-top: 12px;
-  }
   .wbsk-gridwrap {
     position: relative;
   }
-  /* One line that stays with the grid, and leaves with it. It can't make any row jump. */
+  /* One line under the lead story. It pins below the header through the grid, and leaves with it. */
   .wbsk-sharedline {
     position: sticky;
     top: var(--header-height);
     z-index: 20;
-    min-height: 48px;
-    margin: 0 calc(var(--gutter) * -1) 16px;
-    padding: 12px var(--gutter);
-    font-size: var(--text-small);
-    background: rgb(245 239 230 / 0);
-    transition: background-color var(--hover) var(--settle);
+    display: none;
+    align-items: center;
+    height: 64px;
+    margin: 0 calc(var(--gutter) * -1) clamp(40px, 4vw, 64px);
+    padding-inline: var(--gutter);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--color-ink);
+    background: var(--color-ivory);
+    border-bottom: 1px solid rgb(35 28 22 / 0.14);
   }
-  .wbsk-sharedline[data-filled="true"] {
-    background: rgb(245 239 230 / 0.94);
+  @media (min-width: 1200px) {
+    .wbsk-sharedline {
+      height: 52px;
+    }
   }
-  .wbsk-sharedline span {
-    display: block;
-    animation: wbsk-fade var(--hover) var(--settle) both;
+  @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
+    .wbsk-sharedline {
+      display: flex;
+    }
+  }
+  .wbsk-crossline {
+    display: grid;
+    width: 100%;
+  }
+  .wbsk-crossline > span {
+    display: -webkit-box;
+    grid-area: 1 / 1;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    opacity: 0;
+    transition: opacity var(--hover) var(--settle);
+  }
+  .wbsk-crossline > span[data-on="true"] {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wbsk-crossline > span {
+      transition: none;
+    }
+  }
+  .wbsk-weddings__grid {
+    padding-top: 0;
+  }
+  @media (max-width: 699px), (hover: none), (pointer: coarse) {
+    .wbsk-weddings__grid {
+      padding-top: clamp(40px, 8vw, 64px);
+    }
   }
   .wbsk-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(48px, 6vw, 96px) clamp(20px, 2.6vw, 40px);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 56px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
-  @media (max-width: 1023px) {
+  @media (min-width: 700px) {
     .wbsk-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 72px 32px;
     }
   }
-  @media (max-width: 699px) {
+  @media (min-width: 1200px) {
     .wbsk-grid {
-      grid-template-columns: minmax(0, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 88px 48px;
     }
   }
   .wbsk-grid__more {
     display: flex;
     justify-content: center;
-    margin-top: 64px;
+    margin-top: clamp(64px, 7vw, 96px);
   }
   .wbsk-closingline {
     padding-block: var(--section);
@@ -1399,6 +1458,20 @@
     html[data-page-transition="expand"] .wbsk-storycover .wbsk-frame {
       view-transition-name: wedding-cover;
     }
+    html[data-page-transition="expand"] .wbsk-storycover__label .wbsk-h1 {
+      view-transition-name: wedding-names;
+      width: fit-content;
+    }
+    html[data-page-transition]::view-transition-group(wedding-names) {
+      z-index: 7;
+      animation-duration: 0.5s;
+      animation-timing-function: var(--travel);
+    }
+    html[data-page-transition]::view-transition-old(wedding-names),
+    html[data-page-transition]::view-transition-new(wedding-names) {
+      animation-duration: 0.5s;
+      animation-timing-function: var(--travel);
+    }
     html[data-page-transition]::view-transition-group(wedding-cover) {
       z-index: 5;
       animation-duration: 0.5s;
@@ -1410,11 +1483,13 @@
       object-fit: cover;
       animation-duration: 0.5s;
     }
+    /* The old page stays solid under the new one, so the dark page behind never shows through as a grey dip. */
     html[data-page-transition="expand"]::view-transition-old(root) {
-      animation: wbsk-out 0.25s var(--travel) both;
+      animation: none;
+      opacity: 1;
     }
     html[data-page-transition="expand"]::view-transition-new(root) {
-      animation: wbsk-fadein 0.4s 0.1s var(--settle) both;
+      animation: wbsk-fade 0.4s 0.08s var(--settle) both;
     }
     /* The names settle on top of the growing photo, never behind it. */
     html[data-page-transition]::view-transition-group(story-label) {

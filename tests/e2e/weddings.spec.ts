@@ -16,7 +16,7 @@ test("Weddings page: lead story, grid, no accessibility problems, no sideways sc
   await page.goto("./weddings/");
   await expect(page.locator("h1")).toHaveCount(1);
   await expect(page.locator(".wbsk-lead-story")).toContainText("Sample");
-  await expect(page.locator(".wbsk-card")).toHaveCount(5);
+  await expect(page.locator(".wbsk-card")).toHaveCount(12);
   // Newest first: the lead is the newest, and each card is older than the one before.
   await expect(page.locator(".wbsk-lead-story")).toContainText("Sample Asha");
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
@@ -38,7 +38,7 @@ test("the grid has the agreed columns", async ({ page }) => {
   await page.goto("./weddings/");
   const columns = await page.locator(".wbsk-grid").evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length);
   const width = page.viewportSize()!.width;
-  expect(columns).toBe(width >= 1024 ? 3 : width >= 700 ? 2 : 1);
+  expect(columns).toBe(width >= 1200 ? 3 : width >= 700 ? 2 : 1);
 });
 
 test("hovering a card shows its description without moving any row", async ({ page }) => {
@@ -185,7 +185,7 @@ test("Next story goes to the next older wedding, and loops after the oldest", as
   await expect(page.locator("h1")).toContainText("Sample Mira");
   await page.goBack();
   await expect(page).toHaveURL(/sample-asha/);
-  await page.goto("./client/sample-zoya-sample-kian/");
+  await page.goto("./client/sample-pari-sample-dhruv/");
   await expect(page.locator(".wbsk-nextstory")).toContainText("Sample Asha");
 });
 

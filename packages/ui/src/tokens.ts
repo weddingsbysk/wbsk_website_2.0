@@ -4,6 +4,7 @@ export const colors = {
   ink: "#231C16",
   gold: "#DDAF3A",
   deepGold: "#7A5C17",
+  muted: "#6B5E52",
   error: "#A32A1E",
 } as const;
 

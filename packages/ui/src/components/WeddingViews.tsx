@@ -8,7 +8,10 @@ export type WeddingSummary = {
   href: string;
   first: string;
   second: string;
+  /** Shown in capitals, e.g. "DESTINATION · GOA". */
   place: string;
+  placeLabel: string;
+  city: string;
   venue: string;
   monthYear: string;
   shortDescription: string;
@@ -23,45 +26,59 @@ export function CoupleNames({ first, second }: { first: string; second: string }
   );
 }
 
-/** Editorial Caption: a clean 4:5 photo, with everything written below it (Decision 05). */
-export function ClientCard({ wedding, onShow }: { wedding: WeddingSummary; onShow?: (text: string) => void }) {
+/**
+ * Editorial Caption: a clean 4:5 photo with everything written below it (Decision 05). A copy in the
+ * homepage's moving row is the same card, hidden from keyboards and screen readers (Decision 30).
+ */
+export function ClientCard({
+  wedding,
+  onShow,
+  sizes,
+  copy,
+}: {
+  wedding: WeddingSummary;
+  onShow?: (text: string) => void;
+  sizes: string;
+  copy?: boolean;
+}) {
   const show = onShow ? () => onShow(wedding.shortDescription) : undefined;
   return (
-    <article className="wbsk-card" data-slug={wedding.slug}>
+    <article className="wbsk-card" data-slug={copy ? undefined : wedding.slug}>
       <WbskLink
         href={wedding.href}
         className="wbsk-card__link"
         data-transition="expand"
+        aria-label={`${wedding.first} & ${wedding.second}, ${wedding.placeLabel} · ${wedding.city}, ${wedding.venue} · ${wedding.monthYear}: view story`}
+        tabIndex={copy ? -1 : undefined}
         onMouseEnter={show}
         onFocus={show}
       >
         <span className="wbsk-card__photo">
-          {wedding.cardPhoto ? (
-            <WbskImage
-              image={wedding.cardPhoto}
-              slot="card"
-              sizes="(min-width: 1024px) 31vw, (min-width: 700px) 47vw, 92vw"
-              aspectRatio={4 / 5}
-            />
-          ) : null}
-          {/* Clean at rest; on hover, cinema bars close in and carry the invitation (Decision 05). */}
-          <span className="wbsk-card__bar" data-edge="top" aria-hidden="true" />
-          <span className="wbsk-card__bar" data-edge="bottom" aria-hidden="true" />
-          <span className="wbsk-card__more" aria-hidden="true">
-            View story →
+          <span className="wbsk-card__clip" data-expand="">
+            {wedding.cardPhoto ? <WbskImage image={wedding.cardPhoto} slot="card" sizes={sizes} aspectRatio={4 / 5} /> : null}
           </span>
         </span>
         <span className="wbsk-card__caption">
-          <span className="wbsk-label wbsk-card__place">{wedding.place}</span>
-          <span className="wbsk-h3 wbsk-card__names" role="heading" aria-level={2}>
+          {/* The names come first for screen readers and voice control; styles put the place above them. */}
+          <span className="wbsk-card__names" role="heading" aria-level={2}>
             <CoupleNames first={wedding.first} second={wedding.second} />
-          </span>
-          <span className="wbsk-card__meta">
-            {wedding.venue} · {wedding.monthYear}
+          </span>{" "}
+          <span className="wbsk-label wbsk-card__place">{wedding.place}</span>{" "}
+          <span className="wbsk-card__metaline">
+            <span className="wbsk-card__meta">
+              {wedding.venue}&nbsp;· <span className="wbsk-nowrap">{wedding.monthYear}</span>
+            </span>{" "}
+            <span className="wbsk-card__more" aria-hidden="true">
+              <span className="wbsk-card__moreword">
+                View story
+                <span className="wbsk-card__rule" />
+              </span>
+              <span className="wbsk-card__arrow" />
+            </span>
           </span>
         </span>
       </WbskLink>
-      <p className="wbsk-card__description">{wedding.shortDescription}</p>
+      {copy ? null : <p className="wbsk-card__description">{wedding.shortDescription}</p>}
     </article>
   );
 }

@@ -34,7 +34,7 @@ test("homepage: every section, in the agreed order, with nothing broken", async 
   );
   expect(tops).toEqual([...tops].sort((a, b) => a - b));
   await expect(page.locator(".wbsk-counter")).toHaveCount(2);
-  await expect(page.locator(".wbsk-siderow__card")).not.toHaveCount(0);
+  await expect(page.locator(".wbsk-drift li[data-real]")).not.toHaveCount(0);
   await checks(page);
   expect(errors).toEqual([]);
 });
@@ -42,7 +42,11 @@ test("homepage: every section, in the agreed order, with nothing broken", async 
 test("featured cards open a couple's page; See all goes to Weddings", async ({ page }) => {
   await page.goto("./");
   await expect(page.getByRole("link", { name: "See all weddings →" })).toHaveAttribute("href", /weddings\/$/);
-  const card = page.locator(".wbsk-siderow__card .wbsk-card__link").first();
+  await page.locator(".wbsk-drift").scrollIntoViewIfNeeded();
+  await page.locator('.wbsk-drift[data-mode="drift"]').waitFor({ timeout: 15000 });
+  // A paused row holds still for the test's click; a person simply presses it as it drifts.
+  await page.getByRole("button", { name: "Pause moving weddings" }).click();
+  const card = page.locator(".wbsk-drift li[data-real] .wbsk-card__link").first();
   await card.scrollIntoViewIfNeeded();
   await card.click();
   await expect(page).toHaveURL(/client\//);

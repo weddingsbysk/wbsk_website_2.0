@@ -1,7 +1,7 @@
 "use client";
 
 import "@wbsk/ui/css/home.css";
-import { ClientCard, FilmPlayer, SideRow, WbskLink, type WeddingSummary, type WbskImageSource } from "@wbsk/ui";
+import { FilmPlayer, SideRow, WbskLink, type WbskImageSource } from "@wbsk/ui";
 import { prefersReducedMotion } from "@wbsk/ui/motion";
 import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 
@@ -45,32 +45,6 @@ export function Counter({ value, label }: { value: string; label: string }) {
       <p ref={ref} className="wbsk-counter__value">{value}</p>
       <p className="wbsk-label">{label}</p>
     </div>
-  );
-}
-
-/** Featured weddings in one sideways row, with the hovered card's description below (Decision 05). */
-export function FeaturedRow({ weddings, seeAllHref }: { weddings: WeddingSummary[]; seeAllHref: string }) {
-  const [description, setDescription] = useState("");
-  return (
-    <>
-      <SideRow
-        label="Featured weddings"
-        footer={
-          <WbskLink href={seeAllHref} className="wbsk-link wbsk-morelink">
-            See all weddings →
-          </WbskLink>
-        }
-      >
-        {weddings.map((wedding) => (
-          <li key={wedding.slug} className="wbsk-siderow__card">
-            <ClientCard wedding={wedding} onShow={setDescription} />
-          </li>
-        ))}
-      </SideRow>
-      <p className="wbsk-rowline" aria-live="polite">
-        <span key={description}>{description}</span>
-      </p>
-    </>
   );
 }
 

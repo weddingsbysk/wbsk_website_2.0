@@ -397,8 +397,8 @@ export async function getHomepageContent() {
   const weddings = listed
     .filter((wedding) => wedding.featured)
     .sort((a, b) => rank(home?.weddingOrder, a.id) - rank(home?.weddingOrder, b.id))
-    .map(({ slug, href, first, second, place, venue, monthYear, shortDescription, cardPhoto }) => ({
-      slug, href, first, second, place, venue, monthYear, shortDescription, cardPhoto,
+    .map(({ slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, cardPhoto }) => ({
+      slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, cardPhoto,
     }));
   const google = data.settings;
   return {

@@ -10,21 +10,22 @@ export default async function Page() {
   const [{ listed }, page] = await Promise.all([getWeddings(), getWeddingsIntro()]);
   const [lead, ...rest] = listed;
   // Cards only get what they show: the full stories and galleries stay out of this page.
-  const cards = rest.map(({ slug, href, first, second, place, venue, monthYear, shortDescription, cardPhoto }) => ({
+  const cards = rest.map(({ slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, cardPhoto }) => ({
     slug,
     href,
     first,
     second,
     place,
+    placeLabel,
+    city,
     venue,
     monthYear,
     shortDescription,
     cardPhoto,
   }));
   return (
-    <>
+    <div className="wbsk-weddings">
       <section className="wbsk-container wbsk-weddings__intro">
-        <p className="wbsk-label">Weddings</p>
         <h1 className="wbsk-h1 wbsk-measure">
           <TitleWords text={page?.intro ?? "Every wedding here belongs to two people who trusted us with the quiet parts too."} />
         </h1>
@@ -34,7 +35,7 @@ export default async function Page() {
           <WbskLink href={lead.href} className="wbsk-lead-story" data-slug={lead.slug} data-transition="expand">
             <Letterbox>
               {lead.coverDesktop ? (
-                <WbskImage image={lead.coverDesktop} portraitImage={lead.coverPhone ?? undefined} slot="coverDesktop" sizes="(min-width: 1440px) 1360px, 100vw" aspectRatio={21 / 9} priority parallax />
+                <WbskImage image={lead.coverDesktop} portraitImage={lead.coverPhone ?? undefined} slot="coverDesktop" sizes="(min-width: 1680px) 1570px, 100vw" aspectRatio={21 / 9} priority parallax />
               ) : null}
             </Letterbox>
             <span className="wbsk-lead-story__text" data-tone="dark">
@@ -47,11 +48,11 @@ export default async function Page() {
         </section>
       ) : null}
       <section className="wbsk-container wbsk-weddings__grid">
-        <WeddingsGrid weddings={cards} />
+        <WeddingsGrid weddings={cards} leadDescription={lead?.shortDescription ?? ""} />
       </section>
       <section className="wbsk-container wbsk-closingline">
         <EnquireButton statement>{page?.closingLine ?? "Tell us about your wedding"}</EnquireButton>
       </section>
-    </>
+    </div>
   );
 }

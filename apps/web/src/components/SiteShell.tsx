@@ -1,7 +1,7 @@
 "use client";
 
 import { Footer, Header, LinkProvider, type WbskLinkProps } from "@wbsk/ui";
-import { prefersReducedMotion, startWheelSmoothing } from "@wbsk/ui/motion";
+import { prefersReducedMotion, startWheelSmoothing, takeExpandSource } from "@wbsk/ui/motion";
 import { navItems } from "@wbsk/content";
 import NextLink from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -21,10 +21,23 @@ const DUSK_MS = 220;
 
 const pathOf = (href: string) => href.split("#")[0] ?? href;
 const COVER_NAME = "wedding-cover";
+const NAMES_NAME = "wedding-names";
 const isStoryPage = (path: string) => /^\/(client|pre-wedding)\/[^/]+\/?$/.test(path);
 const slugOf = (path: string) => path.split("/").filter(Boolean).at(-1) ?? "";
 
 type Signature = "expand" | "next";
+
+/** Names only what's moving, only for this move, so no card or copy ever carries them by default. */
+function nameForExpand(from: Element) {
+  const frame = from.querySelector<HTMLElement>("[data-expand]") ?? from.querySelector<HTMLElement>(".wbsk-frame");
+  const names = from.querySelector<HTMLElement>(".wbsk-card__names, .wbsk-lead-story__names");
+  if (frame) frame.style.viewTransitionName = COVER_NAME;
+  if (names) names.style.viewTransitionName = NAMES_NAME;
+  return () => {
+    if (frame) frame.style.viewTransitionName = "";
+    if (names) names.style.viewTransitionName = "";
+  };
+}
 
 /** The header and menu's Enquire link opens the panel; without scripts it goes to the homepage form. */
 function EnquireLink({ href, onClick, ...rest }: WbskLinkProps) {
@@ -72,7 +85,7 @@ export function SiteShell({ children, social }: { children: ReactNode; social: {
   );
 
   const changePage = useCallback(
-    (navigate: () => void, direction: "forward" | "back", kind?: Signature, frame?: HTMLElement | null) => {
+    (navigate: () => void, direction: "forward" | "back", kind?: Signature, from?: Element | null) => {
       if (prefersReducedMotion()) {
         navigate();
         return;
@@ -82,15 +95,15 @@ export function SiteShell({ children, social }: { children: ReactNode; social: {
         root.dataset.pageDirection = direction;
         if (kind) root.dataset.pageTransition = kind;
         else delete root.dataset.pageTransition;
-        // The card's photo becomes the shared element that grows into the cover (Decision 05).
-        if (frame) frame.style.viewTransitionName = COVER_NAME;
+        // The card's photo grows into the cover and its names travel into the label (Decision 05).
+        const release = from ? nameForExpand(from) : () => {};
         const transition = document.startViewTransition(() => {
           navigate();
           return waitForCommit();
         });
         void transition.finished.finally(() => {
           delete root.dataset.pageTransition;
-          if (frame) frame.style.viewTransitionName = "";
+          release();
         });
         return;
       }
@@ -101,7 +114,9 @@ export function SiteShell({ children, social }: { children: ReactNode; social: {
   );
 
   useEffect(() => {
-    const onPopState = () => {
+    let replaying = false;
+    const onPopState = (event: PopStateEvent) => {
+      if (replaying) return;
       if (prefersReducedMotion() || typeof document.startViewTransition !== "function") return;
       const root = document.documentElement;
       const here = pathRef.current;
@@ -115,17 +130,24 @@ export function SiteShell({ children, social }: { children: ReactNode; social: {
       // Browser Back from a destination fades like its "Back to the records" link (G9).
       else if (going.replace(/\/$/, "") === "/pre-wedding" && here.startsWith("/pre-wedding/")) root.dataset.pageTransition = "records";
       else delete root.dataset.pageTransition;
-      let frame: HTMLElement | null = null;
+      let release = () => {};
+      // The router waits until the old page has been captured, then hears about the Back press.
+      event.stopImmediatePropagation();
+      const state = event.state as unknown;
       const transition = document.startViewTransition(async () => {
-        await waitForCommit();
+        const committed = waitForCommit();
+        replaying = true;
+        window.dispatchEvent(new PopStateEvent("popstate", { state }));
+        replaying = false;
+        await committed;
         if (reversing?.kind === "expand") {
-          frame = document.querySelector<HTMLElement>(`[data-slug="${slugOf(here)}"] .wbsk-frame`);
-          if (frame) frame.style.viewTransitionName = COVER_NAME;
+          const card = document.querySelector(`[data-slug="${slugOf(here)}"]`);
+          if (card) release = nameForExpand(card);
         }
       });
       void transition.finished.finally(() => {
         delete root.dataset.pageTransition;
-        if (frame) frame.style.viewTransitionName = "";
+        release();
       });
       if (reversing) lastMoveRef.current = null;
     };
@@ -165,8 +187,8 @@ export function SiteShell({ children, social }: { children: ReactNode; social: {
         const link = event.currentTarget;
         const kind = link.dataset.transition as Signature | undefined;
         if (kind) lastMoveRef.current = { kind, from: pathRef.current, to: pathOf(href) };
-        const frame = kind === "expand" ? link.querySelector<HTMLElement>(".wbsk-frame") : null;
-        changePage(() => router.push(href), "forward", kind, frame);
+        const from = kind === "expand" ? (takeExpandSource() ?? link) : null;
+        changePage(() => router.push(href), "forward", kind, from);
       };
       return <NextLink href={href} onClick={handleClick} {...rest} />;
     },

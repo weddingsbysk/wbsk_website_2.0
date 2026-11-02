@@ -95,19 +95,96 @@
     cursor: default;
     opacity: 0.32;
   }
-  .wbsk-rowline {
-    min-height: 3em;
-    margin: 16px 0 0;
-    font-size: var(--text-small);
+  /* The homepage weddings row (Decision 30). Without scripts it's a plain sideways row. */
+  .wbsk-drift {
+    --drift-card: clamp(280px, 30vw, 440px);
+    --drift-gap: clamp(24px, 3vw, 48px);
+    margin-bottom: -32px;
+    padding-block: 12px 56px;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
-  .wbsk-rowline span {
-    display: block;
-    animation: wbsk-fade var(--hover) var(--settle) both;
+  .wbsk-drift::-webkit-scrollbar {
+    display: none;
   }
-  @media (hover: none) {
-    .wbsk-rowline {
+  .wbsk-drift[data-mode="drift"] {
+    overflow-x: clip;
+    overflow-y: visible;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .wbsk-drift[data-mode="drift"],
+    .wbsk-drift[data-mode="still"][data-fits="false"] {
+      cursor: grab;
+    }
+    .wbsk-drift[data-mode="drift"] .wbsk-card__link {
+      cursor: inherit;
+    }
+    .wbsk-drift[data-over-card="true"] {
+      cursor: pointer !important;
+    }
+    .wbsk-drift[data-dragging="true"] {
+      cursor: grabbing !important;
+    }
+  }
+  .wbsk-drift__track {
+    display: flex;
+    gap: var(--drift-gap);
+    width: max-content;
+    margin: 0;
+    padding: 0 var(--gutter);
+    list-style: none;
+  }
+  .wbsk-drift__track[data-moving="true"] {
+    will-change: transform;
+  }
+  .wbsk-drift__track > li {
+    flex: none;
+    width: var(--drift-card);
+  }
+  @media (max-width: 699px) {
+    .wbsk-drift {
+      --drift-card: 72vw;
+      --drift-gap: 20px;
+      margin-bottom: -44px;
+    }
+  }
+  .wbsk-drift__below {
+    position: relative;
+    z-index: 1;
+  }
+  .wbsk-drift__line {
+    min-height: 1.5em;
+    margin-bottom: 24px;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-ink);
+  }
+  @media (hover: none), (pointer: coarse), (max-width: 699px) {
+    .wbsk-drift__line {
       display: none;
     }
+  }
+  .wbsk-drift__bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+  }
+  .wbsk-drift__controls {
+    display: flex;
+    gap: 8px;
+  }
+  .wbsk-drift__bar .wbsk-roundbutton {
+    color: var(--color-ink);
+    border-color: var(--color-deep-gold);
+  }
+  .wbsk-drift__see {
+    margin-left: auto;
   }
   .wbsk-reaction__who {
     margin: 12px 0 4px;

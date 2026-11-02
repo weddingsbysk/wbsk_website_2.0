@@ -1,7 +1,8 @@
 import "@wbsk/ui/css/home.css";
 import { CoverVideo, HeroDrift, Letterbox, Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
 import { EnquiryForm } from "../components/EnquiryForm";
-import { Counter, FeaturedRow, FilmStack, ReactionRow, ReviewsLoop } from "../components/HomeSections";
+import { FeaturedRow } from "../components/DriftRow";
+import { Counter, FilmStack, ReactionRow, ReviewsLoop } from "../components/HomeSections";
 import { OpeningIntro } from "../components/OpeningIntro";
 import { getHomepageContent, mainPageMetadata } from "../lib/content";
 
@@ -44,8 +45,8 @@ export default async function HomePage() {
             <Reveal>
               <p className="wbsk-label wbsk-homesection__label">Recent weddings</p>
             </Reveal>
-            <FeaturedRow weddings={home.weddings} seeAllHref="/weddings/" />
           </div>
+          <FeaturedRow weddings={home.weddings} seeAllHref="/weddings/" />
         </section>
       ) : null}
 

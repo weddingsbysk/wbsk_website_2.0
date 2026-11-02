@@ -16,16 +16,52 @@ type GsapBundle = {
 };
 
 let gsapPromise: Promise<GsapBundle> | null = null;
+let gsapLoaded: GsapBundle | null = null;
+
+/** GSAP if it has already arrived, for anything that must be ready within this very frame. */
+export const peekGsap = () => gsapLoaded;
 
 /** GSAP is the only animation library, and only loads once something needs it. */
 export function loadGsap(): Promise<GsapBundle> {
   gsapPromise ??= Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(
     ([{ gsap }, { ScrollTrigger }]) => {
       gsap.registerPlugin(ScrollTrigger);
-      return { gsap, ScrollTrigger };
+      gsapLoaded = { gsap, ScrollTrigger };
+      return gsapLoaded;
     },
   );
   return gsapPromise;
+}
+
+/** The agreed curves as functions, because GSAP doesn't read cubic-bezier strings (Decisions 11, 12). */
+export function bezierEase(x1: number, y1: number, x2: number, y2: number) {
+  const coordinate = (t: number, a: number, b: number) => 3 * a * t * (1 - t) ** 2 + 3 * b * t * t * (1 - t) + t ** 3;
+  return (progress: number) => {
+    if (progress <= 0 || progress >= 1) return progress;
+    let low = 0;
+    let high = 1;
+    let t = progress;
+    for (let i = 0; i < 20; i += 1) {
+      if (coordinate(t, x1, x2) < progress) low = t;
+      else high = t;
+      t = (low + high) / 2;
+    }
+    return coordinate(t, y1, y2);
+  };
+}
+
+export const settleEase = bezierEase(0.22, 1, 0.36, 1);
+export const travelEase = bezierEase(0.65, 0, 0.35, 1);
+
+let expandSource: HTMLElement | null = null;
+/** The moving row's copies can't be links, so the row says which copy the page should grow from. */
+export function setExpandSource(card: HTMLElement | null) {
+  expandSource = card;
+}
+export function takeExpandSource() {
+  const card = expandSource;
+  expandSource = null;
+  return card;
 }
 
 const GESTURE_GAP_MS = 250;
