@@ -26,7 +26,7 @@ test.describe("opening intro", () => {
     await expect(word).toHaveCSS("filter", "none", { timeout: 6000 });
   });
 
-  test("plays on the first visit, lands the logo on the header, and only once", async ({ page }) => {
+  test("plays each time the homepage opens, lands the logo on the header, and a refresh starts at the top", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("./");
@@ -38,7 +38,25 @@ test.describe("opening intro", () => {
     await expect(page.locator(".wbsk-header__logo img")).toHaveCSS("opacity", "1");
     expect(errors).toEqual([]);
 
+    await page.evaluate(() => window.scrollTo(0, 800));
     await page.reload();
+    await expect(html).toHaveAttribute("data-intro", "play");
+    await expect(page.locator(".wbsk-intro__veil")).toBeVisible();
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+
+  test("moving within the site and browser Back don't replay it", async ({ page }) => {
+    await page.goto("./");
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute("data-intro", "play");
+    await page.keyboard.press("Escape");
+    await expect(html).not.toHaveAttribute("data-intro", "play");
+    await page.locator(".wbsk-header__logo").waitFor();
+    await page.evaluate(() => window.scrollTo(0, 900));
+    await page.goto("./weddings/");
+    await expect(html).not.toHaveAttribute("data-intro", "play");
+    await page.goBack();
+    await expect(page).toHaveURL(/wbsk_website_2\.0\/$/);
     await expect(html).not.toHaveAttribute("data-intro", "play");
     await expect(page.locator(".wbsk-intro__veil")).toBeHidden();
   });
