@@ -29,7 +29,7 @@ async function connect(page: Page, reply: "ok" | "fail" | "slow" = "ok") {
 
 test.beforeEach(async ({ page }) => {
   test.slow();
-  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-seen", "1"));
+  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-skip-for-tests", "1"));
 });
 
 const homeForm = (page: Page) => page.locator("#enquire form");

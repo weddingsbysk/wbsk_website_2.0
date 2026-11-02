@@ -18,6 +18,9 @@ const PHONE_BELOW = 820;
 /** Starts the small files downloading as soon as the veil is parsed, ahead of the page's scripts. */
 const loadScript = `(function(){if(document.documentElement.dataset.intro!=="play")return;document.querySelectorAll(".wbsk-intro [data-src]").forEach(function(e){e.src=e.dataset.src})})()`;
 
+/** React's development mode starts each effect twice, so a stop only counts if no second start follows. */
+let pendingEnd: number | undefined;
+
 function clipScale() {
   const { innerWidth: w, innerHeight: h } = window;
   // On phones the name is sized to the screen, not the clip's wide black frame.
@@ -32,6 +35,7 @@ export function OpeningIntro() {
   const boldRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
+    window.clearTimeout(pendingEnd);
     const root = document.documentElement;
     const veil = veilRef.current;
     const video = videoRef.current;
@@ -50,19 +54,25 @@ export function OpeningIntro() {
       animations.push(animation);
       return animation;
     };
-    const finish = () => {
-      if (ended) return;
+    const stop = () => {
+      if (ended) return false;
       ended = true;
-      // A refresh starts at the top for the intro; from here on, Back keeps a visitor's place again.
-      history.scrollRestoration = "auto";
       timers.forEach((timer) => window.clearTimeout(timer));
       animations.forEach((animation) => animation.cancel());
       video.pause();
+      removeSkip();
+      return true;
+    };
+    const handOver = () => {
+      // A refresh starts at the top for the intro; from here on, Back keeps a visitor's place again.
+      history.scrollRestoration = "auto";
       // The logo has landed (or been skipped), so now the film's title can arrive.
       root.dataset.hero = "enter";
       delete root.dataset.intro;
       window.setTimeout(() => (root.dataset.hero = "done"), TITLE_DONE_MS);
-      removeSkip();
+    };
+    const finish = () => {
+      if (stop()) handOver();
     };
     const skip = () => finish();
     const removeSkip = () => {
@@ -169,7 +179,9 @@ export function OpeningIntro() {
       else video.addEventListener("loadeddata", begin, { once: true });
     }
 
-    return finish;
+    return () => {
+      if (stop()) pendingEnd = window.setTimeout(handOver);
+    };
   }, []);
 
   return (

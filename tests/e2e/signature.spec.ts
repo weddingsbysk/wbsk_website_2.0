@@ -4,7 +4,7 @@ import { expect, test, type Page } from "@playwright/test";
 const width = (page: Page) => page.viewportSize()?.width ?? 0;
 const isPhone = (page: Page) => width(page) < 760;
 const skipIntro = (page: Page) =>
-  page.addInitScript(() => sessionStorage.setItem("wbsk-intro-seen", "1"));
+  page.addInitScript(() => sessionStorage.setItem("wbsk-intro-skip-for-tests", "1"));
 
 const arc = (page: Page) => page.locator(".wbsk-arc");
 const ready = (page: Page) =>

@@ -42,7 +42,7 @@ const driftReady = async (page: Page) => {
 
 test.beforeEach(async ({ page }) => {
   test.slow();
-  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-seen", "1"));
+  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-skip-for-tests", "1"));
 });
 
 test.describe("the card (Decision 05)", () => {

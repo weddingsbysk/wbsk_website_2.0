@@ -20,7 +20,7 @@ async function checks(page: Page) {
 
 test.beforeEach(async ({ page }) => {
   test.slow();
-  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-seen", "1"));
+  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-skip-for-tests", "1"));
 });
 
 test("homepage: every section, in the agreed order, with nothing broken", async ({ page }) => {

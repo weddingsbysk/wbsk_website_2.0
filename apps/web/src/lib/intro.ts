@@ -1,5 +1,5 @@
 /** Only the browser tests set this, so they can reach the page without sitting through the intro. */
-const SKIP_KEY = "wbsk-intro-seen";
+const SKIP_KEY = "wbsk-intro-skip-for-tests";
 /** If the page's scripts never start, the veil lifts by itself (the page works without them). */
 const FAILSAFE_MS = 6000;
 

@@ -5,7 +5,7 @@ const pages = ["", "weddings/", "films/", "pre-wedding/", "our-team/", "careers/
 
 // The opening intro has its own tests; here the page underneath is what's being checked.
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-seen", "1"));
+  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-skip-for-tests", "1"));
 });
 
 const isPhone = (page: Page) => (page.viewportSize()?.width ?? 0) < 900;

@@ -7,7 +7,7 @@ const isWide = (page: Page) => (page.viewportSize()?.width ?? 0) >= 1024;
 
 test.beforeEach(async ({ page }) => {
   test.slow();
-  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-seen", "1"));
+  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-skip-for-tests", "1"));
 });
 
 test("Weddings page: lead story, grid, no accessibility problems, no sideways scroll", async ({ page }) => {
