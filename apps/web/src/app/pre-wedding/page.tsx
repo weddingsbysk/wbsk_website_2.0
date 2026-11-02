@@ -46,14 +46,12 @@ export default async function Page() {
           <SectionHead>What We Offer</SectionHead>
         </div>
         <div className="wbsk-offerings">
+          <div className="wbsk-offers__cloth" aria-hidden="true" />
+          <svg className="wbsk-offers__line" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none" aria-hidden="true">
+            <path d="M53 0 C47 20, 54 38, 50 56 S46.5 82, 52 100" vectorEffect="non-scaling-stroke" />
+          </svg>
           {page.offerings.map((offering, index) => (
             <article key={offering.name} className="wbsk-offering" data-tone={index % 2 ? "dark" : undefined}>
-              <svg className="wbsk-offers__rings" viewBox="0 0 600 600" fill="none" aria-hidden="true">
-                <circle cx="300" cy="300" r="298" />
-                <circle cx="300" cy="300" r="222" />
-                <circle cx="300" cy="300" r="140" />
-                <circle cx="300" cy="300" r="48" />
-              </svg>
               <div className="wbsk-offering__inner">
                 <Reveal>
                   <h2 className="wbsk-h1">{offering.name}</h2>
@@ -66,7 +64,7 @@ export default async function Page() {
                       videoId={film.videoId}
                       poster={film.poster}
                       title={`${offering.name} example film ${order + 1}`}
-                      sizes="(min-width: 900px) 42vw, 92vw"
+                      sizes="(min-width: 900px) 21vw, 72vw"
                     />
                   ))}
                 </div>

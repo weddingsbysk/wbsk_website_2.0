@@ -254,9 +254,7 @@
   /* The film stack (Decision 04). */
   /* The depth arc, in its own rounded tray, so no film ever fills the whole screen. */
   .wbsk-stack {
-    max-width: 1240px;
-    margin-inline: auto;
-    padding: clamp(14px, 2vw, 28px);
+    padding: clamp(14px, 1.6vw, 24px) clamp(14px, 1.6vw, 24px) clamp(12px, 1.2vw, 18px);
     overflow: clip;
     background: rgb(245 239 230 / 0.05);
     border: 1px solid rgb(221 175 58 / 0.24);
@@ -265,7 +263,7 @@
   }
   .wbsk-stack__cards {
     position: relative;
-    aspect-ratio: 16 / 5.2;
+    aspect-ratio: 16 / 3.75;
     perspective: 1400px;
     touch-action: pan-y;
     cursor: grab;
@@ -274,9 +272,9 @@
   }
   .wbsk-stack__card {
     position: absolute;
-    top: 5%;
-    left: 27%;
-    width: 46%;
+    top: 3%;
+    left: 33%;
+    width: 34%;
     transform-origin: center;
     will-change: transform;
   }
@@ -296,11 +294,11 @@
   }
   @media (max-width: 759px) {
     .wbsk-stack__cards {
-      aspect-ratio: 16 / 8;
+      aspect-ratio: 16 / 7.4;
     }
     .wbsk-stack__card {
-      left: 13%;
-      width: 74%;
+      left: 16%;
+      width: 68%;
     }
   }
   .wbsk-stack__bar {
@@ -309,7 +307,7 @@
     gap: 20px 40px;
     align-items: flex-start;
     justify-content: space-between;
-    margin-top: 28px;
+    margin-top: 14px;
   }
   .wbsk-stack__controls {
     display: flex;

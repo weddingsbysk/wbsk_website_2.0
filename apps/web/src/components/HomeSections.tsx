@@ -62,13 +62,15 @@ const SWIPE = 48;
 const DRAG_START = 6;
 const CARDS_PER_DRAG = 0.0024;
 const SETTLE_S = 0.9;
-const SHIFT_PERCENT = 92;
+const SHIFT_PERCENT = 230;
+const PHONE_SPREAD = 0.62;
+const PHONE_BELOW = 760;
 const DEPTH = 0.84;
 const TURN = 15;
 const MAX_TURN = 34;
 const DIM = 0.4;
 const FAN_RIPPLE_S = 0.14;
-const FILM_SECONDS = 15;
+const FILM_SECONDS = 8;
 const FILM_RESUME_MS = 1500;
 const FILM_WHEEL_STEP = 60;
 const FILM_WHEEL_GAP_MS = 320;
@@ -76,11 +78,11 @@ const FILM_WHEEL_LOOP = 140;
 const FILMS_PAUSED_KEY = "wbsk-films-paused";
 
 /** Where a film sits for its distance from the front: the records' depth, kept in a soft arc. */
-function placeFilm(distance: number, fan: number) {
+function placeFilm(distance: number, fan: number, spread: number) {
   const away = Math.abs(distance);
   const side = Math.sign(distance);
-  const x = side * (1 - Math.exp(-away * 0.95)) * SHIFT_PERCENT * 1.25 * fan;
-  const y = (1 - Math.exp(-away * 0.8)) * 7 * fan;
+  const x = side * (1 - Math.exp(-away * 0.6)) * SHIFT_PERCENT * spread * fan;
+  const y = (1 - Math.exp(-away * 0.8)) * 5 * fan;
   const turn = -side * Math.min(away * TURN, MAX_TURN) * fan;
   const scale = Math.pow(DEPTH, Math.min(away, 3)) * (0.82 + 0.18 * fan);
   return {
@@ -140,7 +142,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
     };
     const draw = () => {
       cards.forEach((card, index) => {
-        const place = placeFilm(nearest(index), fans.current[index] ?? 1);
+        const place = placeFilm(nearest(index), fans.current[index] ?? 1, window.innerWidth < PHONE_BELOW ? PHONE_SPREAD : 1);
         card.style.transform = place.transform;
         card.style.zIndex = place.zIndex;
         card.style.opacity = place.opacity;

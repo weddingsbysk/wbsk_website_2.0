@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { buildSrcSet, fullscreenWidths, sanityUrl, tinyPreviewUrl, type SanityImage } from "../image";
 import { layoutMasonry } from "../masonry";
 
-export const GALLERY_COLUMNS = { wide: 5, narrow: 2 };
+export const GALLERY_COLUMNS = { wide: 4, narrow: 2 };
 
 /**
  * Rendered on the server with no per-photo script. Each photo is a real link to its large version,
@@ -24,9 +24,6 @@ export function Gallery({ photos, limit }: { photos: SanityImage[]; limit?: numb
           "--c2": narrow[index]!.column,
           "--r2": narrow[index]!.row,
           "--s2": narrow[index]!.span,
-          // Neighbouring columns drift in opposite directions as the gallery scrolls.
-          "--d": wide[index]!.column % 2 ? -1 : 1,
-          "--d2": narrow[index]!.column % 2 ? -1 : 1,
         } as CSSProperties;
         return (
           <li key={photo.url} style={style} data-extra={limit !== undefined && index >= limit ? true : undefined}>
@@ -47,7 +44,7 @@ export function Gallery({ photos, limit }: { photos: SanityImage[]; limit?: numb
                 className="wbsk-gallery__sharp"
                 src={sanityUrl(photo, { width: 450 })}
                 srcSet={buildSrcSet(photo, "thumbnail")}
-                sizes="(min-width: 1024px) 20vw, 50vw"
+                sizes="(min-width: 1024px) 24vw, 50vw"
                 alt={photo.alt}
                 loading="lazy"
                 decoding="async"

@@ -45,6 +45,7 @@ export function GalleryLightbox({
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLSpanElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const returnRef = useRef<HTMLAnchorElement | null>(null);
   const swipeRef = useRef<{ x: number; y: number } | null>(null);
@@ -70,6 +71,28 @@ export function GalleryLightbox({
     root.dataset.ready = "true";
     return () => root.removeEventListener("load", onLoad, true);
   }, []);
+
+  // The slim gold line shows how far through the photographs you are.
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    const bar = progressRef.current;
+    if (!scrolling || !scroller || !bar) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const max = scroller.scrollHeight - scroller.clientHeight;
+      bar.style.transform = `scaleY(${max > 0 ? Math.max(0.04, scroller.scrollTop / max) : 1})`;
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      scroller.removeEventListener("scroll", onScroll);
+    };
+  }, [scrolling]);
 
   // Browsers without scroll-linked animation still get the rise, once per photo.
   useEffect(() => {
@@ -187,6 +210,11 @@ export function GalleryLightbox({
       ) : (
         children
       )}
+      {scrolling ? (
+        <span className="wbsk-gallerywindow__progress" aria-hidden="true">
+          <span ref={progressRef} />
+        </span>
+      ) : null}
       {more && !expanded ? (
         <div className="wbsk-gallerywrap__more">
           <button

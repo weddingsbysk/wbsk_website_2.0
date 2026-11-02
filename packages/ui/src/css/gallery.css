@@ -16,19 +16,37 @@
   .wbsk-gallerywrap {
     container-type: inline-size;
   }
-  /* A tray of dark cloth that the photographs move through. */
-  .wbsk-gallerywrap:has(> .wbsk-gallerywindow),
-  .wbsk-gallerytray {
-    padding: clamp(12px, 1.6vw, 24px);
+  /* A tray of dark cloth that the photographs move through, with a slim gold line for progress. */
+  .wbsk-gallerywrap:has(> .wbsk-gallerywindow) {
+    position: relative;
+    padding: clamp(10px, 1.1vw, 16px);
     background-color: var(--color-dusk);
     background-image: url("../textures/paper-dusk.webp");
     background-size: 512px;
-    border: 1px solid rgb(221 175 58 / 0.22);
     border-radius: clamp(16px, 1.8vw, 24px);
     box-shadow:
-      inset 0 2px 18px rgb(0 0 0 / 0.55),
-      0 18px 40px -22px rgb(35 28 22 / 0.5);
+      inset 0 1px 0 rgb(245 239 230 / 0.06),
+      inset 0 0 26px rgb(0 0 0 / 0.5),
+      0 24px 48px -28px rgb(35 28 22 / 0.65);
     --focus: var(--color-gold);
+  }
+  .wbsk-gallerywindow__progress {
+    position: absolute;
+    top: 28px;
+    right: 6px;
+    bottom: 28px;
+    width: 2px;
+    overflow: hidden;
+    background: rgb(221 175 58 / 0.18);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+  .wbsk-gallerywindow__progress > span {
+    display: block;
+    height: 100%;
+    background: var(--color-gold);
+    transform: scaleY(0);
+    transform-origin: top;
   }
   /*
    * The gallery's own window: photographs scroll inside it while the page holds still. The page
@@ -37,57 +55,57 @@
    */
   .wbsk-gallerywindow {
     position: relative;
-    height: min(78svh, 900px);
+    height: min(76svh, 860px);
     overflow: hidden auto;
     overscroll-behavior: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-gold) transparent;
-    border-radius: var(--radius-wbsk);
-    mask-image: linear-gradient(to bottom, transparent, #000 40px, #000 calc(100% - 56px), transparent);
+    scrollbar-width: none;
+    border-radius: 10px;
+  }
+  .wbsk-gallerywindow::-webkit-scrollbar {
+    display: none;
   }
   .wbsk-gallerywindow:focus-visible {
     outline-offset: 4px;
-    mask-image: none;
-  }
-  .wbsk-gallerywindow .wbsk-gallery {
-    padding-block: 28px 56px;
   }
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
-      /* Photos rise and sharpen into view as the window scrolls past them. */
+      /* Each photograph fades up as it enters, and the picture settles slowly inside its frame. */
       .wbsk-gallerywindow .wbsk-gallery__photo {
         animation: wbsk-photo-rise linear both;
         animation-timeline: view();
-        animation-range: entry 0% entry 85%;
+        animation-range: entry 0% entry 55%;
       }
-      /* The columns slide against each other, so the wall of photos has depth. */
-      .wbsk-gallerywindow .wbsk-gallery > li {
-        animation: wbsk-column-drift linear both;
-        animation-timeline: scroll(nearest);
+      .wbsk-gallerywindow .wbsk-gallery__photo img {
+        animation: wbsk-photo-settle linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 60%;
       }
     }
     .wbsk-gallerywindow[data-reveal="manual"] .wbsk-gallery__photo {
       opacity: 0;
-      transform: translateY(48px) scale(0.94);
+      transform: translateY(32px);
       transition: opacity 0.9s var(--settle), transform 1.1s var(--settle);
     }
     .wbsk-gallerywindow[data-reveal="manual"] .wbsk-gallery__photo[data-seen] {
       opacity: 1;
       transform: none;
     }
+    .wbsk-gallery__photo:hover .wbsk-gallery__sharp {
+      scale: 1.04;
+    }
+    .wbsk-gallery__sharp {
+      transition: opacity 0.5s var(--settle), scale 1.2s var(--settle);
+    }
   }
   @keyframes wbsk-photo-rise {
     from {
       opacity: 0;
-      transform: translateY(96px) scale(0.86) rotate(calc(var(--drift, 0) * 1.6deg));
+      transform: translateY(32px);
     }
   }
-  @keyframes wbsk-column-drift {
+  @keyframes wbsk-photo-settle {
     from {
-      transform: translateY(calc(var(--drift, 0) * -44px));
-    }
-    to {
-      transform: translateY(calc(var(--drift, 0) * 44px));
+      transform: scale(1.14);
     }
   }
   .wbsk-gallery {
@@ -99,7 +117,6 @@
     column-gap: calc(var(--col) * 0.06);
   }
   .wbsk-gallery > li {
-    --drift: var(--d2);
     grid-column: var(--c2);
     grid-row: var(--r2) / span var(--s2);
     padding-bottom: calc(var(--col) * 0.06);
@@ -107,10 +124,9 @@
   }
   @media (min-width: 1024px) {
     .wbsk-gallery {
-      --columns: 5;
+      --columns: 4;
     }
     .wbsk-gallery > li {
-      --drift: var(--d);
       grid-column: var(--c5);
       grid-row: var(--r5) / span var(--s5);
     }
@@ -120,7 +136,7 @@
     display: block;
     height: 100%;
     overflow: hidden;
-    border-radius: var(--radius-wbsk);
+    border-radius: 4px;
     background-color: #d9cfc0;
     cursor: zoom-in;
   }

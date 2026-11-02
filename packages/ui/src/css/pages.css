@@ -143,106 +143,137 @@
   }
 
   /* Pre-wedding. */
-  /* Two sheets laid together: light paper for Full-length, dark cloth for Concept, on a slant. */
+  /* Light paper and dark cloth meeting along one long, slow curve, traced in gold. */
   .wbsk-offers {
     padding-top: var(--section);
   }
   .wbsk-offers__head .wbsk-sectionhead {
-    margin-bottom: clamp(40px, 5vw, 72px);
+    margin-bottom: clamp(32px, 4vw, 56px);
   }
   .wbsk-offerings {
     position: relative;
     display: grid;
     overflow: clip;
   }
+  .wbsk-offers__cloth,
+  .wbsk-offers__line {
+    position: absolute;
+    inset: 0;
+    display: none;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .wbsk-offers__cloth {
+    background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M53 0 C47 20 54 38 50 56 S46.5 82 52 100 L100 100 L100 0 Z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M53 0 C47 20 54 38 50 56 S46.5 82 52 100 L100 100 L100 0 Z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+  }
+  .wbsk-offers__line {
+    stroke: var(--color-gold);
+    stroke-width: 1;
+  }
   .wbsk-offering {
     position: relative;
     min-width: 0;
-    overflow: clip;
   }
-  .wbsk-offering:not([data-tone="dark"]) {
-    overflow: visible;
+  .wbsk-offering[data-tone="dark"] {
+    background-image: none;
+    background-color: transparent;
   }
   .wbsk-offering__inner {
     position: relative;
     z-index: 1;
     display: grid;
     align-content: start;
-    gap: clamp(28px, 3vw, 44px);
-    padding: clamp(40px, 5vw, 80px) var(--gutter);
+    gap: clamp(24px, 2.6vw, 36px);
+    padding-block: clamp(40px, 5vw, 80px);
   }
   .wbsk-offering .wbsk-lead {
-    margin-top: 16px;
+    margin-top: 12px;
+    max-width: 34em;
+    text-wrap: pretty;
   }
+  /* The two example films sit side by side, small enough to compare at a glance. */
   .wbsk-offering__films {
     display: grid;
-    gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(12px, 1.2vw, 18px);
   }
-  /* The gold rings of a record, centred on the join and lying under everything on each sheet. */
-  .wbsk-offers__rings {
-    position: absolute;
-    top: clamp(16px, 4vw, 64px);
-    right: calc(min(46vw, 620px) / -2);
-    z-index: 0;
-    width: min(46vw, 620px);
-    stroke: var(--color-deep-gold);
-    stroke-width: 1;
-    opacity: 0.3;
-    pointer-events: none;
+  .wbsk-offering .wbsk-film__icon {
+    width: 44px;
+    height: 44px;
   }
-  .wbsk-offering[data-tone="dark"] .wbsk-offers__rings {
-    right: auto;
-    left: calc(3vw - min(46vw, 620px) / 2);
-    stroke: var(--color-gold);
-    opacity: 0.32;
+  .wbsk-offering .wbsk-film__icon svg {
+    width: 14px;
+    height: 14px;
   }
   @media (max-width: 899px) {
+    .wbsk-offering__inner {
+      padding-inline: var(--gutter);
+    }
     .wbsk-offering[data-tone="dark"] {
-      margin-top: -28px;
+      background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
       border-radius: 28px 28px 0 0;
     }
-    .wbsk-offers__rings {
-      display: none;
+    /* On phones the pair sits in a row you can swipe, with the next one peeking in. */
+    .wbsk-offering__films {
+      display: flex;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      scrollbar-width: none;
+    }
+    .wbsk-offering__films > * {
+      flex: none;
+      width: 72vw;
+      scroll-snap-align: center;
     }
   }
   @media (min-width: 900px) {
     .wbsk-offerings {
       grid-template-columns: 1fr 1fr;
+      gap: clamp(88px, 9.4vw, 150px);
+      padding-inline: var(--gutter);
     }
-    .wbsk-offering[data-tone="dark"] {
-      margin-left: -6vw;
-      clip-path: polygon(6vw 0, 100% 0, 100% 100%, 0 100%);
-    }
-    .wbsk-offering[data-tone="dark"] .wbsk-offering__inner {
-      padding-left: calc(6vw + clamp(32px, 4vw, 64px));
-    }
-    .wbsk-offering:not([data-tone="dark"]) .wbsk-offering__inner {
-      padding-right: clamp(40px, 6vw, 96px);
+    .wbsk-offers__cloth,
+    .wbsk-offers__line {
+      display: block;
     }
   }
-  /* The photographs in two columns, in a window that takes on its sheet's material. */
+  /* The photographs in two columns; each window takes on its side's material. */
   .wbsk-offering .wbsk-gallerywindow {
-    height: min(66svh, 720px);
+    height: min(60svh, 620px);
   }
   .wbsk-offering .wbsk-gallery {
     --columns: 2;
   }
   .wbsk-offering .wbsk-gallery > li {
-    --drift: var(--d2);
     grid-column: var(--c2);
     grid-row: var(--r2) / span var(--s2);
   }
   .wbsk-offering:not([data-tone="dark"]) .wbsk-gallerywrap {
     background-color: var(--color-ivory);
     background-image: url("../textures/card-stock.webp");
-    border-color: rgb(122 92 23 / 0.28);
     box-shadow:
-      inset 0 2px 14px rgb(35 28 22 / 0.16),
-      0 18px 34px -24px rgb(35 28 22 / 0.5);
+      inset 0 0 0 1px rgb(122 92 23 / 0.12),
+      inset 0 0 22px rgb(35 28 22 / 0.1),
+      0 22px 40px -28px rgb(35 28 22 / 0.6);
     --focus: var(--color-deep-gold);
   }
-  .wbsk-offering:not([data-tone="dark"]) .wbsk-gallerywindow {
-    scrollbar-color: var(--color-deep-gold) transparent;
+  .wbsk-offering:not([data-tone="dark"]) .wbsk-gallerywindow__progress {
+    background: rgb(122 92 23 / 0.16);
+  }
+  .wbsk-offering:not([data-tone="dark"]) .wbsk-gallerywindow__progress > span {
+    background: var(--color-deep-gold);
+  }
+  .wbsk-offering[data-tone="dark"] .wbsk-gallerywrap {
+    background-color: rgb(245 239 230 / 0.04);
+    background-image: none;
+    box-shadow:
+      inset 0 0 0 1px rgb(221 175 58 / 0.14),
+      inset 0 0 26px rgb(0 0 0 / 0.45);
   }
   @media (scripting: enabled) {
     .wbsk-gallerywrap[data-limited] [data-extra] {

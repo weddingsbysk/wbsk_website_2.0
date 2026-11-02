@@ -1,6 +1,6 @@
 /** The homepage row's movement as plain numbers, so it feels the same at any screen rate (Decision 30). */
 
-export const SECONDS_PER_CARD = 15;
+export const SECONDS_PER_CARD = 6;
 export const MOMENTUM_TAU = 0.5;
 export const PAUSE_TAU = 0.2;
 export const RESUME_TAU = 0.4;

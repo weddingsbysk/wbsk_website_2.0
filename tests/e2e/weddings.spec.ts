@@ -99,7 +99,7 @@ test("gallery: agreed columns, Studio order left to right, and no photos overlap
     }),
   );
   const columns = [...new Set(data.map((d) => d.x))];
-  expect(columns.length).toBe(isWide(page) ? 5 : 2);
+  expect(columns.length).toBe(isWide(page) ? 4 : 2);
   // Reading order: the first photos sit in columns left to right.
   expect(data.slice(0, columns.length).map((d) => d.x)).toEqual([...columns].sort((a, b) => a - b));
   for (const x of columns) {
