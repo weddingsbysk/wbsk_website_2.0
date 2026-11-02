@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
-import { loadGsap, prefersReducedMotion, settleEase } from "../motion";
+import { loadGsap, peekGsap, prefersReducedMotion, settleEase } from "../motion";
 
 /** Card motion (Decisions 05, 11, 12): tweens start from wherever the card is, so nothing snaps. */
 const HOVER = 0.3;
@@ -13,6 +13,8 @@ const ARRIVE = 0.7;
 const RIPPLE = 0.09;
 const RISE = 24;
 const PRESS_MS = 150;
+const TILT_Y = 9;
+const TILT_X = 7;
 
 export const canHover = () =>
   typeof window !== "undefined" && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
@@ -26,13 +28,26 @@ export function setCardHot(card: HTMLElement, on: boolean) {
     if (card.dataset.hot !== wanted) return;
     const part = (name: string) => card.querySelector(name);
     const hover = { duration: HOVER, ease: settleEase, overwrite: "auto" as const };
-    gsap.to(part(".wbsk-card__link"), { ...hover, y: on ? LIFT : 0 });
-    gsap.to(part(".wbsk-card__photo"), { ...hover, "--card-lift": on ? 1 : 0 });
+    const tiltBack = on ? {} : { rotationX: 0, rotationY: 0 };
+    gsap.to(part(".wbsk-card__link"), { ...hover, y: on ? LIFT : 0, "--card-lift": on ? 1 : 0, ...tiltBack });
+    gsap.to(part(".wbsk-card__sheen > span"), { duration: 0.5, ease: settleEase, overwrite: "auto", opacity: on ? 1 : 0 });
     gsap.to(part(".wbsk-card__clip .wbsk-frame"), { duration: ZOOM_SECONDS, ease: settleEase, overwrite: "auto", scale: on ? ZOOM : 1 });
     gsap.to(part(".wbsk-card__more"), { ...hover, opacity: on ? 1 : 0 });
     gsap.to(part(".wbsk-card__arrow"), { ...hover, x: on ? NUDGE : 0 });
     gsap.to(part(".wbsk-card__rule"), { ...hover, scaleX: on ? 1 : 0 });
   });
+}
+
+/** Tilts a card towards the cursor, with the light following, like the centre record (Decision 13). */
+export function tiltCard(card: HTMLElement, clientX: number, clientY: number) {
+  if (prefersReducedMotion()) return;
+  const gsap = peekGsap()?.gsap;
+  if (!gsap) return;
+  const box = card.getBoundingClientRect();
+  const px = (clientX - box.left) / box.width - 0.5;
+  const py = (clientY - box.top) / box.height - 0.5;
+  gsap.to(card.querySelector(".wbsk-card__link"), { rotationY: px * TILT_Y, rotationX: -py * TILT_X, duration: 0.8, ease: "power3.out", overwrite: "auto" });
+  gsap.to(card.querySelector(".wbsk-card__sheen > span"), { xPercent: px * 45, yPercent: py * 45, duration: 0.8, ease: "power3.out", overwrite: "auto" });
 }
 
 /** A brief press-in on touch screens, then the action (Decision 05). */
@@ -72,6 +87,9 @@ export function useCardMotion(rootRef: RefObject<HTMLElement | null>, { pointer 
       settle(next, focused, hovered);
       hovered = next;
     };
+    const onPointerMove = (event: PointerEvent) => {
+      if (hovered && event.pointerType === "mouse") tiltCard(hovered, event.clientX, event.clientY);
+    };
     const onPointerLeave = () => {
       settle(null, focused, hovered);
       hovered = null;
@@ -105,6 +123,7 @@ export function useCardMotion(rootRef: RefObject<HTMLElement | null>, { pointer 
     root.addEventListener("focusout", onFocusOut);
     if (pointer) {
       root.addEventListener("pointerover", onPointerOver);
+      root.addEventListener("pointermove", onPointerMove);
       root.addEventListener("pointerleave", onPointerLeave);
       root.addEventListener("click", onClick, { capture: true });
     }
@@ -112,6 +131,7 @@ export function useCardMotion(rootRef: RefObject<HTMLElement | null>, { pointer 
       root.removeEventListener("focusin", onFocusIn);
       root.removeEventListener("focusout", onFocusOut);
       root.removeEventListener("pointerover", onPointerOver);
+      root.removeEventListener("pointermove", onPointerMove);
       root.removeEventListener("pointerleave", onPointerLeave);
       root.removeEventListener("click", onClick, { capture: true });
     };

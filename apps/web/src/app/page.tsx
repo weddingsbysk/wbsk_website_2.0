@@ -41,7 +41,7 @@ export default async function HomePage() {
       <section data-tone="dark" className="wbsk-philosophy" aria-labelledby="philosophy-quote">
         <div className="wbsk-container">
           <Reveal>
-            <p className="wbsk-label">Our philosophy</p>
+            <p className="wbsk-label">Our perspective</p>
             <h2 id="philosophy-quote" className="wbsk-philosophy__quote">
               &ldquo;{emphasised(home.whoWeAre ?? "", home.quoteEmphasis)}&rdquo;
             </h2>

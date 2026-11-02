@@ -255,9 +255,21 @@
   .wbsk-arc {
     --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .88 0 0 0 .055 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  .wbsk-section[data-tone="dark"]:not(.wbsk-pageintro),
+  /* Real materials: cotton paper on the light scenes, dark woven cloth on the dark ones. */
+  body,
+  .wbsk-sharedline,
+  .wbsk-panel__sheet {
+    background-image: url("./textures/paper-ivory.webp");
+    background-size: 512px;
+  }
+  [data-tone="dark"],
   .wbsk-footer {
-    background-image: var(--grain);
+    background-image: url("./textures/paper-dusk.webp");
+    background-size: 512px;
+  }
+  .wbsk-storycover__label {
+    background-image: url("./textures/card-stock.webp");
+    background-size: 512px;
   }
 
   /* Links: a gold line draws in from the left (Decision 12) */
@@ -846,16 +858,48 @@
 
   /* Client cards: Editorial Caption (Decision 05). A page from a wedding magazine: clean photo, quiet caption. */
   .wbsk-card {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     container-type: inline-size;
+    perspective: 1100px;
   }
+  /* A real printed card: fine stock, a bevelled edge, a photo set into it, and a shadow on the table. */
   .wbsk-card__link {
-    display: block;
+    --card-lift: 0;
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: clamp(10px, 0.9vw, 14px);
+    padding-bottom: clamp(16px, 1.4vw, 22px);
     color: inherit;
     text-decoration: none;
+    background-color: #fefbf5;
+    background-image: url("./textures/card-stock.webp");
+    background-size: 512px;
     border-radius: var(--radius-wbsk);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.85),
+      inset 0 -1px 0 rgb(122 92 23 / 0.16),
+      0 1px 0 #ddd2bd,
+      0 2px 0 #cfc2a9,
+      0 3px 1px rgb(35 28 22 / 0.24),
+      0 8px 14px -6px rgb(35 28 22 / 0.2),
+      0 22px 36px -14px rgb(35 28 22 / 0.42);
     -webkit-tap-highlight-color: transparent;
     -webkit-user-drag: none;
+  }
+  .wbsk-card__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow:
+      0 6px 10px rgb(35 28 22 / 0.14),
+      0 34px 60px -16px rgb(35 28 22 / 0.5);
+    opacity: var(--card-lift);
+    pointer-events: none;
   }
   .wbsk-card__link:focus-visible {
     outline: 2px solid var(--focus);
@@ -865,27 +909,26 @@
     transform: scale(0.98);
     transition: transform 150ms var(--settle);
   }
-  /* The shadow belongs to the photo alone. Only the second layer's opacity ever animates. */
   .wbsk-card__photo {
-    --card-lift: 0;
     position: relative;
     display: block;
-    border-radius: var(--radius-wbsk);
-    box-shadow: var(--shadow-card-rest);
+    border-radius: 3px;
   }
+  /* The photo sits into the card, so its edge catches a little shade. */
   .wbsk-card__photo::after {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    box-shadow: var(--shadow-card-lift);
-    opacity: var(--card-lift);
+    box-shadow:
+      inset 0 0 0 1px rgb(35 28 22 / 0.14),
+      inset 0 2px 5px rgb(35 28 22 / 0.2);
     pointer-events: none;
   }
   .wbsk-card__clip {
     display: block;
     overflow: hidden;
-    border-radius: var(--radius-wbsk);
+    border-radius: 3px;
     isolation: isolate;
   }
   .wbsk-card__clip .wbsk-frame {
@@ -895,11 +938,49 @@
     -webkit-user-drag: none;
     transition: opacity 0.6s var(--settle);
   }
+  /* Light across the card, which follows the cursor as it tilts. */
+  .wbsk-card__sheen {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .wbsk-card__sheen > span {
+    position: absolute;
+    top: -30%;
+    left: -30%;
+    width: 160%;
+    height: 160%;
+    background: radial-gradient(closest-side, rgb(255 248 228 / 0.42), rgb(255 248 228 / 0) 70%);
+    opacity: 0;
+    mix-blend-mode: soft-light;
+  }
   .wbsk-card__caption {
+    position: relative;
     display: flex;
+    flex: 1;
     flex-direction: column;
-    margin-top: 20px;
+    margin-top: 16px;
+    padding-inline: 4px;
     text-align: left;
+  }
+  /* A small gold-foil WBSK, as on the record sleeves. Decoration, so it isn't in the page's text. */
+  .wbsk-card__caption::before {
+    content: "WBSK" / "";
+    position: absolute;
+    top: 0;
+    right: 4px;
+    font-family: var(--font-serif);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0.08em;
+    color: transparent;
+    background: linear-gradient(105deg, #8a6a1f, #e7c76c 45%, #9c7a2a 70%, #d9b65a);
+    -webkit-background-clip: text;
+    background-clip: text;
   }
   .wbsk-card__place {
     display: block;
@@ -1031,7 +1112,7 @@
   }
   @media (max-width: 699px) {
     .wbsk-card__caption {
-      margin-top: 16px;
+      margin-top: 14px;
     }
   }
   /* Phones and touch screens have no hover: the description sits under the card instead. */

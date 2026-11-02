@@ -33,7 +33,7 @@ test("homepage: every section, in the agreed order, with nothing broken", async 
     ),
   );
   expect(tops).toEqual([...tops].sort((a, b) => a - b));
-  await expect(page.locator(".wbsk-counter")).toHaveCount(4);
+  await expect(page.locator(".wbsk-counter")).toHaveCount(2);
   await expect(page.locator(".wbsk-drift li[data-real]")).not.toHaveCount(0);
   await checks(page);
   expect(errors).toEqual([]);

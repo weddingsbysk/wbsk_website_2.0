@@ -158,8 +158,6 @@ async function addOldLookFields() {
       counters: [
         { _type: "counter", _key: "a", value: "9+", label: "Years of craft (sample)" },
         { _type: "counter", _key: "b", value: "500+", label: "Stories told (sample)" },
-        { _type: "counter", _key: "c", value: "1", label: "Wedding per day (sample)" },
-        { _type: "counter", _key: "d", value: "∞", label: "Memories made (sample)" },
       ],
     },
   });

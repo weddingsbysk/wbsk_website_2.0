@@ -59,6 +59,9 @@ export function ClientCard({
             {wedding.cardPhoto ? <WbskImage image={wedding.cardPhoto} slot="card" sizes={sizes} aspectRatio={4 / 5} /> : null}
           </span>
         </span>
+        <span className="wbsk-card__sheen" aria-hidden="true">
+          <span />
+        </span>
         <span className="wbsk-card__caption">
           {/* The names come first for screen readers and voice control; styles put the place above them. */}
           <span className="wbsk-card__names" role="heading" aria-level={2}>

@@ -46,16 +46,11 @@
     color: rgb(245 239 230 / 0.72);
   }
   .wbsk-philosophy__counters {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 40px 16px;
-    max-width: 62rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px clamp(64px, 10vw, 160px);
+    justify-content: center;
     margin: clamp(64px, 7vw, 104px) auto 0;
-  }
-  @media (min-width: 760px) {
-    .wbsk-philosophy__counters {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
   }
   .wbsk-counter__value {
     margin: 0 0 8px;
@@ -142,10 +137,10 @@
   }
   /* The homepage weddings row (Decision 30). Without scripts it's a plain sideways row. */
   .wbsk-drift {
-    --drift-card: clamp(280px, 30vw, 440px);
+    --drift-card: clamp(280px, 25vw, 380px);
     --drift-gap: clamp(24px, 3vw, 48px);
-    margin-bottom: -32px;
-    padding-block: 12px 56px;
+    margin-bottom: -36px;
+    padding-block: 40px 72px;
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -186,8 +181,12 @@
     will-change: transform;
   }
   .wbsk-drift__track > li {
+    position: relative;
     flex: none;
     width: var(--drift-card);
+  }
+  .wbsk-drift__track > li[data-hot] {
+    z-index: 3;
   }
   @media (max-width: 699px) {
     .wbsk-drift {

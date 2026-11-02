@@ -19,7 +19,7 @@ export const homepage = defineType({
     photoField({ name: "heroPosterDesktop", title: "Desktop poster 16:9", slot: "desktop poster", rule: imageRules.heroPosterDesktop, required: true, group: "hero", description: "The first frame of the desktop video, in the same grade." }),
     photoField({ name: "heroPosterPhone", title: "Phone poster 9:16", slot: "phone poster", rule: imageRules.heroPosterPhone, required: true, group: "hero", description: "The first frame of the phone video, in the same grade." }),
     defineField({ name: "heroLine", title: "Hero line", type: "string", group: "hero", description: "One short line over the film." }),
-    defineField({ name: "whoWeAre", title: "Philosophy quote", type: "text", rows: 3, group: "who", description: "The big quote on the dark section. No quotation marks: the site adds them." }),
+    defineField({ name: "whoWeAre", title: "Perspective quote", type: "text", rows: 3, group: "who", description: "The big quote on the dark section. No quotation marks: the site adds them." }),
     defineField({ name: "quoteEmphasis", title: "Word in gold", type: "string", group: "who", description: "One word from the quote, spelt exactly as it is there. It shows in gold italic." }),
     defineField({ name: "quoteBy", title: "Who said it", type: "string", group: "who" }),
     defineField({ name: "weddingsLine", title: "Line under Recent Weddings", type: "string", group: "who" }),
@@ -27,7 +27,7 @@ export const homepage = defineType({
       name: "counters",
       type: "array",
       group: "who",
-      validation: (rule) => rule.max(4).error("Keep it to four numbers"),
+      validation: (rule) => rule.max(2).error("Keep it to two numbers"),
       of: [defineArrayMember({ type: "object", name: "counter", fields: [
         defineField({ name: "value", type: "string", description: 'A round figure such as "250+".' }),
         defineField({ name: "label", type: "string" }),

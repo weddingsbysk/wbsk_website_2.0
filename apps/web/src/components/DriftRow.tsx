@@ -1,7 +1,7 @@
 "use client";
 
 import "@wbsk/ui/css/home.css";
-import { canHover, ClientCard, pressThen, setCardHot, useCardEntrance, useCardMotion, WbskLink, type WeddingSummary } from "@wbsk/ui";
+import { canHover, ClientCard, pressThen, setCardHot, tiltCard, useCardMotion, WbskLink, type WeddingSummary } from "@wbsk/ui";
 import { capFling, DRAG_START, nearestLoop, scalePush, SECONDS_PER_CARD, shouldDrift, stepDrift, targetForCard, type DriftNumbers } from "@wbsk/ui/drift";
 import { loadGsap, peekGsap, prefersReducedMotion, setExpandSource, travelEase } from "@wbsk/ui/motion";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -20,7 +20,17 @@ const PUSH_WAKE_MS = 900;
 const FRESH_MOVE_MS = 80;
 const PAUSED_KEY = "wbsk-drift-paused";
 const RETURN_KEY = "wbsk-drift-return";
-const ROW_SIZES = "(min-width: 1467px) 440px, (min-width: 934px) 30vw, (min-width: 700px) 280px, 72vw";
+/** The arc's opening, laid out straight (Decision 13): a stack rises, then fans out, nearest first. */
+const STACK_RISE_S = 0.9;
+const FAN_AT_S = 0.75;
+const FAN_S = 1.5;
+const FAN_RIPPLE_S = 0.14;
+const STACK_SCALE = 0.82;
+const STACK_DROP = 70;
+const STACK_TURN = 2.5;
+/** Dock-style swell under the cursor, as on the records. */
+const SWELL = 0.09;
+const ROW_SIZES = "(min-width: 1520px) 360px, (min-width: 1120px) 24vw, (min-width: 700px) 270px, 66vw";
 
 function readSession(key: string) {
   try {
@@ -67,6 +77,9 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
   const flags = useRef({ hover: false, focus: false, touch: false, holding: false, gliding: false, frozen: false, userPaused: false, holdUntil: 0 });
   const renderRef = useRef<() => void>(() => {});
   const glideRef = useRef<(to: number) => void>(() => {});
+  const introDone = useRef(false);
+  const skipIntroRef = useRef<() => void>(() => {});
+  const returningRef = useRef(typeof window !== "undefined" && Boolean(readSession(RETURN_KEY)));
 
   // A test address only, like the arc's ?records=: shows the row with fewer cards. Remove at P10.
   useEffect(() => {
@@ -78,7 +91,6 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
   }, []);
 
   useCardMotion(rowRef, { pointer: false });
-  useCardEntrance(rowRef, ".wbsk-drift__track > li[data-real]:nth-child(-n+5)");
 
   const measure = useCallback(() => {
     const row = rowRef.current;
@@ -270,6 +282,36 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       else delete row.dataset.overCard;
     };
 
+    // Cards near the cursor swell, their neighbours a little less, then settle back.
+    const swollen = new Set<HTMLElement>();
+    const swell = (clientX: number, on: boolean) => {
+      const layout = layoutRef.current;
+      if (!layout) return;
+      const box = row.getBoundingClientRect();
+      const along = clientX - box.left - layout.gutter + layout.setWidth + n.x;
+      const slot = Math.floor(along / layout.step);
+      const all = cards();
+      const near = new Set<HTMLElement>();
+      if (on) {
+        for (let at = slot - 2; at <= slot + 2; at += 1) {
+          const card = all[at]?.querySelector<HTMLElement>(".wbsk-card");
+          if (!card) continue;
+          const distance = (at + 0.5) - (along / layout.step);
+          near.add(card);
+          swollen.add(card);
+          gsap.to(card, { scale: 1 + SWELL * Math.exp(-distance * distance * 1.6), duration: 0.45, ease: "power3.out", overwrite: "auto" });
+          if (at === slot) all[at]!.dataset.hot = "";
+          else delete all[at]!.dataset.hot;
+        }
+      }
+      swollen.forEach((card) => {
+        if (near.has(card)) return;
+        gsap.to(card, { scale: 1, duration: 0.5, ease: "power3.out", overwrite: "auto" });
+        delete card.parentElement?.dataset.hot;
+        swollen.delete(card);
+      });
+    };
+
     const pointer = { id: -1, startX: 0, startY: 0, lastX: 0, lastT: 0, speed: 0, moved: false, guard: false };
     const onPointerDown = (event: PointerEvent) => {
       if (event.button !== 0) return;
@@ -282,9 +324,14 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerId !== pointer.id) {
         if (event.pointerType === "mouse" && !f.holding) {
+          if (f.frozen) return;
           const over = cardAt(event.clientX, event.clientY);
           setHot(over?.card ?? null);
-          if (over) setDescription(weddingsRef.current[over.index]?.shortDescription ?? "");
+          swell(event.clientX, Boolean(over));
+          if (over?.card) {
+            tiltCard(over.card, event.clientX, event.clientY);
+            setDescription(weddingsRef.current[over.index]?.shortDescription ?? "");
+          }
         }
         return;
       }
@@ -304,6 +351,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
         track.dataset.moving = "true";
         moving = true;
         setHot(null);
+        swell(0, false);
       }
       const step = event.clientX - pointer.lastX;
       const elapsed = Math.max(event.timeStamp - pointer.lastT, 1) / 1000;
@@ -337,6 +385,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       f.hover = false;
       f.holdUntil = performance.now() + RESUME_AFTER_MS;
       setHot(null);
+      swell(0, false);
     };
     // Only a clearly sideways gesture is ever taken. Vertical wheel and swipes stay with the page.
     const onWheel = (event: WheelEvent) => {
@@ -440,6 +489,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       push.kill();
       screen.disconnect();
       setHot(null);
+      swell(0, false);
       document.removeEventListener("visibilitychange", sync);
       row.removeEventListener("pointerdown", onPointerDown);
       row.removeEventListener("pointermove", onPointerMove);
@@ -524,6 +574,10 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       }
       hot = card;
     };
+    const onMoveTilt = (event: PointerEvent) => {
+      if (hot && event.pointerType === "mouse") tiltCard(hot, event.clientX, event.clientY);
+    };
+    row.addEventListener("pointermove", onMoveTilt);
     const onLeave = () => {
       if (hot) setCardHot(hot, false);
       hot = null;
@@ -532,11 +586,94 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     row.addEventListener("pointerleave", onLeave);
     return () => {
       row.removeEventListener("pointerover", onOver);
+      row.removeEventListener("pointermove", onMoveTilt);
       row.removeEventListener("pointerleave", onLeave);
     };
   }, [mode]);
 
+  // The row introduces itself once, when most of it is on screen (Decisions 13 and 30).
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    const track = trackRef.current;
+    if (!row || !track || !bundle || mode === "plain" || introDone.current) return;
+    introDone.current = true;
+    if (prefersReducedMotion() || returningRef.current) return;
+    const { gsap } = bundle;
+    const f = flags.current;
+    const items = [...track.querySelectorAll<HTMLElement>(":scope > li")];
+    gsap.set(items, { opacity: 0 });
+    f.frozen = true;
+    let timeline: { progress: (value: number) => unknown } | null = null;
+    let finished = false;
+    const done = () => {
+      finished = true;
+      f.frozen = false;
+      skipIntroRef.current = () => {};
+    };
+    const begin = () => {
+      const rowBox = row.getBoundingClientRect();
+      const centre = rowBox.left + rowBox.width / 2;
+      const placed = items
+        .map((item) => {
+          const box = item.getBoundingClientRect();
+          return { item, away: box.left + box.width / 2 - centre, on: box.right > rowBox.left && box.left < rowBox.right };
+        })
+        .filter((entry) => entry.on)
+        .sort((a, b) => Math.abs(a.away) - Math.abs(b.away));
+      gsap.set(items, { opacity: 1 });
+      const tl = gsap.timeline({
+        onComplete: () => {
+          gsap.set(items, { clearProps: "transform,opacity,zIndex" });
+          done();
+        },
+      });
+      placed.forEach(({ item, away }, rank) => {
+        gsap.set(item, { x: -away, y: STACK_DROP, scale: STACK_SCALE, rotation: (rank % 2 ? 1 : -1) * Math.min(rank, 3) * STACK_TURN * 0.5, zIndex: placed.length - rank, opacity: 0 });
+        tl.to(item, { y: 0, opacity: 1, duration: STACK_RISE_S, ease: "power3.out" }, 0);
+        tl.to(item, { x: 0, scale: 1, rotation: 0, duration: FAN_S, ease: "expo.out" }, FAN_AT_S + rank * FAN_RIPPLE_S);
+      });
+      timeline = tl;
+    };
+    const watch = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        watch.disconnect();
+        begin();
+      },
+      { threshold: 0.45 },
+    );
+    watch.observe(row);
+    const skip = () => {
+      if (finished) return;
+      watch.disconnect();
+      if (timeline) timeline.progress(1);
+      else {
+        gsap.set(items, { clearProps: "opacity" });
+        done();
+      }
+    };
+    skipIntroRef.current = skip;
+    row.addEventListener("pointerdown", skip);
+    row.addEventListener("focusin", skip);
+    const onSideways = (event: WheelEvent) => {
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) skip();
+    };
+    row.addEventListener("wheel", onSideways, { passive: true });
+    return () => {
+      watch.disconnect();
+      row.removeEventListener("pointerdown", skip);
+      row.removeEventListener("focusin", skip);
+      row.removeEventListener("wheel", onSideways);
+      // Development mode starts effects twice, and a change of mode starts again; neither should lose the intro.
+      if (!finished) {
+        (timeline as { kill?: () => void } | null)?.kill?.();
+        introDone.current = false;
+      }
+    };
+  }, [bundle, mode]);
+
   const moveByCard = (direction: 1 | -1) => {
+    skipIntroRef.current();
     const layout = layoutRef.current;
     const row = rowRef.current;
     if (!layout || !row) return;
@@ -553,6 +690,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
   };
 
   const togglePause = () => {
+    skipIntroRef.current();
     const next = !flags.current.userPaused;
     flags.current.userPaused = next;
     writeSession(PAUSED_KEY, next ? "1" : "0");
