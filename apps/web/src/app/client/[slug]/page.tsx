@@ -1,5 +1,5 @@
 import { youTubeId } from "@wbsk/content";
-import { CoupleNames, FilmPlayer, Gallery, GalleryLightbox, Reveal, StoryCover, WbskImage, WbskLink } from "@wbsk/ui";
+import { CoupleNames, FilmPlayer, Gallery, GalleryLightbox, Reveal, StoryCover, WbskImage, WbskLink, SectionHead } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EnquireButton } from "../../../components/EnquiryPanel";
@@ -60,7 +60,7 @@ export default async function Page({ params }: Params) {
 
       <section className="wbsk-container wbsk-story" data-film={teaserId ? "true" : "false"}>
         <Reveal className="wbsk-story__text">
-          <h2 className="wbsk-label">Their story</h2>
+          <h2 className="wbsk-h2">Their Story</h2>
           {wedding.theirStory.split(/\n{2,}/).map((paragraph) => (
             <p key={paragraph.slice(0, 40)} className="wbsk-lead">
               {paragraph}
@@ -80,7 +80,7 @@ export default async function Page({ params }: Params) {
       {wedding.gallery.length ? (
         <section className="wbsk-container wbsk-story__gallery" aria-label="Photographs">
           <div className="wbsk-gallerybar">
-            <h2 className="wbsk-label">The day, in photographs</h2>
+            <h2 className="wbsk-h2">The Day, in Photographs</h2>
             <p className="wbsk-card__meta">{wedding.gallery.length} photographs · scroll inside the frame</p>
           </div>
           <GalleryLightbox watermarkSrc={publicAsset("/wbsk-logo.svg")} scrolling>
@@ -95,7 +95,7 @@ export default async function Page({ params }: Params) {
             {highlightId && wedding.highlight?.poster ? (
               <>
                 <Reveal>
-                  <h2 className="wbsk-h2">The film</h2>
+                  <SectionHead>The Film</SectionHead>
                 </Reveal>
                 <Reveal delayIndex={1}>
                   <FilmPlayer videoId={highlightId} poster={wedding.highlight.poster} title={`highlight film for ${names}`} />

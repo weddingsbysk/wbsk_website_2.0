@@ -1,5 +1,5 @@
 import "@wbsk/ui/css/pages.css";
-import { Reveal, TitleWords } from "@wbsk/ui";
+import { Reveal, TitleWords, SectionHead } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquiryForm } from "../../components/EnquiryForm";
 import { getCareersPage, mainPageMetadata } from "../../lib/content";
@@ -11,13 +11,12 @@ export default async function Page() {
   return (
     <>
       <section className="wbsk-container wbsk-pagehead">
-        <p className="wbsk-label">Careers</p>
-        <h1 className="wbsk-h1 wbsk-measure">
-          <TitleWords text={intro ?? "If you notice the small things at a big wedding, come and talk to us."} />
-        </h1>
+        <SectionHead as="h1" line={intro ?? "If you notice the small things at a big wedding, come and talk to us."}>
+          <TitleWords text="Careers" />
+        </SectionHead>
       </section>
       <section className="wbsk-container wbsk-roles" aria-label="Open roles">
-        <p className="wbsk-label">Open roles</p>
+        <SectionHead>Open Roles</SectionHead>
         {roles.length ? (
           <ul>
             {roles.map((role, index) => (

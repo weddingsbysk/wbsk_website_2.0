@@ -1,5 +1,5 @@
 import "@wbsk/ui/css/pages.css";
-import { GlideIn, Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
+import { GlideIn, Reveal, TitleWords, WbskImage, WbskLink, SectionHead } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquireButton } from "../../components/EnquiryPanel";
 import { getTeamPage, mainPageMetadata } from "../../lib/content";
@@ -17,10 +17,9 @@ export default async function Page() {
   return (
     <div data-tone="dark" className="wbsk-teampage">
       <section className="wbsk-container wbsk-pagehead">
-        <p className="wbsk-label">Our team</p>
-        <h1 className="wbsk-h1 wbsk-measure wbsk-teampage__line">
-          <TitleWords text={line ?? "The people you'll forget are working."} />
-        </h1>
+        <SectionHead as="h1" line={line ?? "The people you'll forget are working."}>
+          <TitleWords text="Our Team" />
+        </SectionHead>
       </section>
       {lead ? (
         <section className="wbsk-container wbsk-person" data-lead="true" data-side="right">

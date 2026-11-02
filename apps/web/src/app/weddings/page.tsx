@@ -1,4 +1,4 @@
-import { CoupleNames, Letterbox, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
+import { CoupleNames, Letterbox, SectionHead, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquireButton } from "../../components/EnquiryPanel";
 import { WeddingsGrid } from "../../components/WeddingsGrid";
@@ -10,7 +10,7 @@ export default async function Page() {
   const [{ listed }, page] = await Promise.all([getWeddings(), getWeddingsIntro()]);
   const [lead, ...rest] = listed;
   // Cards only get what they show: the full stories and galleries stay out of this page.
-  const cards = rest.map(({ slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, cardPhoto }) => ({
+  const cards = rest.map(({ slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, storyTitle, cardPhoto }) => ({
     slug,
     href,
     first,
@@ -21,14 +21,15 @@ export default async function Page() {
     venue,
     monthYear,
     shortDescription,
+    storyTitle,
     cardPhoto,
   }));
   return (
     <div className="wbsk-weddings">
       <section className="wbsk-container wbsk-weddings__intro">
-        <h1 className="wbsk-h1 wbsk-measure">
-          <TitleWords text={page?.intro ?? "Every wedding here belongs to two people who trusted us with the quiet parts too."} />
-        </h1>
+        <SectionHead as="h1" line={page?.intro ?? "Every wedding here belongs to two people who trusted us with the quiet parts too."}>
+          <TitleWords text="Weddings" />
+        </SectionHead>
       </section>
       {lead ? (
         <section className="wbsk-container">

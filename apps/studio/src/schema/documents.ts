@@ -22,6 +22,7 @@ export const wedding = defineType({
   orderings: [{ title: "Newest first", name: "dateDesc", by: [{ field: "weddingDate", direction: "desc" }] }],
   fields: [
     sampleField,
+    defineField({ name: "storyTitle", title: "Story title", type: "string", group: "couple", description: "Shown on the card, for example Seaside Elegance." }),
     defineField({ name: "firstName", title: "First name", type: "string", group: "couple", validation: required("the first name") as never }),
     defineField({ name: "secondName", title: "Second name", type: "string", group: "couple", validation: required("the second name") as never }),
     defineField({ name: "placeLabel", title: "Place label", type: "string", group: "couple", options: { layout: "radio", direction: "horizontal", list: ["Destination", "Local"] }, validation: required("the place label") as never }),

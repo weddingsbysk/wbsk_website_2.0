@@ -7,27 +7,44 @@ import { introDecisionScript } from "../lib/intro";
 import { isProduction, publicAsset, siteUrl } from "../lib/site";
 import "./globals.css";
 
-const bodoni = localFont({
-  src: "../fonts/bodoni-moda.woff2",
-  weight: "400 500",
-  variable: "--font-bodoni",
+const playfair = localFont({
+  src: "../fonts/playfair-display.woff2",
+  weight: "400 900",
+  variable: "--font-playfair",
   display: "swap",
   adjustFontFallback: "Times New Roman",
 });
-const hanken = localFont({
-  src: "../fonts/hanken-grotesk.woff2",
-  weight: "400 600",
-  variable: "--font-hanken",
-  display: "swap",
-});
-const amp = localFont({
-  src: "../fonts/bodoni-moda-amp.woff2",
-  weight: "400 500",
+const playfairItalic = localFont({
+  src: "../fonts/playfair-display-italic.woff2",
+  weight: "400 900",
   style: "italic",
-  variable: "--font-bodoni-amp",
+  variable: "--font-playfair-italic",
   display: "swap",
   preload: false,
   adjustFontFallback: false,
+});
+const cormorant = localFont({
+  src: "../fonts/cormorant-garamond.woff2",
+  weight: "300 700",
+  variable: "--font-cormorant",
+  display: "swap",
+  adjustFontFallback: "Times New Roman",
+});
+const cormorantItalic = localFont({
+  src: "../fonts/cormorant-garamond-italic.woff2",
+  weight: "300 700",
+  style: "italic",
+  variable: "--font-cormorant-italic",
+  display: "swap",
+  preload: false,
+  adjustFontFallback: false,
+});
+const outfit = localFont({
+  src: "../fonts/outfit.woff2",
+  weight: "100 900",
+  variable: "--font-outfit",
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -44,7 +61,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${bodoni.variable} ${hanken.variable} ${amp.variable}`}
+      className={`${playfair.variable} ${playfairItalic.variable} ${cormorant.variable} ${cormorantItalic.variable} ${outfit.variable}`}
       suppressHydrationWarning
     >
       <head>

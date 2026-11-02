@@ -1,5 +1,5 @@
 import "@wbsk/ui/css/home.css";
-import { CoverVideo, HeroDrift, Letterbox, Reveal, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
+import { CoverVideo, HeroDrift, Letterbox, Reveal, SectionHead, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
 import { EnquiryForm } from "../components/EnquiryForm";
 import { FeaturedRow } from "../components/DriftRow";
 import { Counter, FilmStack, ReactionRow, ReviewsLoop } from "../components/HomeSections";
@@ -7,6 +7,19 @@ import { OpeningIntro } from "../components/OpeningIntro";
 import { getHomepageContent, mainPageMetadata } from "../lib/content";
 
 export const generateMetadata = () => mainPageMetadata("homepage", "Weddings By Siddhant Kapoor");
+
+/** Sets the one chosen word of the quote in gold italic. */
+function emphasised(quote: string, word?: string) {
+  const at = word ? quote.indexOf(word) : -1;
+  if (!word || at < 0) return quote;
+  return (
+    <>
+      {quote.slice(0, at)}
+      <em>{word}</em>
+      {quote.slice(at + word.length)}
+    </>
+  );
+}
 
 export default async function HomePage() {
   const home = await getHomepageContent();
@@ -25,25 +38,30 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="wbsk-section wbsk-container wbsk-who">
-        <Reveal>
-          <p className="wbsk-label">Who we are</p>
-          <h2 className="wbsk-h1 wbsk-who__story">{home.whoWeAre}</h2>
-        </Reveal>
-        {home.counters.length ? (
-          <Reveal delayIndex={1} className="wbsk-who__counters">
-            {home.counters.map((counter) => (
-              <Counter key={counter.label} value={counter.value} label={counter.label} />
-            ))}
+      <section data-tone="dark" className="wbsk-philosophy" aria-labelledby="philosophy-quote">
+        <div className="wbsk-container">
+          <Reveal>
+            <p className="wbsk-label">Our philosophy</p>
+            <h2 id="philosophy-quote" className="wbsk-philosophy__quote">
+              &ldquo;{emphasised(home.whoWeAre ?? "", home.quoteEmphasis)}&rdquo;
+            </h2>
+            {home.quoteBy ? <p className="wbsk-philosophy__by">{home.quoteBy}</p> : null}
           </Reveal>
-        ) : null}
+          {home.counters.length ? (
+            <Reveal delayIndex={1} className="wbsk-philosophy__counters">
+              {home.counters.map((counter) => (
+                <Counter key={counter.label} value={counter.value} label={counter.label} />
+              ))}
+            </Reveal>
+          ) : null}
+        </div>
       </section>
 
       {home.weddings.length ? (
         <section className="wbsk-homesection wbsk-homesection--flush" aria-label="Featured weddings">
           <div className="wbsk-container">
             <Reveal>
-              <p className="wbsk-label wbsk-homesection__label">Recent weddings</p>
+              <SectionHead line={home.weddingsLine}>Recent Weddings</SectionHead>
             </Reveal>
           </div>
           <FeaturedRow weddings={home.weddings} seeAllHref="/weddings/" />
@@ -54,7 +72,7 @@ export default async function HomePage() {
         <section data-tone="dark" className="wbsk-section" aria-label="Featured films">
           <div className="wbsk-container">
             <Reveal>
-              <p className="wbsk-label wbsk-homesection__label">On film</p>
+              <SectionHead>On Film</SectionHead>
             </Reveal>
             <FilmStack films={home.films} />
           </div>
@@ -68,7 +86,7 @@ export default async function HomePage() {
           </Letterbox>
         ) : null}
         <Reveal className="wbsk-teamline">
-          <h2 className="wbsk-h2">{home.teamLine ?? "The people behind your story"}</h2>
+          <SectionHead>{home.teamLine ?? "The people behind your story"}</SectionHead>
           <WbskLink href="/our-team/" className="wbsk-link wbsk-morelink">
             Meet the people →
           </WbskLink>
@@ -81,7 +99,7 @@ export default async function HomePage() {
             {home.reviews.length ? (
               <>
                 <Reveal>
-                  <p className="wbsk-label wbsk-homesection__label">What our couples say</p>
+                  <SectionHead>What Our Couples Say</SectionHead>
                 </Reveal>
                 <ReviewsLoop reviews={home.reviews} />
               </>
@@ -95,7 +113,7 @@ export default async function HomePage() {
             {home.reactions.length ? (
               <div className="wbsk-reactions">
                 <Reveal>
-                  <p className="wbsk-label wbsk-homesection__label">Watch them react</p>
+                  <SectionHead>Watch Them React</SectionHead>
                 </Reveal>
                 <ReactionRow reactions={home.reactions} />
               </div>
@@ -108,7 +126,7 @@ export default async function HomePage() {
         <section className="wbsk-homesection" aria-label="Featured on">
           <div className="wbsk-container">
             <Reveal>
-              <p className="wbsk-label wbsk-homesection__label">Featured on</p>
+              <SectionHead>Featured On</SectionHead>
             </Reveal>
             <ul className="wbsk-featuredon">
               {home.featuredOn.map((item) => (

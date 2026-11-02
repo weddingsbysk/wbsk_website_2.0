@@ -9,6 +9,7 @@ export { GlideIn } from "./components/GlideIn";
 export { HeroDrift } from "./components/HeroDrift";
 export { Letterbox } from "./components/Letterbox";
 export { Reveal } from "./components/Reveal";
+export { SectionHead } from "./components/SectionHead";
 export { SideRow } from "./components/SideRow";
 export { canHover, pressThen, rippleIn, setCardHot, useCardEntrance, useCardMotion } from "./components/cardMotion";
 export { WbskImage } from "./components/WbskImage";

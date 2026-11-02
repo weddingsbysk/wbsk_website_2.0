@@ -109,6 +109,7 @@ type WeddingResult = {
   weddingDate: string;
   slug: string;
   shortDescription: string;
+  storyTitle?: string;
   theirStory: string;
   cardPhoto: ImageResult;
   coverDesktop: ImageResult;
@@ -153,6 +154,7 @@ function toWedding(item: WeddingResult) {
     venue: item.venue,
     monthYear: monthYear(item.weddingDate),
     shortDescription: item.shortDescription,
+    storyTitle: item.storyTitle,
     theirStory: item.theirStory,
     cardPhoto: withoutInlinePreview(toImage(item.cardPhoto)),
     coverDesktop: toImage(item.coverDesktop),
@@ -187,6 +189,7 @@ export function getWeddings() {
       venue,
       weddingDate,
       "slug": address.current,
+      storyTitle,
       shortDescription,
       theirStory,
       cardPhoto${imageFields},
@@ -358,6 +361,9 @@ export async function getHomepageContent() {
       teamLine?: string;
       showFeaturedOn?: boolean;
       counters?: { value: string; label: string }[];
+      quoteEmphasis?: string;
+      quoteBy?: string;
+      weddingsLine?: string;
       heroPosterDesktop: ImageResult;
       heroPosterPhone: ImageResult;
       teamPhoto: ImageResult;
@@ -372,7 +378,7 @@ export async function getHomepageContent() {
     settings: { googleRating?: number; googleReviewCount?: number; googleProfile?: string } | null;
   }>(/* groq */ `{
     "home": *[_id == "homepage"][0]{
-      heroLine, whoWeAre, teamLine, showFeaturedOn, counters[]{value, label},
+      heroLine, whoWeAre, quoteEmphasis, quoteBy, weddingsLine, teamLine, showFeaturedOn, counters[]{value, label},
       heroPosterDesktop${imageFields}, heroPosterPhone${imageFields}, teamPhoto${imageFields},
       "videoDesktop": heroVideoDesktop.asset->url, "videoPhone": heroVideoPhone.asset->url,
       "weddingOrder": featuredWeddings[]._ref, "filmOrder": featuredFilms[]._ref
@@ -397,13 +403,16 @@ export async function getHomepageContent() {
   const weddings = listed
     .filter((wedding) => wedding.featured)
     .sort((a, b) => rank(home?.weddingOrder, a.id) - rank(home?.weddingOrder, b.id))
-    .map(({ slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, cardPhoto }) => ({
-      slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, cardPhoto,
+    .map(({ slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, storyTitle, cardPhoto }) => ({
+      slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, storyTitle, cardPhoto,
     }));
   const google = data.settings;
   return {
     heroLine: home?.heroLine,
     whoWeAre: home?.whoWeAre,
+    quoteEmphasis: home?.quoteEmphasis,
+    quoteBy: home?.quoteBy,
+    weddingsLine: home?.weddingsLine,
     teamLine: home?.teamLine,
     counters: home?.counters ?? [],
     posterDesktop: toImage(home?.heroPosterDesktop ?? null),

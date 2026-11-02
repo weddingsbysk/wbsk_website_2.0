@@ -15,6 +15,7 @@ export type WeddingSummary = {
   venue: string;
   monthYear: string;
   shortDescription: string;
+  storyTitle?: string;
   cardPhoto: WbskImageSource | null;
 };
 
@@ -48,7 +49,7 @@ export function ClientCard({
         href={wedding.href}
         className="wbsk-card__link"
         data-transition="expand"
-        aria-label={`${wedding.first} & ${wedding.second}, ${wedding.placeLabel} · ${wedding.city}, ${wedding.venue} · ${wedding.monthYear}: view story`}
+        aria-label={`${wedding.first} & ${wedding.second}, ${wedding.placeLabel} · ${wedding.city}, ${wedding.storyTitle ? `${wedding.storyTitle}, ` : ""}${wedding.monthYear}, ${wedding.venue}, ${wedding.city}: view story`}
         tabIndex={copy ? -1 : undefined}
         onMouseEnter={show}
         onFocus={show}
@@ -64,9 +65,23 @@ export function ClientCard({
             <CoupleNames first={wedding.first} second={wedding.second} />
           </span>{" "}
           <span className="wbsk-label wbsk-card__place">{wedding.place}</span>{" "}
+          {wedding.storyTitle ? <span className="wbsk-card__title">{wedding.storyTitle} </span> : null}
           <span className="wbsk-card__metaline">
-            <span className="wbsk-card__meta">
-              {wedding.venue}&nbsp;· <span className="wbsk-nowrap">{wedding.monthYear}</span>
+            <span className="wbsk-card__facts">
+              <span className="wbsk-card__meta">
+                <svg className="wbsk-card__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true">
+                  <rect x="2" y="3" width="12" height="11" rx="1.5" />
+                  <path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" />
+                </svg>
+                {wedding.monthYear}
+              </span>{" "}
+              <span className="wbsk-card__meta">
+                <svg className="wbsk-card__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true">
+                  <path d="M8 14.5s5-4.3 5-8.2A5 5 0 0 0 3 6.300c0 3.900 5 8.200 5 8.200Z" />
+                  <circle cx="8" cy="6.300" r="1.700" />
+                </svg>
+                {wedding.venue}, {wedding.city}
+              </span>
             </span>{" "}
             <span className="wbsk-card__more" aria-hidden="true">
               <span className="wbsk-card__moreword">

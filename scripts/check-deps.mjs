@@ -29,6 +29,9 @@ const approved = new Set([
   "sharp",
   "@fontsource-variable/bodoni-moda",
   "@fontsource-variable/hanken-grotesk",
+  "@fontsource-variable/playfair-display",
+  "@fontsource-variable/cormorant-garamond",
+  "@fontsource-variable/outfit",
 ]);
 const banned =
   /^(framer-motion|motion|@radix-ui\/|@shadcn|shadcn|three$|tailwindcss-animate|lenis)/;

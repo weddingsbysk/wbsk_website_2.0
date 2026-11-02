@@ -28,12 +28,12 @@ test("homepage: every section, in the agreed order, with nothing broken", async 
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("./");
   const tops = await page.evaluate(() =>
-    [".wbsk-hero", ".wbsk-who", '[aria-label="Featured weddings"]', '[aria-label="Featured films"]', '[aria-label="The team"]', '[aria-label="What our couples say"]', "#enquire"].map(
+    [".wbsk-hero", ".wbsk-philosophy", '[aria-label="Featured weddings"]', '[aria-label="Featured films"]', '[aria-label="The team"]', '[aria-label="What our couples say"]', "#enquire"].map(
       (selector) => document.querySelector(selector)!.getBoundingClientRect().top,
     ),
   );
   expect(tops).toEqual([...tops].sort((a, b) => a - b));
-  await expect(page.locator(".wbsk-counter")).toHaveCount(2);
+  await expect(page.locator(".wbsk-counter")).toHaveCount(4);
   await expect(page.locator(".wbsk-drift li[data-real]")).not.toHaveCount(0);
   await checks(page);
   expect(errors).toEqual([]);
@@ -133,8 +133,8 @@ test("Pre-wedding: cover, records, offerings, galleries and form, in order", asy
     ),
   );
   expect(tops).toEqual([...tops].sort((a, b) => a - b));
-  await expect(page.getByRole("heading", { name: "Full-length" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Concept" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Full-length", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Concept", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Plan your pre-wedding" })).toBeVisible();
   await checks(page);
 });

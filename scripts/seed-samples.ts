@@ -144,8 +144,32 @@ async function addExtraWeddings() {
   console.log(`Done: ${extra.length} extra weddings, ${counter} images.`);
 }
 
+/** The old site's look (owner, 2 November 2026): only these fields change, nothing else is touched. */
+async function addOldLookFields() {
+  const titles = ["Evening", "Lakeside", "Courtyard", "Haveli", "Riverside", "Homecoming", "Terrace", "Desert", "Backwater", "Lawn", "Hilltop", "Fort", "Garden", "Estate", "Old Hotel", "Rooftop"];
+  const tx = client.transaction();
+  titles.forEach((title, i) => tx.patch(`sample-wedding-${i + 1}`, { set: { storyTitle: `Sample ${title} Story` } }));
+  tx.patch("homepage", {
+    set: {
+      whoWeAre: "We don't just photograph weddings. We preserve the feeling of them.",
+      quoteEmphasis: "feeling",
+      quoteBy: "Siddhant Kapoor · Lead Photographer",
+      weddingsLine: "Each wedding is a unique story waiting to be told.",
+      counters: [
+        { _type: "counter", _key: "a", value: "9+", label: "Years of craft (sample)" },
+        { _type: "counter", _key: "b", value: "500+", label: "Stories told (sample)" },
+        { _type: "counter", _key: "c", value: "1", label: "Wedding per day (sample)" },
+        { _type: "counter", _key: "d", value: "∞", label: "Memories made (sample)" },
+      ],
+    },
+  });
+  await tx.commit();
+  console.log("Done: old-look fields added.");
+}
+
 async function main() {
   if (process.env.SEED_ONLY === "extra-weddings") return addExtraWeddings();
+  if (process.env.SEED_ONLY === "old-look") return addOldLookFields();
   console.log("Uploading sample weddings…");
   await many(couples, async ([first, second, label, city, venue, date], i) => {
     const n = i + 1;

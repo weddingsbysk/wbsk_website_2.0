@@ -51,7 +51,7 @@ test.describe("the card (Decision 05)", () => {
     const card = page.locator(".wbsk-card").first();
     const link = card.locator(".wbsk-card__link");
     await expect(link).toHaveCount(1);
-    await expect(link).toHaveAttribute("aria-label", /^Sample .* & Sample .*, (Destination|Local) · .*, .* · .*: view story$/);
+    await expect(link).toHaveAttribute("aria-label", /^Sample .* & Sample .*, (Destination|Local) · .*: view story$/);
     await expect(card.locator(".wbsk-card__photo .wbsk-frame")).toHaveCSS("border-radius", "0px");
     expect(await card.locator(".wbsk-card__clip").evaluate((el) => el.textContent)).toBe("");
     await expect(card.locator(".wbsk-card__caption")).toHaveCSS("text-align", "left");

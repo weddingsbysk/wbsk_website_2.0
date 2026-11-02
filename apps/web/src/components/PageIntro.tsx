@@ -1,4 +1,4 @@
-import { TitleWords } from "@wbsk/ui";
+import { SectionHead, TitleWords } from "@wbsk/ui";
 import type { ReactNode } from "react";
 
 /** Plain opening used by pages still waiting for their own phase. */
@@ -17,10 +17,9 @@ export function PageIntro({
       className="wbsk-section wbsk-pageintro"
     >
       <div className="wbsk-container">
-        <h1 className="wbsk-h1">
+        <SectionHead as="h1" line={children}>
           <TitleWords text={title} />
-        </h1>
-        <p className="wbsk-lead wbsk-measure wbsk-pageintro__text">{children}</p>
+        </SectionHead>
       </div>
     </section>
   );

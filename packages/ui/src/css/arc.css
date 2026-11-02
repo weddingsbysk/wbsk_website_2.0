@@ -207,7 +207,7 @@
     top: calc(var(--s) * 1.08);
     right: 0;
     left: 0;
-    font-family: var(--font-bodoni), serif;
+    font-family: var(--font-playfair), serif;
     font-size: clamp(16px, 2vw, 22px);
     letter-spacing: 0.06em;
     text-align: center;
@@ -267,7 +267,7 @@
   .wbsk-arc__row a {
     display: grid;
     gap: 10px;
-    font-family: var(--font-bodoni), serif;
+    font-family: var(--font-playfair), serif;
     font-size: 18px;
     text-align: center;
     color: var(--color-ivory);

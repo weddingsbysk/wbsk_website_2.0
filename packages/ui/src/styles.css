@@ -8,8 +8,9 @@
   --color-muted: #6b5e52;
   --color-error: #a32a1e;
 
-  --font-serif: var(--font-bodoni), "Times New Roman", serif;
-  --font-sans: var(--font-hanken), Arial, sans-serif;
+  --font-serif: var(--font-playfair), "Times New Roman", serif;
+  --font-sans: var(--font-cormorant), "Times New Roman", serif;
+  --font-ui: var(--font-outfit), Arial, sans-serif;
 
   --radius-wbsk: 8px;
 
@@ -36,15 +37,16 @@
     --section: clamp(112px, 13vw, 208px);
     --gap-block: clamp(64px, 8vw, 128px);
     /* A wide scale: the drama comes from the distance between headline and text (Warm Cinema). */
-    --text-display: clamp(3.5rem, 8.4vw, 9rem);
-    --text-h1: clamp(2.75rem, 5.2vw, 6rem);
-    --text-h2: clamp(2.125rem, 3.5vw, 4rem);
-    --text-h3: clamp(1.375rem, 1.85vw, 1.75rem);
-    --text-lead: clamp(1.125rem, 1.45vw, 1.4375rem);
-    --text-body: 1.0625rem;
-    --text-small: 0.875rem;
+    --text-display: clamp(3.25rem, 6.7vw, 6rem);
+    --text-h1: clamp(2.5rem, 4.2vw, 3.75rem);
+    --text-h2: clamp(2rem, 3.1vw, 2.75rem);
+    --text-h3: clamp(1.25rem, 1.5vw, 1.375rem);
+    --text-lead: clamp(1.1875rem, 1.45vw, 1.3125rem);
+    --text-body: clamp(1.125rem, 1.4vw, 1.25rem);
+    --text-small: 1.0625rem;
+    --text-ui: 0.75rem;
     --text-label: 0.6875rem;
-    --text-card-names: 1.75rem;
+    --text-card-names: 1.25rem;
     --header-height: 60px;
   }
 
@@ -72,7 +74,7 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: var(--text-body);
-    line-height: 1.65;
+    line-height: 1.45;
     font-kerning: normal;
     font-synthesis: none;
     -webkit-font-smoothing: antialiased;
@@ -150,7 +152,7 @@
   .wbsk-h2,
   .wbsk-h3 {
     font-family: var(--font-serif);
-    font-weight: 400;
+    font-weight: 700;
     font-optical-sizing: auto;
     text-wrap: balance;
     margin: 0;
@@ -158,27 +160,24 @@
   /* Optical sizes are held below Bodoni's finest setting so hairlines and hyphens survive at screen sizes. */
   .wbsk-display {
     font-size: var(--text-display);
-    line-height: 0.98;
-    letter-spacing: -0.022em;
-    font-variation-settings: "opsz" 44;
+    line-height: 1.02;
+    letter-spacing: 0;
   }
   .wbsk-h1 {
     font-size: var(--text-h1);
-    line-height: 1.02;
-    letter-spacing: -0.018em;
-    font-variation-settings: "opsz" 36;
+    line-height: 1.1;
+    letter-spacing: 0;
   }
   .wbsk-h2 {
     font-size: var(--text-h2);
-    line-height: 1.06;
-    letter-spacing: -0.012em;
-    font-variation-settings: "opsz" 28;
+    line-height: 1.12;
+    letter-spacing: 0;
   }
   .wbsk-h3 {
     font-size: var(--text-h3);
-    line-height: 1.15;
-    letter-spacing: -0.004em;
-    font-variation-settings: "opsz" 18;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0;
   }
   .wbsk-lead {
     font-size: var(--text-lead);
@@ -191,13 +190,57 @@
     margin: 0;
   }
   .wbsk-amp {
-    font-family: var(--font-bodoni-amp), var(--font-serif);
+    font-family: var(--font-playfair-italic), var(--font-serif);
     font-style: italic;
   }
+  /* The widely spaced small capitals that give the site its luxury. */
+  .wbsk-header__navlink,
+  .wbsk-button,
+  .wbsk-morelink,
+  .wbsk-footer a,
+  .wbsk-footer p {
+    font-family: var(--font-ui);
+  }
+  .wbsk-sectionhead {
+    display: grid;
+    justify-items: center;
+    max-width: 46rem;
+    margin: 0 auto clamp(44px, 5vw, 72px);
+    text-align: center;
+  }
+  .wbsk-sectionhead__title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: var(--text-h1);
+    font-weight: 700;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .wbsk-sectionhead__rule {
+    display: block;
+    width: 80px;
+    height: 2px;
+    margin-top: 20px;
+    background: var(--color-deep-gold);
+  }
+  [data-tone="dark"] .wbsk-sectionhead__rule {
+    background: var(--color-gold);
+  }
+  .wbsk-sectionhead__line {
+    margin: 20px 0 0;
+    font-size: var(--text-lead);
+    line-height: 1.4;
+    text-wrap: balance;
+    color: var(--color-muted);
+  }
+  [data-tone="dark"] .wbsk-sectionhead__line {
+    color: inherit;
+  }
   .wbsk-label {
+    font-family: var(--font-ui);
     font-size: var(--text-label);
-    font-weight: 600;
-    letter-spacing: 0.18em;
+    font-weight: 400;
+    letter-spacing: 0.32em;
     line-height: 1.4;
     text-transform: uppercase;
     color: var(--color-deep-gold);
@@ -254,12 +297,15 @@
     gap: 10px;
     overflow: hidden;
     min-height: 52px;
-    padding: 0 26px;
-    letter-spacing: 0.005em;
+    padding: 0 30px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
     border: 1px solid var(--color-deep-gold);
     border-radius: var(--radius-wbsk);
-    font: inherit;
+    font-family: var(--font-ui);
+    font-size: var(--text-ui);
     font-weight: 500;
+    line-height: 1.3;
     text-decoration: none;
     color: var(--color-ink);
     background: transparent;
@@ -397,9 +443,10 @@
     gap: clamp(24px, 2.6vw, 40px);
   }
   .wbsk-header__navlink {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: 0.012em;
+    font-size: var(--text-ui);
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
   }
   .wbsk-header__actions {
     margin-left: auto;
@@ -454,7 +501,6 @@
   }
   .wbsk-menu__link {
     font-family: var(--font-serif);
-    font-variation-settings: "opsz" 24;
     font-size: var(--text-h1);
     line-height: 1.2;
     color: inherit;
@@ -857,38 +903,64 @@
   }
   .wbsk-card__place {
     display: block;
+    order: -2;
+    margin-bottom: 10px;
+  }
+  .wbsk-card__title {
+    display: block;
     order: -1;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
+    font-family: var(--font-serif);
+    font-size: var(--text-h3);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-ink);
   }
   .wbsk-card__names {
     display: block;
     width: fit-content;
     max-width: 100%;
-    margin-bottom: 6px;
-    font-family: var(--font-serif);
+    margin-bottom: 12px;
+    font-family: var(--font-cormorant-italic), var(--font-sans);
     font-size: var(--text-card-names);
-    font-weight: 400;
-    font-variation-settings: "opsz" 28;
-    line-height: 1.1;
-    letter-spacing: -0.01em;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.25;
     text-wrap: balance;
-    color: var(--color-ink);
+    color: var(--color-deep-gold);
+  }
+  .wbsk-card__names .wbsk-amp {
+    font-family: inherit;
   }
   .wbsk-card__metaline {
     display: flex;
     gap: 16px;
-    align-items: baseline;
+    align-items: flex-end;
     justify-content: space-between;
   }
-  .wbsk-card .wbsk-card__meta {
+  .wbsk-card__facts {
+    display: grid;
     flex: 1 1 auto;
+    gap: 5px;
     min-width: 0;
+  }
+  .wbsk-card .wbsk-card__meta {
+    display: flex;
+    gap: 9px;
+    align-items: center;
     margin: 0;
-    font-size: var(--text-small);
-    line-height: 1.5;
-    letter-spacing: 0.005em;
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
     color: var(--color-muted);
     opacity: 1;
+  }
+  .wbsk-card__icon {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    color: var(--color-deep-gold);
   }
   .wbsk-nowrap {
     white-space: nowrap;
@@ -908,7 +980,8 @@
     flex: none;
     gap: 6px;
     padding-right: 4px;
-    font-size: 0.8125rem;
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
     line-height: 1.5;
     white-space: nowrap;
     color: var(--color-deep-gold);
@@ -937,7 +1010,7 @@
   .wbsk-card__description {
     margin: 12px 0 0;
     font-size: var(--text-small);
-    line-height: 1.55;
+    line-height: 1.4;
     color: var(--color-muted);
   }
   /* Arrivals are tucked away only once scripts have taken charge of bringing them back. */
@@ -957,9 +1030,6 @@
     }
   }
   @media (max-width: 699px) {
-    :root {
-      --text-card-names: 1.5rem;
-    }
     .wbsk-card__caption {
       margin-top: 16px;
     }
@@ -987,6 +1057,7 @@
     --gutter-phone: 16px;
   }
   .wbsk-weddings__intro {
+    text-align: center;
     padding-top: calc(var(--header-height) + clamp(72px, 10vw, 168px));
     padding-bottom: clamp(56px, 7vw, 112px);
   }
@@ -1050,9 +1121,8 @@
     display: block;
     margin: 0;
     font-size: var(--text-h1);
-    line-height: 1.02;
-    letter-spacing: -0.018em;
-    font-variation-settings: "opsz" 36;
+    line-height: 1.1;
+    letter-spacing: 0;
     color: var(--color-ivory);
   }
   .wbsk-gridwrap {
@@ -1068,8 +1138,8 @@
     height: 64px;
     margin: 0 calc(var(--gutter) * -1) clamp(40px, 4vw, 64px);
     padding-inline: var(--gutter);
-    font-size: 0.9375rem;
-    line-height: 1.45;
+    font-size: var(--text-small);
+    line-height: 1.35;
     color: var(--color-ink);
     background: var(--color-ivory);
     border-bottom: 1px solid rgb(35 28 22 / 0.14);
@@ -1149,10 +1219,8 @@
     padding: 0;
     font-family: var(--font-serif);
     font-size: var(--text-h1);
-    font-weight: 400;
-    font-variation-settings: "opsz" 36;
-    line-height: 1.02;
-    letter-spacing: -0.018em;
+    font-weight: 700;
+    line-height: 1.1;
     text-align: left;
     text-wrap: balance;
     color: inherit;
@@ -1562,6 +1630,7 @@
   .wbsk-pagehead {
     display: grid;
     gap: 20px;
+    text-align: center;
     padding-top: calc(var(--header-height) + clamp(56px, 9vw, 152px));
     padding-bottom: clamp(48px, 6vw, 96px);
   }
@@ -1658,8 +1727,10 @@
     }
   }
   .wbsk-morelink {
-    font-size: var(--text-small);
-    font-weight: 500;
+    font-size: var(--text-ui);
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
   }
   .wbsk-textbutton {
     padding: 0;

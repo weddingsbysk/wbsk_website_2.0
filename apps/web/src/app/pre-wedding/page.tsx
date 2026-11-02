@@ -1,5 +1,5 @@
 import "@wbsk/ui/css/pages.css";
-import { CoverVideo, HeroDrift, FilmPlayer, Gallery, GalleryLightbox, Reveal, TitleWords, WbskImage } from "@wbsk/ui";
+import { CoverVideo, HeroDrift, FilmPlayer, Gallery, GalleryLightbox, Reveal, TitleWords, WbskImage, SectionHead } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquiryForm } from "../../components/EnquiryForm";
 import { PreWeddingArc } from "../../components/PreWeddingArc";
@@ -44,7 +44,7 @@ export default async function Page() {
 
       <section className="wbsk-section wbsk-container" aria-label="What we offer">
         <Reveal>
-          <p className="wbsk-label wbsk-homesection__label">What we offer</p>
+          <SectionHead>What We Offer</SectionHead>
         </Reveal>
         <div className="wbsk-offerings">
           {page.offerings.map((offering, index) => (
@@ -70,7 +70,7 @@ export default async function Page() {
       {page.offerings.map((offering) =>
         offering.gallery.length ? (
           <section key={offering.name} className="wbsk-container wbsk-offering__gallery" aria-label={`${offering.name} example photographs`}>
-            <p className="wbsk-label wbsk-homesection__label">{offering.name}, in photographs</p>
+            <SectionHead>{offering.name}, in Photographs</SectionHead>
             <GalleryLightbox
               watermarkSrc={publicAsset("/wbsk-logo.svg")}
               more={offering.gallery.length > GALLERY_SHOWN ? { kind: "view", label: "View all" } : undefined}
