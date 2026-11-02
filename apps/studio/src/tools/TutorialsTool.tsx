@@ -1,7 +1,10 @@
 import { useRef, useState, type CSSProperties } from "react";
 import film from "../tutorials/using-wbsk-studio.json";
 import posterUrl from "../tutorials/using-wbsk-studio.jpg?url";
-import filmUrl from "../tutorials/using-wbsk-studio.mp4?url";
+import { SITE_ADDRESS } from "../brand";
+
+// On the website's hosting, because the Studio's can't jump inside a video: Safari refuses it, and chapters do nothing.
+const filmUrl = `${SITE_ADDRESS}/tutorial/using-wbsk-studio.mp4`;
 
 const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
