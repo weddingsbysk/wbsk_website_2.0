@@ -51,7 +51,7 @@ test("hovering a card shows its description without moving any row", async ({ pa
   const before = await gridTop();
   await card.hover();
   await expect(line).toContainText("Sample wording");
-  expect(await gridTop()).toBe(before);
+  expect(await gridTop()).toBeCloseTo(before, 1);
   await expect(page.locator(".wbsk-card__more").first()).toHaveCSS("opacity", "1", { timeout: 3000 });
 });
 

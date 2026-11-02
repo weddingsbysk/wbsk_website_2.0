@@ -13,6 +13,7 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+# The full browser tests run on the owner's PC before each publish (owner, 2 November 2026), not here.
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -47,24 +48,8 @@ jobs:
         with:
           path: apps/web/out
 
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    env:
-      NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-      - run: npx playwright install --with-deps chromium webkit firefox
-      - run: npm run test:e2e
-
   deploy:
-    needs: [build, test]
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       pages: write

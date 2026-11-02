@@ -19,6 +19,7 @@
     "test:links": "node scripts/check-links.mjs",
     "test:perf": "node scripts/run-lighthouse.mjs",
     "serve": "node scripts/serve-out.mjs",
+    "test:before-publish": "export NEXT_PUBLIC_BASE_PATH=/wbsk_website_2.0; npm run clean && npm run check && playwright test --workers=5",
     "scan": "node scripts/scan-public.mjs",
     "check:deps": "node scripts/check-deps.mjs",
     "clean": "node scripts/clean.mjs",

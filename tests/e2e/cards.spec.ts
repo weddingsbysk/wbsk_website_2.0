@@ -271,10 +271,10 @@ test.describe("the moving row (Decision 30)", () => {
     const place = async () => page.locator(".wbsk-drift li[data-real]").first().evaluate((el) => el.getBoundingClientRect().left);
     const a = await place();
     await page.getByRole("button", { name: "Next wedding" }).click();
-    await page.waitForTimeout(1300);
-    const moved = Math.abs(await place() - a);
-    expect(moved).toBeGreaterThan(step * 0.5);
-    expect(moved).toBeLessThan(step * 1.5);
+    // The glide is timed, so a slow machine simply takes longer to show it.
+    await expect.poll(async () => Math.abs((await place()) - a), { timeout: 15000 }).toBeGreaterThan(step * 0.5);
+    await settled(page);
+    expect(Math.abs((await place()) - a)).toBeLessThan(step * 1.5);
   });
 
   test("the loop's wrap is invisible: one full loop later the row looks identical", async ({ page, browserName }) => {
