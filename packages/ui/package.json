@@ -8,6 +8,7 @@
     "./styles.css": "./src/styles.css",
     "./css/*": "./src/css/*",
     "./motion": "./src/motion/index.ts",
+    "./scenes": "./src/motion/scenes.ts",
     "./drift": "./src/drift.ts",
     "./record-arc": "./src/record-arc/RecordArc.tsx",
     "./tokens": "./src/tokens.ts"

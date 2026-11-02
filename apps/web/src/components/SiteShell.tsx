@@ -2,6 +2,7 @@
 
 import { Footer, Header, LinkProvider, type WbskLinkProps } from "@wbsk/ui";
 import { prefersReducedMotion, startWheelSmoothing, takeExpandSource } from "@wbsk/ui/motion";
+import { startScrollScenes } from "@wbsk/ui/scenes";
 import { navItems } from "@wbsk/content";
 import NextLink from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -166,6 +167,22 @@ export function SiteShell({ children, social }: { children: ReactNode; social: {
       stop();
     };
   }, []);
+
+  // Scroll motion waits until the browser is free, so it never competes with the first picture.
+  useEffect(() => {
+    const main = document.getElementById("main");
+    if (!main) return;
+    let stop = () => {};
+    const start = () => {
+      stop = startScrollScenes(main);
+    };
+    const idle = window.requestIdleCallback?.(start, { timeout: 1500 }) ?? window.setTimeout(start, 400);
+    return () => {
+      window.cancelIdleCallback?.(idle);
+      window.clearTimeout(idle);
+      stop();
+    };
+  }, [pathname]);
 
   const renderLink = useCallback(
     ({ href, onClick, ...rest }: WbskLinkProps) => {

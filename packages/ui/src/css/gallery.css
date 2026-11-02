@@ -16,6 +16,20 @@
   .wbsk-gallerywrap {
     container-type: inline-size;
   }
+  /* A tray of dark cloth that the photographs move through. */
+  .wbsk-gallerywrap:has(> .wbsk-gallerywindow),
+  .wbsk-gallerytray {
+    padding: clamp(12px, 1.6vw, 24px);
+    background-color: var(--color-dusk);
+    background-image: url("../textures/paper-dusk.webp");
+    background-size: 512px;
+    border: 1px solid rgb(221 175 58 / 0.22);
+    border-radius: clamp(16px, 1.8vw, 24px);
+    box-shadow:
+      inset 0 2px 18px rgb(0 0 0 / 0.55),
+      0 18px 40px -22px rgb(35 28 22 / 0.5);
+    --focus: var(--color-gold);
+  }
   /*
    * The gallery's own window: photographs scroll inside it while the page holds still. The page
    * takes over again at either end, so nobody is ever trapped, and short gallery windows leave
@@ -23,11 +37,11 @@
    */
   .wbsk-gallerywindow {
     position: relative;
-    height: min(84svh, 980px);
+    height: min(78svh, 900px);
     overflow: hidden auto;
     overscroll-behavior: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--color-deep-gold) transparent;
+    scrollbar-color: var(--color-gold) transparent;
     border-radius: var(--radius-wbsk);
     mask-image: linear-gradient(to bottom, transparent, #000 40px, #000 calc(100% - 56px), transparent);
   }
@@ -44,7 +58,7 @@
       .wbsk-gallerywindow .wbsk-gallery__photo {
         animation: wbsk-photo-rise linear both;
         animation-timeline: view();
-        animation-range: entry 0% entry 75%;
+        animation-range: entry 0% entry 85%;
       }
       /* The columns slide against each other, so the wall of photos has depth. */
       .wbsk-gallerywindow .wbsk-gallery > li {
@@ -65,15 +79,15 @@
   @keyframes wbsk-photo-rise {
     from {
       opacity: 0;
-      transform: translateY(56px) scale(0.93);
+      transform: translateY(96px) scale(0.86) rotate(calc(var(--d, 0) * 1.6deg));
     }
   }
   @keyframes wbsk-column-drift {
     from {
-      transform: translateY(calc(var(--d, 0) * -18px));
+      transform: translateY(calc(var(--d, 0) * -44px));
     }
     to {
-      transform: translateY(calc(var(--d, 0) * 18px));
+      transform: translateY(calc(var(--d, 0) * 44px));
     }
   }
   .wbsk-gallery {

@@ -30,7 +30,7 @@ export function Letterbox({ children }: { children: ReactNode }) {
     return () => observer.disconnect();
   }, []);
   return (
-    <div ref={ref} className="wbsk-letterbox">
+    <div ref={ref} className="wbsk-letterbox" data-scene="grow">
       <div className="wbsk-letterbox__picture">{children}</div>
       <span className="wbsk-letterbox__bar" data-edge="top" aria-hidden="true" />
       <span className="wbsk-letterbox__bar" data-edge="bottom" aria-hidden="true" />

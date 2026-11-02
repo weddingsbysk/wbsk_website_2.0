@@ -72,7 +72,7 @@ export default async function HomePage() {
         <section data-tone="dark" className="wbsk-section" aria-label="Featured films">
           <div className="wbsk-container">
             <Reveal>
-              <SectionHead>On Film</SectionHead>
+              <SectionHead>Our Featured Films</SectionHead>
             </Reveal>
             <FilmStack films={home.films} />
           </div>

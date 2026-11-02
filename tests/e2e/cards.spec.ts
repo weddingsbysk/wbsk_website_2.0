@@ -231,6 +231,12 @@ test.describe("the moving row (Decision 30)", () => {
     await page.waitForTimeout(700);
     expect(Math.abs((await offset(page)) - b)).toBeLessThan(1);
     await page.getByRole("button", { name: "Play moving weddings" }).click();
+    // Pressing the button can scroll the row away, and off screen it rightly stops.
+    await page.evaluate(() => {
+      const el = document.querySelector(".wbsk-drift")!;
+      window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 60);
+    });
+    await page.mouse.move(2, 2);
     await expect.poll(async () => Math.abs((await offset(page)) - b), { timeout: 6000 }).toBeGreaterThan(5);
   });
 

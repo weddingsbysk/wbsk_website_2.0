@@ -51,7 +51,6 @@
   .wbsk-teampage {
     padding-bottom: var(--gap-block);
     overflow-x: clip;
-    background-image: var(--grain);
   }
   .wbsk-teampage,
   .wbsk-filmspage {

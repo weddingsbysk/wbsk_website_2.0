@@ -13,7 +13,6 @@ type Params = { params: Promise<{ slug: string }> };
 
 export const dynamicParams = false;
 
-const GALLERY_SHOWN = 20;
 
 export async function generateStaticParams() {
   const destinations = await getDestinationPages();
@@ -52,11 +51,8 @@ export default async function Page({ params }: Params) {
       ) : null}
       {photos.length ? (
         <section className="wbsk-section wbsk-container" aria-label="Photographs">
-          <GalleryLightbox
-            watermarkSrc={publicAsset("/wbsk-logo.svg")}
-            more={photos.length > GALLERY_SHOWN ? { kind: "show", label: "Show more" } : undefined}
-          >
-            <Gallery photos={photos} limit={GALLERY_SHOWN} />
+          <GalleryLightbox watermarkSrc={publicAsset("/wbsk-logo.svg")} scrolling>
+            <Gallery photos={photos} />
           </GalleryLightbox>
         </section>
       ) : null}

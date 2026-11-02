@@ -8,7 +8,6 @@ import { publicAsset } from "../../lib/site";
 
 export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("preWeddingPage", "Pre-wedding");
 
-const GALLERY_SHOWN = 12;
 
 export default async function Page() {
   const page = await getPreWeddingPage();
@@ -71,11 +70,8 @@ export default async function Page() {
         offering.gallery.length ? (
           <section key={offering.name} className="wbsk-container wbsk-offering__gallery" aria-label={`${offering.name} example photographs`}>
             <SectionHead>{offering.name}, in Photographs</SectionHead>
-            <GalleryLightbox
-              watermarkSrc={publicAsset("/wbsk-logo.svg")}
-              more={offering.gallery.length > GALLERY_SHOWN ? { kind: "view", label: "View all" } : undefined}
-            >
-              <Gallery photos={offering.gallery} limit={GALLERY_SHOWN} />
+            <GalleryLightbox watermarkSrc={publicAsset("/wbsk-logo.svg")} scrolling label={`${offering.name} photographs`}>
+              <Gallery photos={offering.gallery} />
             </GalleryLightbox>
           </section>
         ) : null,

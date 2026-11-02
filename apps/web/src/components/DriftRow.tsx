@@ -30,7 +30,7 @@ const STACK_DROP = 70;
 const STACK_TURN = 2.5;
 /** Dock-style swell under the cursor, as on the records. */
 const SWELL = 0.09;
-const ROW_SIZES = "(min-width: 1520px) 360px, (min-width: 1120px) 24vw, (min-width: 700px) 270px, 66vw";
+const ROW_SIZES = "(min-width: 1520px) 270px, (min-width: 1190px) 18vw, (min-width: 700px) 210px, 60vw";
 
 function readSession(key: string) {
   try {

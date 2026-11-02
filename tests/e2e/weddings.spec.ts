@@ -189,6 +189,27 @@ test("Next story goes to the next older wedding, and loops after the oldest", as
   await expect(page.locator(".wbsk-nextstory")).toContainText("Sample Asha");
 });
 
+test("every gallery scrolls in its own window while the page holds still", async ({ page }) => {
+  test.skip(isPhone(page), "Mouse wheel.");
+  for (const address of [LARGE, "./pre-wedding/", "./pre-wedding/sample-goa/"]) {
+    await page.goto(address);
+    const windowed = page.locator(".wbsk-gallerywindow").first();
+    await windowed.scrollIntoViewIfNeeded();
+    await windowed.evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 120));
+    await page.waitForTimeout(700);
+    const box = (await windowed.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + 100);
+    const before = await page.evaluate(() => window.scrollY);
+    if ((await windowed.evaluate((el) => el.scrollHeight - el.clientHeight)) < 300) continue;
+    for (let i = 0; i < 2; i += 1) {
+      await page.mouse.wheel(0, 100);
+      await page.waitForTimeout(120);
+    }
+    await expect.poll(() => windowed.evaluate((el) => el.scrollTop), { timeout: 3000 }).toBeGreaterThan(50);
+    expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(before, -1);
+  }
+});
+
 test("reduced motion: no bars, instant pages", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("./weddings/");

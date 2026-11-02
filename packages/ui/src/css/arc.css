@@ -8,7 +8,7 @@
     max-height: 760px;
     overflow: hidden;
     color: var(--color-ivory);
-    background: radial-gradient(ellipse 60% 55% at 50% 52%, #33291f 0%, var(--color-dusk) 75%);
+    background: radial-gradient(ellipse 60% 55% at 50% 52%, rgb(90 70 48 / 0.34) 0%, rgb(31 25 20 / 0) 75%), var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
     touch-action: pan-y;
     user-select: none;
     outline: none;
@@ -35,7 +35,7 @@
     position: absolute;
     inset: 0;
     z-index: 150;
-    background: var(--grain), linear-gradient(to top, var(--color-dusk), rgb(31 25 20 / 0) 16%);
+    background: linear-gradient(to top, var(--color-dusk), rgb(31 25 20 / 0) 16%);
     pointer-events: none;
   }
   /* At rest the layers let go of the graphics chip, so the browser redraws them crisp. */

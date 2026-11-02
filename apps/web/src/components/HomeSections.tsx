@@ -2,8 +2,8 @@
 
 import "@wbsk/ui/css/home.css";
 import { FilmPlayer, SideRow, WbskLink, type WbskImageSource } from "@wbsk/ui";
-import { prefersReducedMotion } from "@wbsk/ui/motion";
-import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
+import { loadGsap, prefersReducedMotion } from "@wbsk/ui/motion";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 
 const never = () => () => {};
 const readReduced = () => prefersReducedMotion();
@@ -59,39 +59,127 @@ export type StackFilm = {
 };
 
 const SWIPE = 48;
+const DRAG_START = 6;
+const CARDS_PER_DRAG = 0.0024;
+const SETTLE_S = 0.9;
+const SHIFT_PERCENT = 92;
+const DEPTH = 0.84;
+const TURN = 15;
+const MAX_TURN = 34;
+const DIM = 0.4;
+const FAN_RIPPLE_S = 0.14;
+
+/** Where a film sits for its distance from the front: the records' depth, kept in a soft arc. */
+function placeFilm(distance: number, fan: number) {
+  const away = Math.abs(distance);
+  const side = Math.sign(distance);
+  const x = side * (1 - Math.exp(-away * 0.95)) * SHIFT_PERCENT * 1.25 * fan;
+  const y = (1 - Math.exp(-away * 0.8)) * 7 * fan;
+  const turn = -side * Math.min(away * TURN, MAX_TURN) * fan;
+  const scale = Math.pow(DEPTH, Math.min(away, 3)) * (0.82 + 0.18 * fan);
+  return {
+    transform: `translate(${x.toFixed(2)}%, ${y.toFixed(2)}%) rotateY(${turn.toFixed(2)}deg) scale(${scale.toFixed(4)})`,
+    zIndex: String(100 - Math.round(away * 10)),
+    opacity: String(away > 2.6 ? Math.max(0, 3.2 - away) : 1),
+    dim: String(Math.min(1, away) * DIM),
+  };
+}
 
 /**
- * The swipeable film stack: the front film large, the next peeking behind (Decision 04). Normal page
- * scrolling is never held. A film stops when it leaves the front, so no sound plays from behind.
+ * Featured films in a depth arc: the front film large, the others receding to each side (Decisions 04
+ * and 13). They follow a finger or a drag, and only a clearly sideways gesture is taken, so normal
+ * page scrolling is never held. A film stops when it leaves the front, so no sound plays from behind.
  */
 export function FilmStack({ films }: { films: StackFilm[] }) {
   const reduced = useReducedMotion();
   const [front, setFront] = useState(0);
   const [playing, setPlaying] = useState<string | null>(null);
-  const drag = useRef<number | null>(null);
   const stackRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const motion = useRef({ p: 0, target: 0 });
+  const fans = useRef<number[]>([]);
+  const drawRef = useRef<() => void>(() => {});
+  const glideRef = useRef<(to: number) => void>(() => {});
+  const wheelAt = useRef(0);
+  const pointerRef = useRef({ x: 0, y: 0, from: 0, moved: false, on: false });
   const count = films.length;
 
-  // The cards settle into the stack as the section comes into view, once (Decision 04).
-  useEffect(() => {
-    const stack = stackRef.current;
-    if (!stack) return;
-    if (stack.getBoundingClientRect().top < window.innerHeight * 0.8) return;
-    stack.dataset.settled = "false";
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry?.isIntersecting) return;
-      observer.disconnect();
-      delete stack.dataset.settled;
-    }, { threshold: 0.3 });
-    observer.observe(stack);
-    return () => observer.disconnect();
-  }, []);
   const go = (by: number) => {
     setPlaying(null);
-    setFront((current) => (current + by + count) % count);
+    motion.current.target += by;
+    setFront(((motion.current.target % count) + count) % count);
+    glideRef.current(motion.current.target);
   };
-  if (!count) return null;
-  const current = films[front]!;
+
+  useLayoutEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || reduced || !count) return;
+    const cards = [...stage.querySelectorAll<HTMLElement>(":scope > .wbsk-stack__card")];
+    fans.current = cards.map(() => 1);
+    const nearest = (index: number) => {
+      let distance = (index - motion.current.p) % count;
+      if (distance > count / 2) distance -= count;
+      if (distance < -count / 2) distance += count;
+      return distance;
+    };
+    const draw = () => {
+      cards.forEach((card, index) => {
+        const place = placeFilm(nearest(index), fans.current[index] ?? 1);
+        card.style.transform = place.transform;
+        card.style.zIndex = place.zIndex;
+        card.style.opacity = place.opacity;
+        card.style.setProperty("--dim", place.dim);
+      });
+    };
+    drawRef.current = draw;
+    draw();
+    stage.dataset.live = "true";
+    const bare = (to: number) => {
+      motion.current.p = to;
+      draw();
+    };
+    glideRef.current = bare;
+
+    let cancelled = false;
+    let stopFan = () => {};
+    void loadGsap().then(({ gsap }) => {
+      if (cancelled) return;
+      glideRef.current = (to) => {
+        gsap.to(motion.current, { p: to, duration: SETTLE_S, ease: "power3.out", overwrite: true, onUpdate: draw });
+      };
+      // The films introduce themselves as the records do: a stack that fans out, nearest first.
+      if (stage.getBoundingClientRect().top < window.innerHeight * 0.75) return;
+      fans.current = cards.map(() => 0);
+      draw();
+      const watch = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry?.isIntersecting) return;
+          watch.disconnect();
+          const order = cards.map((_, index) => index).sort((a, b) => Math.abs(nearest(a)) - Math.abs(nearest(b)));
+          order.forEach((index, rank) => {
+            const holder = { k: 0 };
+            gsap.to(holder, {
+              k: 1,
+              duration: 1.5,
+              delay: 0.2 + rank * FAN_RIPPLE_S,
+              ease: "expo.out",
+              onUpdate: () => {
+                fans.current[index] = holder.k;
+                draw();
+              },
+            });
+          });
+        },
+        { threshold: 0.45 },
+      );
+      watch.observe(stage);
+      stopFan = () => watch.disconnect();
+    });
+    return () => {
+      cancelled = true;
+      stopFan();
+    };
+  }, [reduced, count]);
 
   if (reduced) {
     return (
@@ -106,19 +194,59 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
     );
   }
 
+  if (!count) return null;
+  const current = films[front]!;
+
+  // Dragging: the arc follows, then settles on the nearest film. A press off the front film brings
+  // the one on that side forward. Vertical movement stays with the page.
+  const pointer = pointerRef.current;
   return (
-    <div ref={stackRef} className="wbsk-stack" role="group" aria-roledescription="carousel" aria-label="Featured films">
+    <div ref={stackRef} className="wbsk-stack" data-scene="grow" role="group" aria-roledescription="carousel" aria-label="Featured films">
       <div
+        ref={stageRef}
         className="wbsk-stack__cards"
         onPointerDown={(event) => {
-          if (!playing) drag.current = event.clientX;
+          if (playing) return;
+          Object.assign(pointer, { x: event.clientX, y: event.clientY, from: motion.current.p, moved: false, on: true });
+        }}
+        onPointerMove={(event) => {
+          if (!pointer.on) return;
+          const dx = event.clientX - pointer.x;
+          if (!pointer.moved && Math.abs(dx) > DRAG_START && Math.abs(dx) > Math.abs(event.clientY - pointer.y)) {
+            pointer.moved = true;
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }
+          if (pointer.moved) {
+            motion.current.p = pointer.from - dx * CARDS_PER_DRAG * (1440 / Math.max(window.innerWidth, 390));
+            drawRef.current();
+          }
         }}
         onPointerUp={(event) => {
-          const start = drag.current;
-          drag.current = null;
-          if (start !== null && Math.abs(event.clientX - start) > SWIPE) go(event.clientX < start ? 1 : -1);
+          if (!pointer.on) return;
+          pointer.on = false;
+          if (pointer.moved) {
+            const to = Math.round(motion.current.p);
+            setPlaying(null);
+            motion.current.target = to;
+            setFront(((to % count) + count) % count);
+            glideRef.current(to);
+            return;
+          }
+          const box = event.currentTarget.getBoundingClientRect();
+          const off = (event.clientX - box.left) / box.width - 0.5;
+          if (Math.abs(off) > 0.29) go(off > 0 ? 1 : -1);
         }}
-        onPointerCancel={() => (drag.current = null)}
+        onPointerCancel={() => {
+          pointer.on = false;
+          glideRef.current(motion.current.target);
+        }}
+        onWheel={(event) => {
+          if (Math.abs(event.deltaX) <= Math.abs(event.deltaY) || Math.abs(event.deltaX) < 24) return;
+          const now = event.timeStamp;
+          if (now - wheelAt.current < 500) return;
+          wheelAt.current = now;
+          go(event.deltaX > 0 ? 1 : -1);
+        }}
       >
         {films.map((film, index) => {
           const place = (index - front + count) % count;
@@ -134,7 +262,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
                 videoId={film.videoId}
                 poster={film.poster}
                 title={film.names}
-                sizes="(min-width: 1024px) 70vw, 92vw"
+                sizes="(min-width: 1024px) 50vw, 78vw"
                 active={playing === film.id}
                 onPlay={() => setPlaying(film.id)}
                 onStop={() => setPlaying((p) => (p === film.id ? null : p))}
