@@ -9,9 +9,10 @@ const VIDEO_WAIT_MS = 1800;
 const STILL_MS = 600;
 /** Long enough for the slowest word of the hero title to finish arriving. */
 const TITLE_DONE_MS = 4000;
-const GLIDE_DELAY_MS = 120;
+const GLIDE_DELAY_MS = 60;
 const GLIDE_MS = 1000;
-const REVEAL_OVERLAP_MS = 100;
+const LOGO_MELT_AT_MS = 400;
+const LOGO_MELT_MS = 400;
 const REVEAL_MS = 2600;
 const HERO_SETTLE_EXTRA_MS = 1000;
 
@@ -37,6 +38,7 @@ export function OpeningIntro() {
   const veilRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const glideRef = useRef<HTMLDivElement>(null);
+  const markRef = useRef<HTMLImageElement>(null);
   const boldRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
@@ -45,8 +47,9 @@ export function OpeningIntro() {
     const veil = veilRef.current;
     const video = videoRef.current;
     const glide = glideRef.current;
+    const mark = markRef.current;
     const bold = boldRef.current;
-    if (root.dataset.intro !== "play" || !veil || !video || !glide || !bold) return;
+    if (root.dataset.intro !== "play" || !veil || !video || !glide || !mark || !bold) return;
     (window as Window & { __wbskIntro?: boolean }).__wbskIntro = true;
 
     const reduced = prefersReducedMotion();
@@ -54,6 +57,7 @@ export function OpeningIntro() {
     const timers: number[] = [];
     let ended = false;
     let landing = false;
+    let clipFade: Animation | undefined;
 
     const add = (animation: Animation) => {
       animations.push(animation);
@@ -116,40 +120,56 @@ export function OpeningIntro() {
       if (!target) return finish();
       const to = `translate(${target.left}px, ${target.top}px) scale(${target.width / start.width})`;
       const { softSettle, travel } = motionTokens;
+      mark.style.opacity = "0";
+      bold.style.opacity = "1";
       const hero = document.querySelector(".wbsk-hero .wbsk-frame");
 
-      // The still is the clip's own last frame. It comes up first and the clip goes after, so nothing dips.
-      // The still is the clip's own last frame. It comes up first and the clip goes after, so nothing dips.
-      add(glide.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 80, fill: "forwards" }));
-      add(video.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 80, delay: 80, fill: "both" }));
+      // The clip itself travels, so there's no swap to see. It melts into the official logo on the way.
+      const scale = target.width / start.width;
+      const clipTo = `translate(${target.left - start.x}px, ${target.top - start.y}px) scale(${scale})`;
+      video.style.opacity = "1";
+      video.style.transformOrigin = `${MARK.x * k}px ${MARK.y * k}px`;
+      clipFade?.cancel();
+      add(
+        video.animate([{ transform: "none" }, { transform: clipTo }], {
+          duration: GLIDE_MS,
+          delay: GLIDE_DELAY_MS,
+          easing: travel,
+          fill: "both",
+        }),
+      );
       add(
         glide.animate([{ transform: from }, { transform: to }], {
           duration: GLIDE_MS,
           delay: GLIDE_DELAY_MS,
           easing: travel,
-          fill: "forwards",
+          fill: "both",
         }),
       );
       add(
-        bold.animate([{ opacity: 0 }, { opacity: 1 }], {
-          duration: 500,
-          delay: GLIDE_DELAY_MS + 400,
-          fill: "forwards",
+        glide.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: LOGO_MELT_MS,
+          delay: GLIDE_DELAY_MS + LOGO_MELT_AT_MS,
+          fill: "both",
         }),
       );
-      // The logo is home on black first; only then does the homepage slowly come up behind it.
-      const revealAt = GLIDE_DELAY_MS + GLIDE_MS - REVEAL_OVERLAP_MS;
+      add(
+        video.animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: LOGO_MELT_MS,
+          delay: GLIDE_DELAY_MS + LOGO_MELT_AT_MS + LOGO_MELT_MS / 2,
+          fill: "both",
+        }),
+      );
+      // The homepage starts coming up as soon as the letters have closed, under the glide.
       const reveal = add(
         veil.animate([{ opacity: 1 }, { opacity: 0 }], {
           duration: REVEAL_MS,
-          delay: revealAt,
           easing: travel,
-          fill: "forwards",
+          fill: "both",
         }),
       );
       hero?.animate([{ transform: "scale(1.05)" }, { transform: "scale(1)" }], {
         duration: REVEAL_MS + HERO_SETTLE_EXTRA_MS,
-        delay: revealAt,
         easing: softSettle,
         fill: "both",
       }).addEventListener("finish", (event) => (event.target as Animation).cancel());
@@ -164,7 +184,7 @@ export function OpeningIntro() {
       const begin = () => {
         if (landing || ended) return;
         window.clearTimeout(waiting);
-        const fade = add(
+        clipFade = add(
           video.animate(
             [
               { opacity: 0, transform: "scale(1.04)", filter: "blur(10px)" },
@@ -173,7 +193,7 @@ export function OpeningIntro() {
             { duration: 1000, easing: motionTokens.softSettle, fill: "forwards" },
           ),
         );
-        fade.addEventListener("finish", () => {
+        clipFade.addEventListener("finish", () => {
           timers.push(
             window.setTimeout(() => {
               video.play().catch(showStill);
@@ -203,7 +223,7 @@ export function OpeningIntro() {
         suppressHydrationWarning
       />
       <div ref={glideRef} className="wbsk-intro__glide">
-        <img data-src={publicAsset("/intro/wbsk-mark-gold.png")} alt="" suppressHydrationWarning />
+        <img ref={markRef} data-src={publicAsset("/intro/wbsk-mark-gold.png")} alt="" suppressHydrationWarning />
         <img
           ref={boldRef}
           data-src={publicAsset("/wbsk-logo.svg")}
