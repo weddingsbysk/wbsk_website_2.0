@@ -2,8 +2,8 @@
 
 import "@wbsk/ui/css/home.css";
 import { canHover, ClientCard, pressThen, setCardHot, tiltCard, useCardMotion, WbskLink, type WeddingSummary } from "@wbsk/ui";
-import { capFling, DRAG_START, nearestLoop, scalePush, SECONDS_PER_CARD, shouldDrift, stepDrift, targetForCard, type DriftNumbers } from "@wbsk/ui/drift";
-import { loadGsap, peekGsap, prefersReducedMotion, setExpandSource, travelEase } from "@wbsk/ui/motion";
+import { capFling, DRAG_START, MOMENTUM_TAU, nearestLoop, scalePush, SECONDS_PER_CARD, shouldDrift, stepDrift, targetForCard, type DriftNumbers } from "@wbsk/ui/drift";
+import { loadGsap, peekGsap, prefersReducedMotion, setExpandSource, travelEase, watchRestedWheel } from "@wbsk/ui/motion";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { CrossfadeLine } from "./CrossfadeLine";
 
@@ -193,11 +193,14 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       const layout = layoutRef.current;
       if (!layout || f.frozen || f.holding || f.gliding) return;
       const dt = Math.min(deltaMs / 1000, FRAME_CAP);
-      const base = layout.step / SECONDS_PER_CARD;
-      const free = !f.userPaused && !f.hover && !f.focus && !f.touch && performance.now() >= f.holdUntil && Math.abs(n.velocity) < base;
+      // Negative: the cards travel from left to right (owner, 2 November 2026).
+      const base = -layout.step / SECONDS_PER_CARD;
+      const free = !f.userPaused && !f.hover && !f.focus && !f.touch && performance.now() >= f.holdUntil && Math.abs(n.velocity) < Math.abs(base);
       stepDrift(n, dt, base, free ? 1 : 0);
       render();
-      const speed = Math.abs(n.velocity) + Math.abs(n.push) + n.drift * base;
+      const speed = Math.abs(n.velocity) + Math.abs(n.push) + n.drift * Math.abs(base);
+      // Cards passing under a resting cursor come into focus in turn.
+      if (f.hover && Math.abs(n.velocity) > 4) focusUnderCursor();
       const nowMoving = speed > 0.5;
       if (nowMoving !== moving) {
         moving = nowMoving;
@@ -227,7 +230,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       start: "top bottom",
       end: "bottom top",
       onUpdate: (self) => {
-        if (!f.userPaused && !f.focus && !f.holding && !f.gliding && performance.now() >= pushFrom) n.pushTarget = scalePush(self.getVelocity());
+        if (!f.userPaused && !f.focus && !f.holding && !f.gliding && performance.now() >= pushFrom) n.pushTarget = scalePush(-self.getVelocity());
       },
     });
 
@@ -312,6 +315,29 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       });
     };
 
+    const cursor = { x: 0, y: 0 };
+    const focusUnderCursor = () => {
+      const over = cardAt(cursor.x, cursor.y);
+      setHot(over?.card ?? null);
+      swell(cursor.x, Boolean(over));
+      if (over?.card) {
+        tiltCard(over.card, cursor.x, cursor.y);
+        setDescription(weddingsRef.current[over.index]?.shortDescription ?? "");
+      }
+    };
+    // With the cursor resting on the row, scrolling moves the cards: one notch is about one card.
+    const stopWheel = watchRestedWheel(
+      row,
+      (pixels) => {
+        const layout = layoutRef.current;
+        if (!layout || f.frozen) return;
+        glide?.kill();
+        f.gliding = false;
+        n.velocity = capFling(n.velocity + (pixels / 100) * (layout.step / MOMENTUM_TAU));
+      },
+      () => (layoutRef.current?.setWidth ?? 0) * 1.5,
+    );
+
     const pointer = { id: -1, startX: 0, startY: 0, lastX: 0, lastT: 0, speed: 0, moved: false, guard: false };
     const onPointerDown = (event: PointerEvent) => {
       if (event.button !== 0) return;
@@ -325,13 +351,9 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       if (event.pointerId !== pointer.id) {
         if (event.pointerType === "mouse" && !f.holding) {
           if (f.frozen) return;
-          const over = cardAt(event.clientX, event.clientY);
-          setHot(over?.card ?? null);
-          swell(event.clientX, Boolean(over));
-          if (over?.card) {
-            tiltCard(over.card, event.clientX, event.clientY);
-            setDescription(weddingsRef.current[over.index]?.shortDescription ?? "");
-          }
+          cursor.x = event.clientX;
+          cursor.y = event.clientY;
+          focusUnderCursor();
         }
         return;
       }
@@ -485,6 +507,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
 
     return () => {
       gsap.ticker.remove(tick);
+      stopWheel();
       glide?.kill();
       push.kill();
       screen.disconnect();

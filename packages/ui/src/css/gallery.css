@@ -79,15 +79,15 @@
   @keyframes wbsk-photo-rise {
     from {
       opacity: 0;
-      transform: translateY(96px) scale(0.86) rotate(calc(var(--d, 0) * 1.6deg));
+      transform: translateY(96px) scale(0.86) rotate(calc(var(--drift, 0) * 1.6deg));
     }
   }
   @keyframes wbsk-column-drift {
     from {
-      transform: translateY(calc(var(--d, 0) * -44px));
+      transform: translateY(calc(var(--drift, 0) * -44px));
     }
     to {
-      transform: translateY(calc(var(--d, 0) * 44px));
+      transform: translateY(calc(var(--drift, 0) * 44px));
     }
   }
   .wbsk-gallery {
@@ -99,6 +99,7 @@
     column-gap: calc(var(--col) * 0.06);
   }
   .wbsk-gallery > li {
+    --drift: var(--d2);
     grid-column: var(--c2);
     grid-row: var(--r2) / span var(--s2);
     padding-bottom: calc(var(--col) * 0.06);
@@ -109,6 +110,7 @@
       --columns: 5;
     }
     .wbsk-gallery > li {
+      --drift: var(--d);
       grid-column: var(--c5);
       grid-row: var(--r5) / span var(--s5);
     }

@@ -41,41 +41,47 @@ export default async function Page() {
         />
       </div>
 
-      <section className="wbsk-section wbsk-container" aria-label="What we offer">
-        <Reveal>
+      <section className="wbsk-offers" aria-label="What we offer">
+        <div className="wbsk-container wbsk-offers__head">
           <SectionHead>What We Offer</SectionHead>
-        </Reveal>
+        </div>
         <div className="wbsk-offerings">
           {page.offerings.map((offering, index) => (
-            <Reveal key={offering.name} delayIndex={index} className="wbsk-offering">
-              <h2 className="wbsk-h1">{offering.name}</h2>
-              <p className="wbsk-lead">{offering.description}</p>
-              <div className="wbsk-offering__films">
-                {offering.films.slice(0, 2).map((film, order) => (
-                  <FilmPlayer
-                    key={film.id}
-                    videoId={film.videoId}
-                    poster={film.poster}
-                    title={`${offering.name} example film ${order + 1}`}
-                    sizes="(min-width: 900px) 46vw, 92vw"
-                  />
-                ))}
+            <article key={offering.name} className="wbsk-offering" data-tone={index % 2 ? "dark" : undefined}>
+              <svg className="wbsk-offers__rings" viewBox="0 0 600 600" fill="none" aria-hidden="true">
+                <circle cx="300" cy="300" r="298" />
+                <circle cx="300" cy="300" r="222" />
+                <circle cx="300" cy="300" r="140" />
+                <circle cx="300" cy="300" r="48" />
+              </svg>
+              <div className="wbsk-offering__inner">
+                <Reveal>
+                  <h2 className="wbsk-h1">{offering.name}</h2>
+                  <p className="wbsk-lead">{offering.description}</p>
+                </Reveal>
+                <div className="wbsk-offering__films">
+                  {offering.films.slice(0, 2).map((film, order) => (
+                    <FilmPlayer
+                      key={film.id}
+                      videoId={film.videoId}
+                      poster={film.poster}
+                      title={`${offering.name} example film ${order + 1}`}
+                      sizes="(min-width: 900px) 42vw, 92vw"
+                    />
+                  ))}
+                </div>
+                {offering.gallery.length ? (
+                  <div className="wbsk-offering__gallery" aria-label={`${offering.name} example photographs`} role="group">
+                    <GalleryLightbox watermarkSrc={publicAsset("/wbsk-logo.svg")} scrolling label={`${offering.name} photographs`}>
+                      <Gallery photos={offering.gallery} />
+                    </GalleryLightbox>
+                  </div>
+                ) : null}
               </div>
-            </Reveal>
+            </article>
           ))}
         </div>
       </section>
-
-      {page.offerings.map((offering) =>
-        offering.gallery.length ? (
-          <section key={offering.name} className="wbsk-container wbsk-offering__gallery" aria-label={`${offering.name} example photographs`}>
-            <SectionHead>{offering.name}, in Photographs</SectionHead>
-            <GalleryLightbox watermarkSrc={publicAsset("/wbsk-logo.svg")} scrolling label={`${offering.name} photographs`}>
-              <Gallery photos={offering.gallery} />
-            </GalleryLightbox>
-          </section>
-        ) : null,
-      )}
 
       <section className="wbsk-section wbsk-container" id="plan">
         <EnquiryForm config={page.form} />

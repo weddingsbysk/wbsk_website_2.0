@@ -2,7 +2,7 @@
 
 import "@wbsk/ui/css/home.css";
 import { FilmPlayer, SideRow, WbskLink, type WbskImageSource } from "@wbsk/ui";
-import { loadGsap, prefersReducedMotion } from "@wbsk/ui/motion";
+import { loadGsap, peekGsap, prefersReducedMotion, watchRestedWheel } from "@wbsk/ui/motion";
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 
 const never = () => () => {};
@@ -68,6 +68,12 @@ const TURN = 15;
 const MAX_TURN = 34;
 const DIM = 0.4;
 const FAN_RIPPLE_S = 0.14;
+const FILM_SECONDS = 15;
+const FILM_RESUME_MS = 1500;
+const FILM_WHEEL_STEP = 60;
+const FILM_WHEEL_GAP_MS = 320;
+const FILM_WHEEL_LOOP = 140;
+const FILMS_PAUSED_KEY = "wbsk-films-paused";
 
 /** Where a film sits for its distance from the front: the records' depth, kept in a soft arc. */
 function placeFilm(distance: number, fan: number) {
@@ -99,17 +105,27 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
   const motion = useRef({ p: 0, target: 0 });
   const fans = useRef<number[]>([]);
   const drawRef = useRef<() => void>(() => {});
+  const holdRef = useRef<{ holding: boolean; holdUntil: number } | null>(null);
   const glideRef = useRef<(to: number) => void>(() => {});
   const wheelAt = useRef(0);
+  const playingRef = useRef(false);
+  const pausedRef = useRef(false);
+  const [paused, setPaused] = useState(false);
   const pointerRef = useRef({ x: 0, y: 0, from: 0, moved: false, on: false });
   const count = films.length;
 
+  const wrapFront = (position: number) => ((Math.round(position) % count) + count) % count;
   const go = (by: number) => {
     setPlaying(null);
-    motion.current.target += by;
-    setFront(((motion.current.target % count) + count) % count);
+    motion.current.target = Math.round(motion.current.target) + by;
+    setFront(wrapFront(motion.current.target));
     glideRef.current(motion.current.target);
   };
+  const goRef = useRef(go);
+  useEffect(() => {
+    goRef.current = go;
+    playingRef.current = Boolean(playing);
+  });
 
   useLayoutEffect(() => {
     const stage = stageRef.current;
@@ -139,14 +155,99 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
       draw();
     };
     glideRef.current = bare;
+    const state = { hover: false, focus: false, gliding: false, holding: false, holdUntil: 0, speed: 0, seen: false };
+    holdRef.current = state;
+    try {
+      pausedRef.current = sessionStorage.getItem(FILMS_PAUSED_KEY) === "1";
+      setPaused(pausedRef.current);
+    } catch {
+      // Private windows can refuse storage; the films just move.
+    }
+    const onEnter = (event: globalThis.PointerEvent) => {
+      if (event.pointerType === "mouse") state.hover = true;
+    };
+    const onLeave = () => {
+      state.hover = false;
+      state.holdUntil = performance.now() + FILM_RESUME_MS;
+    };
+    const onFocusIn = () => {
+      state.focus = true;
+    };
+    const onFocusOut = (event: FocusEvent) => {
+      if (stage.parentElement?.contains(event.relatedTarget as Node | null)) return;
+      state.focus = false;
+      state.holdUntil = performance.now() + FILM_RESUME_MS;
+    };
+    const tray = stage.parentElement!;
+    tray.addEventListener("pointerenter", onEnter);
+    tray.addEventListener("pointerleave", onLeave);
+    tray.addEventListener("focusin", onFocusIn);
+    tray.addEventListener("focusout", onFocusOut);
+    // With the cursor resting on the films, scrolling brings the next one forward.
+    let wheeled = 0;
+    let lastStep = 0;
+    const stopWheel = watchRestedWheel(
+      tray,
+      (pixels) => {
+        wheeled += pixels;
+        const now = performance.now();
+        if (Math.abs(wheeled) < FILM_WHEEL_STEP || now - lastStep < FILM_WHEEL_GAP_MS) return;
+        goRef.current(wheeled > 0 ? 1 : -1);
+        wheeled = 0;
+        lastStep = now;
+      },
+      () => count * FILM_WHEEL_LOOP,
+    );
+    const onSideways = (event: WheelEvent) => {
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      event.preventDefault();
+      wheeled += event.deltaX;
+      const now = performance.now();
+      if (Math.abs(wheeled) < FILM_WHEEL_STEP || now - lastStep < FILM_WHEEL_GAP_MS) return;
+      goRef.current(wheeled > 0 ? 1 : -1);
+      wheeled = 0;
+      lastStep = now;
+    };
+    tray.addEventListener("wheel", onSideways, { passive: false });
+    let tickFn: ((time: number, deltaMs: number) => void) | null = null;
+    const screen = new IntersectionObserver(([entry]) => {
+      state.seen = Boolean(entry?.isIntersecting);
+    });
+    screen.observe(stage);
 
     let cancelled = false;
     let stopFan = () => {};
     void loadGsap().then(({ gsap }) => {
       if (cancelled) return;
       glideRef.current = (to) => {
-        gsap.to(motion.current, { p: to, duration: SETTLE_S, ease: "power3.out", overwrite: true, onUpdate: draw });
+        state.gliding = true;
+        gsap.to(motion.current, {
+          p: to,
+          duration: SETTLE_S,
+          ease: "power3.out",
+          overwrite: true,
+          onUpdate: draw,
+          onComplete: () => {
+            state.gliding = false;
+            state.holdUntil = performance.now() + FILM_RESUME_MS;
+          },
+        });
       };
+      // The slow endless drift, left to right. It rests while anyone is looking closely.
+      tickFn = (_time, deltaMs) => {
+        if (!state.seen || document.hidden || state.gliding || state.holding) return;
+        const dt = Math.min(deltaMs / 1000, 0.1);
+        const free = !pausedRef.current && !playingRef.current && !state.hover && !state.focus && performance.now() >= state.holdUntil && fans.current.every((k) => k > 0.99);
+        const tau = free ? 0.5 : 0.2;
+        state.speed = (free ? 1 : 0) + (state.speed - (free ? 1 : 0)) * Math.exp(-dt / tau);
+        if (state.speed < 0.001) return;
+        motion.current.p -= (state.speed * dt) / FILM_SECONDS;
+        motion.current.target = motion.current.p;
+        draw();
+        const near = wrapIndex(motion.current.p);
+        setFront((was) => (was === near ? was : near));
+      };
+      gsap.ticker.add(tickFn);
       // The films introduce themselves as the records do: a stack that fans out, nearest first.
       if (stage.getBoundingClientRect().top < window.innerHeight * 0.75) return;
       fans.current = cards.map(() => 0);
@@ -175,9 +276,18 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
       watch.observe(stage);
       stopFan = () => watch.disconnect();
     });
+    const wrapIndex = (position: number) => ((Math.round(position) % count) + count) % count;
     return () => {
       cancelled = true;
       stopFan();
+      stopWheel();
+      screen.disconnect();
+      tray.removeEventListener("wheel", onSideways);
+      tray.removeEventListener("pointerenter", onEnter);
+      tray.removeEventListener("pointerleave", onLeave);
+      tray.removeEventListener("focusin", onFocusIn);
+      tray.removeEventListener("focusout", onFocusOut);
+      if (tickFn) peekGsap()?.gsap.ticker.remove(tickFn);
     };
   }, [reduced, count]);
 
@@ -214,6 +324,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
           const dx = event.clientX - pointer.x;
           if (!pointer.moved && Math.abs(dx) > DRAG_START && Math.abs(dx) > Math.abs(event.clientY - pointer.y)) {
             pointer.moved = true;
+            if (holdRef.current) holdRef.current.holding = true;
             event.currentTarget.setPointerCapture(event.pointerId);
           }
           if (pointer.moved) {
@@ -224,11 +335,12 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
         onPointerUp={(event) => {
           if (!pointer.on) return;
           pointer.on = false;
+          if (holdRef.current) holdRef.current.holding = false;
           if (pointer.moved) {
             const to = Math.round(motion.current.p);
             setPlaying(null);
             motion.current.target = to;
-            setFront(((to % count) + count) % count);
+            setFront(wrapFront(to));
             glideRef.current(to);
             return;
           }
@@ -238,14 +350,8 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
         }}
         onPointerCancel={() => {
           pointer.on = false;
+          if (holdRef.current) holdRef.current.holding = false;
           glideRef.current(motion.current.target);
-        }}
-        onWheel={(event) => {
-          if (Math.abs(event.deltaX) <= Math.abs(event.deltaY) || Math.abs(event.deltaX) < 24) return;
-          const now = event.timeStamp;
-          if (now - wheelAt.current < 500) return;
-          wheelAt.current = now;
-          go(event.deltaX > 0 ? 1 : -1);
         }}
       >
         {films.map((film, index) => {
@@ -278,6 +384,25 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
             <span className="wbsk-sr">Film </span>
             {front + 1} / {count}
           </p>
+          <button
+            type="button"
+            className="wbsk-roundbutton"
+            aria-label={paused ? "Play moving films" : "Pause moving films"}
+            onClick={() => {
+              const next = !pausedRef.current;
+              pausedRef.current = next;
+              setPaused(next);
+              try {
+                sessionStorage.setItem(FILMS_PAUSED_KEY, next ? "1" : "0");
+              } catch {
+                // Private windows can refuse storage; it still holds for this page.
+              }
+            }}
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path d={paused ? "M8 5v14l11-7z" : "M9 5v14M15 5v14"} />
+            </svg>
+          </button>
           <button type="button" className="wbsk-roundbutton" aria-label="Previous film" onClick={() => go(-1)}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
           </button>

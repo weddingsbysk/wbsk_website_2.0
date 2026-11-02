@@ -84,6 +84,55 @@ export function createWheelClassifier() {
   };
 }
 
+const REST_MS = 280;
+
+/**
+ * Lets a wheel move something only when the cursor had already come to rest on it. A page scroll
+ * that started elsewhere carries straight on as the thing passes under the cursor, and after one
+ * full loop the page takes over, so nobody can get stuck in an endless row (owner, 2 November 2026).
+ */
+export function watchRestedWheel(el: HTMLElement, onMove: (pixels: number) => void, loopPixels: () => number): () => void {
+  let enteredAt = Infinity;
+  let lastWheelAt = -Infinity;
+  let claimed = false;
+  let travelled = 0;
+  const onEnter = (event: PointerEvent) => {
+    if (event.pointerType === "mouse") enteredAt = event.timeStamp;
+  };
+  const onLeave = () => {
+    enteredAt = Infinity;
+  };
+  const onAnyWheel = (event: WheelEvent) => {
+    if (event.timeStamp - lastWheelAt > GESTURE_GAP_MS) {
+      claimed = event.composedPath().includes(el) && event.timeStamp - enteredAt >= REST_MS;
+      travelled = 0;
+    }
+    lastWheelAt = event.timeStamp;
+  };
+  const onWheel = (event: WheelEvent) => {
+    if (!claimed || Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.ctrlKey || event.metaKey) return;
+    const pixels = event.deltaMode === 1 ? event.deltaY * 40 : event.deltaY;
+    travelled += Math.abs(pixels);
+    if (travelled > loopPixels()) {
+      claimed = false;
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    onMove(pixels);
+  };
+  el.addEventListener("pointerenter", onEnter);
+  el.addEventListener("pointerleave", onLeave);
+  el.addEventListener("wheel", onWheel, { passive: false });
+  window.addEventListener("wheel", onAnyWheel, { capture: true, passive: true });
+  return () => {
+    el.removeEventListener("pointerenter", onEnter);
+    el.removeEventListener("pointerleave", onLeave);
+    el.removeEventListener("wheel", onWheel);
+    window.removeEventListener("wheel", onAnyWheel, { capture: true });
+  };
+}
+
 function hasOwnScroll(start: Element | null): boolean {
   for (let el = start; el && el !== document.documentElement; el = el.parentElement) {
     if (el.matches("[data-native-wheel], dialog, input, textarea, select")) return true;

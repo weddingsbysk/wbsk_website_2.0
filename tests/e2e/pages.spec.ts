@@ -60,6 +60,8 @@ test("film stack: arrows change the front film, and nothing loads from YouTube u
   await page.goto("./");
   const stack = page.locator(".wbsk-stack");
   await stack.scrollIntoViewIfNeeded();
+  await stack.getByRole("button", { name: "Pause moving films" }).click();
+  await page.waitForTimeout(400);
   await expect(stack.locator(".wbsk-stack__count")).toContainText("1 / ");
   await stack.getByRole("button", { name: "Next film" }).click();
   await expect(stack.locator(".wbsk-stack__count")).toContainText("2 / ");
@@ -123,6 +125,25 @@ test("Careers: open roles and the form", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Sample Lead Photographer" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Be part of WBSK" })).toBeVisible();
   await checks(page);
+});
+
+test("films: drift slowly, the wheel brings the next one, the pause button holds", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 760, "Mouse wheel.");
+  await page.goto("./");
+  const stack = page.locator(".wbsk-stack");
+  await stack.evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100));
+  await page.waitForTimeout(3500);
+  const place = () => page.locator(".wbsk-stack__card").first().evaluate((el) => (el as HTMLElement).style.transform);
+  const a = await place();
+  await expect.poll(place, { timeout: 5000 }).not.toBe(a);
+  const box = (await stack.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + 100);
+  await page.waitForTimeout(700);
+  const y = await page.evaluate(() => window.scrollY);
+  const before = await stack.locator(".wbsk-stack__count").innerText();
+  await page.mouse.wheel(0, 100);
+  await expect(stack.locator(".wbsk-stack__count")).not.toHaveText(before, { timeout: 3000 });
+  expect(await page.evaluate(() => window.scrollY)).toBe(y);
 });
 
 test("Pre-wedding: cover, records, offerings, galleries and form, in order", async ({ page }) => {

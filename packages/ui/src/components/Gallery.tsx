@@ -26,6 +26,7 @@ export function Gallery({ photos, limit }: { photos: SanityImage[]; limit?: numb
           "--s2": narrow[index]!.span,
           // Neighbouring columns drift in opposite directions as the gallery scrolls.
           "--d": wide[index]!.column % 2 ? -1 : 1,
+          "--d2": narrow[index]!.column % 2 ? -1 : 1,
         } as CSSProperties;
         return (
           <li key={photo.url} style={style} data-extra={limit !== undefined && index >= limit ? true : undefined}>

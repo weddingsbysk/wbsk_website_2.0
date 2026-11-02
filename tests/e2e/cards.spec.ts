@@ -148,11 +148,11 @@ test.describe("Weddings page (Decision 05)", () => {
 });
 
 test.describe("the moving row (Decision 30)", () => {
-  test("drifts right to left, with copies hidden from everyone but the eye", async ({ page }) => {
+  test("drifts left to right, with copies hidden from everyone but the eye", async ({ page }) => {
     await gotoRow(page);
     await driftReady(page);
     const a = await offset(page);
-    await expect.poll(() => offset(page), { timeout: 8000 }).toBeLessThan(a - 5);
+    await expect.poll(() => offset(page), { timeout: 12000 }).toBeGreaterThan(a + 5);
     const copies = page.locator(".wbsk-drift__track > li:not([data-real])");
     expect(await copies.count()).toBe(16);
     const allHidden = await copies.evaluateAll((els) => els.every((el) => el.getAttribute("aria-hidden") === "true" && (el as HTMLElement).inert && el.querySelector("a")?.tabIndex === -1));
@@ -172,6 +172,33 @@ test.describe("the moving row (Decision 30)", () => {
     const before = await page.evaluate(() => window.scrollY);
     await page.mouse.wheel(0, 400);
     await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 }).toBeGreaterThan(before + 100);
+  });
+
+  test("with the cursor resting on the row, the wheel moves the cards and the page stays", async ({ page }) => {
+    test.skip(isPhone(page), "Mouse wheel.");
+    const row = await gotoRow(page);
+    await driftReady(page);
+    await page.waitForTimeout(3500);
+    const box = (await row.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, Math.min(box.y + 150, 600));
+    await page.waitForTimeout(700);
+    const y = await page.evaluate(() => window.scrollY);
+    const a = await offset(page);
+    await page.mouse.wheel(0, 100);
+    await expect.poll(async () => Math.abs((await offset(page)) - a), { timeout: 3000 }).toBeGreaterThan(100);
+    expect(await page.evaluate(() => window.scrollY)).toBe(y);
+  });
+
+  test("a page scroll that started elsewhere carries on over the row", async ({ page }) => {
+    test.skip(isPhone(page), "Mouse wheel.");
+    await page.goto("./");
+    await page.mouse.move(700, 300);
+    const y = await page.evaluate(() => window.scrollY);
+    for (let i = 0; i < 30; i += 1) {
+      await page.mouse.wheel(0, 100);
+      await page.waitForTimeout(40);
+    }
+    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 4000 }).toBeGreaterThan(y + 2000);
   });
 
   test("a sideways wheel moves the row and leaves the page where it is", async ({ page }) => {
