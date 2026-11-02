@@ -112,13 +112,13 @@ export function startScrollScenes(root: HTMLElement): () => void {
           scrollTrigger: { trigger: next, start: "top 100%", end: "top 40%", scrub: 0.6 },
         });
       });
-      // The footer's contents rise out from under the page as it lifts away.
-      const footer = document.querySelector(".wbsk-footer");
-      if (footer && !touch) {
-        gsap.from(footer.children, {
+      // The big mark rises out from under the page as it lifts away. Links stay put, so a click can't miss.
+      const mark = document.querySelector(".wbsk-footer__mark");
+      if (mark && !touch) {
+        gsap.from(mark, {
           y: -90,
           ease: "none",
-          scrollTrigger: { trigger: footer, start: "top 100%", end: "bottom 100%", scrub: 0.5 },
+          scrollTrigger: { trigger: ".wbsk-footer", start: "top 100%", end: "bottom 100%", scrub: 0.5 },
         });
       }
     }, root);
