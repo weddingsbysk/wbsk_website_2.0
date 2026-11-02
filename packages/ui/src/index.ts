@@ -12,6 +12,7 @@ export { Letterbox } from "./components/Letterbox";
 export { Reveal } from "./components/Reveal";
 export { SectionHead } from "./components/SectionHead";
 export { SideRow } from "./components/SideRow";
+export { useScrollWindow } from "./components/useScrollWindow";
 export { canHover, pressThen, rippleIn, setCardHot, tiltCard, useCardEntrance, useCardMotion } from "./components/cardMotion";
 export { WbskImage } from "./components/WbskImage";
 export { ClientCard, CoupleNames, StoryCover, TitleWords, type WeddingSummary } from "./components/WeddingViews";

@@ -729,7 +729,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
 
   return (
     <>
-      <div ref={rowRef} className="wbsk-drift" data-cursor="Scroll" data-mode={mode} data-fits={fits} data-paused={paused}>
+      <div ref={rowRef} className="wbsk-drift" data-mode={mode} data-fits={fits} data-paused={paused}>
         <ul ref={trackRef} className="wbsk-drift__track" aria-label="Featured weddings">
           {copies.map(({ wedding, round }) => (
             <li key={`before-${round}-${wedding.slug}`} aria-hidden="true" inert>

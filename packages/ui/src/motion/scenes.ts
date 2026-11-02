@@ -69,6 +69,23 @@ export function startScrollScenes(root: HTMLElement): () => void {
         );
       }
 
+      // Layers at different depths: each drifts with the scroll at its own pace (Our team).
+      const small = window.innerWidth < 760 ? 0.5 : 1;
+      gsap.utils.toArray<HTMLElement>("[data-depth]", root).forEach((layer) => {
+        const reach = Number(layer.dataset.depth) * small;
+        const holder = layer.parentElement!;
+        const onScreen = holder.getBoundingClientRect().top < window.innerHeight;
+        gsap.fromTo(
+          layer,
+          { y: onScreen ? 0 : reach },
+          {
+            y: -reach,
+            ease: "none",
+            scrollTrigger: { trigger: holder, start: onScreen ? window.scrollY : "top bottom", end: "bottom top", scrub: 0.6 },
+          },
+        );
+      });
+
       // Big pictures and films grow into place as they come up the screen, tied to the scroll.
       gsap.utils.toArray<HTMLElement>("[data-scene='grow']", root).filter(below).forEach((media) => {
         gsap.from(media, {

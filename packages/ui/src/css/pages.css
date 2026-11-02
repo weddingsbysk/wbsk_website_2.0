@@ -1,6 +1,34 @@
 /* Films, Our team, Careers, Pre-wedding and destination pages. */
 @layer components {
   /* Films: a screening room (Decision 10). */
+  /* All the films in one tray of dark cloth; they scroll inside it while the page holds still. */
+  .wbsk-filmtray {
+    position: relative;
+    padding: clamp(10px, 1.1vw, 16px);
+    background: rgb(245 239 230 / 0.04);
+    border-radius: clamp(16px, 1.8vw, 24px);
+    box-shadow:
+      inset 0 0 0 1px rgb(221 175 58 / 0.18),
+      inset 0 0 30px rgb(0 0 0 / 0.5);
+  }
+  .wbsk-filmtray__window {
+    height: min(78svh, 840px);
+    overflow: hidden auto;
+    overscroll-behavior: auto;
+    scrollbar-width: none;
+    border-radius: 10px;
+  }
+  .wbsk-filmtray__window::-webkit-scrollbar {
+    display: none;
+  }
+  .wbsk-filmtray__window:focus-visible {
+    outline-offset: 4px;
+  }
+  .wbsk-screening {
+    margin: 0;
+    padding: clamp(16px, 2.4vw, 36px) clamp(16px, 2.6vw, 40px);
+    list-style: none;
+  }
   /* Each film beside its story, on alternating sides, so the page reads like a programme. */
   .wbsk-screening__film {
     padding-block: clamp(28px, 3.4vw, 52px);
@@ -73,53 +101,33 @@
   .wbsk-teampage__line {
     color: var(--color-gold);
   }
-  /* The founder beside a large portrait; the crew together, as one team. */
   .wbsk-person {
     display: grid;
-    gap: 28px clamp(32px, 5vw, 88px);
+    gap: 28px clamp(32px, 6vw, 112px);
     align-items: center;
-    padding-block: clamp(24px, 3vw, 48px);
+    padding-block: var(--gap-block);
   }
   @media (min-width: 900px) {
     .wbsk-person[data-lead] {
-      grid-template-columns: 7fr 5fr;
+      grid-template-columns: 1fr 1fr;
     }
-    .wbsk-person[data-lead] .wbsk-person__photo {
-      max-width: 460px;
-      justify-self: end;
+    .wbsk-person[data-side="left"]:not([data-lead]) {
+      grid-template-columns: 1fr 2fr;
     }
-  }
-  .wbsk-crewgrid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(32px, 3.6vw, 56px) clamp(16px, 2.4vw, 36px);
-    margin-block: clamp(24px, 3vw, 48px) 0;
-    padding-block: clamp(24px, 3vw, 48px);
-    border-top: 1px solid rgb(221 175 58 / 0.2);
-    list-style: none;
-  }
-  @media (min-width: 760px) {
-    .wbsk-crewgrid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+    .wbsk-person[data-side="right"]:not([data-lead]) {
+      grid-template-columns: 2fr 1fr;
+    }
+    .wbsk-person[data-side="right"]:not([data-lead]) .wbsk-person__photo {
+      order: 2;
     }
   }
-  @media (min-width: 1200px) {
-    .wbsk-crewgrid {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+  [data-depth] {
+    will-change: transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-depth] {
+      will-change: auto;
     }
-  }
-  .wbsk-crewgrid .wbsk-person__name {
-    margin: 16px 0 6px;
-    font-size: var(--text-h3);
-  }
-  .wbsk-crewgrid .wbsk-label {
-    letter-spacing: 0.16em;
-  }
-  .wbsk-crewgrid .wbsk-person__lines {
-    margin-top: 8px;
-    font-size: var(--text-small);
-    line-height: 1.35;
-    color: rgb(245 239 230 / 0.82);
   }
   .wbsk-person__photo {
     position: relative;

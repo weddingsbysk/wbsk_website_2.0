@@ -97,6 +97,33 @@ test("the hero never plays a film for reduced motion", async ({ page }) => {
   }
 });
 
+test("Films: one scrolling tray; the page holds still while it moves", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 760, "Mouse wheel.");
+  await page.goto("./films/");
+  const tray = page.locator(".wbsk-filmtray__window");
+  await tray.evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100));
+  await page.waitForTimeout(600);
+  const box = (await tray.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + 120);
+  const y = await page.evaluate(() => window.scrollY);
+  await page.mouse.wheel(0, 100);
+  await page.waitForTimeout(150);
+  await page.mouse.wheel(0, 100);
+  await expect.poll(() => tray.evaluate((el) => el.scrollTop), { timeout: 3000 }).toBeGreaterThan(50);
+  expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(y, -1);
+});
+
+test("Our team: portraits and words drift at their own depths", async ({ page }) => {
+  await page.goto("./our-team/");
+  const layer = page.locator(".wbsk-person__photo [data-depth]").nth(1);
+  await layer.evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 300));
+  await page.waitForTimeout(1500);
+  const place = () => layer.evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42);
+  const a = await place();
+  await page.evaluate(() => window.scrollBy(0, 200));
+  await expect.poll(place, { timeout: 4000 }).not.toBeCloseTo(a, 0);
+});
+
 test("Films: dark, each film with its text, and no YouTube until pressed", async ({ page }) => {
   const youtube: string[] = [];
   page.on("request", (r) => {
@@ -110,7 +137,7 @@ test("Films: dark, each film with its text, and no YouTube until pressed", async
   await checks(page);
 });
 
-test("Our team: lead first and largest, crew together, closing links", async ({ page }) => {
+test("Our team: lead first and largest, crew alternate, closing links", async ({ page }) => {
   await page.goto("./our-team/");
   await expect(page.locator(".wbsk-person").first()).toHaveAttribute("data-lead", "true");
   await expect(page.getByRole("link", { name: "Careers →" })).toBeVisible();
