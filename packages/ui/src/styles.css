@@ -835,6 +835,51 @@
     pointer-events: none;
     background: linear-gradient(to top, rgb(20 15 11 / 0.78), rgb(20 15 11 / 0) 60%);
   }
+  .wbsk-hero__eyebrow {
+    margin: 0 0 14px;
+    font-family: var(--font-ui);
+    font-size: var(--text-label);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgb(245 239 230 / 0.85);
+  }
+  html[data-intro="play"] .wbsk-hero__eyebrow,
+  html[data-intro="play"] .wbsk-hero__cue {
+    opacity: 0;
+  }
+  html[data-hero="enter"] .wbsk-hero__eyebrow,
+  html[data-hero="enter"] .wbsk-hero__cue {
+    animation: wbsk-fadein 1.2s 0.5s var(--settle) both;
+  }
+  /* A thin line running down: there's more below. */
+  .wbsk-hero__cue {
+    position: absolute;
+    right: var(--gutter);
+    bottom: clamp(88px, 12vh, 124px);
+    z-index: 1;
+    width: 1px;
+    height: 64px;
+    overflow: hidden;
+    background: rgb(245 239 230 / 0.25);
+  }
+  .wbsk-hero__cue::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--color-gold);
+    transform: translateY(-100%);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .wbsk-hero__cue::after {
+      animation: wbsk-cue 2.4s 1s var(--travel) 3;
+    }
+    @keyframes wbsk-cue {
+      70%,
+      100% {
+        transform: translateY(100%);
+      }
+    }
+  }
   .wbsk-hero__text {
     position: absolute;
     z-index: 1;
@@ -1584,26 +1629,60 @@
   .wbsk-film__play:focus-visible {
     outline-offset: -4px;
   }
+  /* A quiet ring on the picture, not a badge over it; it fills with gold as you reach for it. */
   .wbsk-film__icon {
     position: absolute;
     top: 50%;
     left: 50%;
     display: grid;
-    width: 72px;
-    height: 72px;
+    width: 64px;
+    height: 64px;
     place-items: center;
-    color: var(--color-dusk);
-    background: var(--color-gold);
+    color: var(--color-gold);
+    background: rgb(20 15 11 / 0.55);
+    border: 1px solid var(--color-gold);
     border-radius: 50%;
     translate: -50% -50%;
-    transition: transform var(--hover) var(--settle);
+    transition:
+      transform 0.5s var(--settle),
+      color var(--hover) var(--settle),
+      background-color var(--hover) var(--settle);
   }
-  .wbsk-film__play:hover .wbsk-film__icon {
-    transform: scale(1.06);
+  .wbsk-film__icon svg {
+    width: 20px;
+    height: 20px;
+    margin-left: 2px;
+  }
+  .wbsk-film__play:hover .wbsk-film__icon,
+  .wbsk-film__play:focus-visible .wbsk-film__icon {
+    color: var(--color-dusk);
+    background: var(--color-gold);
+    transform: scale(1.12);
+  }
+  /* A hairline just inside each film, as a print has, and a shadow beneath it. */
+  .wbsk-film {
+    box-shadow: 0 22px 44px -24px rgb(0 0 0 / 0.65);
+  }
+  .wbsk-film::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgb(245 239 230 / 0.1);
+    pointer-events: none;
   }
   .wbsk-cinema {
     display: grid;
-    gap: clamp(32px, 4vw, 64px);
+    gap: clamp(24px, 3vw, 44px);
+    justify-items: center;
+  }
+  .wbsk-cinema > * {
+    width: 100%;
+    max-width: 1040px;
+  }
+  .wbsk-reels {
+    justify-content: center;
   }
   .wbsk-cinema .wbsk-h2 {
     margin: 0;
@@ -1642,13 +1721,28 @@
     transform: translate(2px, -2px);
   }
 
+  /* A page's last line, centred, with the gold line that opens every section. */
   .wbsk-closingband {
     display: grid;
-    gap: 16px;
+    gap: 14px;
+    justify-items: center;
     padding-block: var(--section);
+    text-align: center;
+  }
+  .wbsk-closingband::before {
+    content: "";
+    width: 1px;
+    height: clamp(40px, 4vw, 64px);
+    margin-bottom: 12px;
+    background: currentcolor;
+    opacity: 0.35;
   }
   .wbsk-closingband .wbsk-lead {
     opacity: 0.78;
+  }
+  .wbsk-closingline {
+    display: flex;
+    justify-content: center;
   }
   .wbsk-nextstory {
     border-radius: 0;

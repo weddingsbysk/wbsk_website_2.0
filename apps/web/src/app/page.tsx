@@ -32,7 +32,9 @@ export default async function HomePage() {
           <CoverVideo desktop={home.videoDesktop} phone={home.videoPhone} posterDesktop={home.posterDesktop} posterPhone={home.posterPhone} label="the WBSK film" />
         </div>
         <HeroDrift />
+        <span className="wbsk-hero__cue" aria-hidden="true" />
         <div className="wbsk-hero__text wbsk-container">
+          <p className="wbsk-hero__eyebrow">Photography · Films · Events</p>
           <h1 className="wbsk-display wbsk-measure">
             <TitleWords text={home.heroLine ?? "Weddings By Siddhant Kapoor"} />
           </h1>

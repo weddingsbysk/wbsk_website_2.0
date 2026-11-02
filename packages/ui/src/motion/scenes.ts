@@ -82,9 +82,10 @@ export function startScrollScenes(root: HTMLElement): () => void {
       // The next scene slides over this one, which falls behind more slowly, for a sense of depth.
       gsap.utils.toArray<HTMLElement>(":scope > section", root).forEach((scene) => {
         const next = scene.nextElementSibling;
-        if (!next || scene.matches(".wbsk-storycover")) return;
+        // Short scenes stay put: they'd have too little spare space for the next one to overlap.
+        if (!next || scene.matches(".wbsk-storycover") || scene.offsetHeight < window.innerHeight * 0.6) return;
         gsap.to(scene, {
-          y: 72,
+          y: 28,
           ease: "none",
           scrollTrigger: { trigger: next, start: "top 100%", end: "top 40%", scrub: 0.6 },
         });

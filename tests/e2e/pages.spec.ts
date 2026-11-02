@@ -97,7 +97,7 @@ test("the hero never plays a film for reduced motion", async ({ page }) => {
   }
 });
 
-test("Films: dark, one per screen, with text and no YouTube until pressed", async ({ page }) => {
+test("Films: dark, each film with its text, and no YouTube until pressed", async ({ page }) => {
   const youtube: string[] = [];
   page.on("request", (r) => {
     if (/youtube|ytimg/.test(r.url())) youtube.push(r.url());
@@ -105,14 +105,12 @@ test("Films: dark, one per screen, with text and no YouTube until pressed", asyn
   await page.goto("./films/");
   const films = page.locator(".wbsk-screening__film");
   await expect(films.first()).toBeVisible();
-  const height = await films.first().evaluate((el) => el.getBoundingClientRect().height);
-  expect(height).toBeGreaterThanOrEqual(page.viewportSize()!.height - 1);
   await expect(films.first().locator(".wbsk-label")).toBeVisible();
   expect(youtube).toEqual([]);
   await checks(page);
 });
 
-test("Our team: lead first and largest, crew alternate, closing links", async ({ page }) => {
+test("Our team: lead first and largest, crew together, closing links", async ({ page }) => {
   await page.goto("./our-team/");
   await expect(page.locator(".wbsk-person").first()).toHaveAttribute("data-lead", "true");
   await expect(page.getByRole("link", { name: "Careers →" })).toBeVisible();

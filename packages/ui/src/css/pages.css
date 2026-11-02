@@ -1,34 +1,54 @@
 /* Films, Our team, Careers, Pre-wedding and destination pages. */
 @layer components {
   /* Films: a screening room (Decision 10). */
-  html:has(.wbsk-filmspage) {
-    scroll-snap-type: y proximity;
-  }
+  /* Each film beside its story, on alternating sides, so the page reads like a programme. */
   .wbsk-screening__film {
-    display: flex;
-    align-items: center;
-    min-height: 100svh;
-    padding-block: calc(var(--header-height) + 16px) 32px;
-    scroll-snap-align: center;
+    padding-block: clamp(28px, 3.4vw, 52px);
   }
   .wbsk-screening__inner {
     display: grid;
-    gap: 20px;
-    max-width: min(1680px, calc((100svh - var(--header-height) - 170px) * 16 / 9 + var(--gutter) * 2));
+    gap: 20px clamp(32px, 5vw, 80px);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .wbsk-screening__inner {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    }
+    .wbsk-screening__film:nth-child(even) .wbsk-screening__inner {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    }
+    .wbsk-screening__film:nth-child(even) .wbsk-screening__text {
+      order: -1;
+      text-align: right;
+    }
+    .wbsk-screening__film:nth-child(even) .wbsk-filmcaption__line {
+      margin-left: auto;
+    }
+  }
+  .wbsk-screening__text > * + * {
+    margin-top: 12px;
   }
   .wbsk-screening__text .wbsk-h3 {
-    margin: 6px 0 0;
+    font-size: var(--text-h2);
+    font-weight: 700;
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+  .wbsk-screening__text .wbsk-filmcaption__line {
+    max-width: 30em;
+    font-size: var(--text-lead);
+    line-height: 1.35;
   }
   @media (prefers-reduced-motion: no-preference) {
     .wbsk-screening__film .wbsk-film {
-      opacity: 0.55;
+      opacity: 0.7;
       transition: opacity 0.9s var(--settle);
     }
     .wbsk-screening__film[data-centre="true"] .wbsk-film {
       opacity: 1;
     }
     .wbsk-screening__film .wbsk-screening__text {
-      opacity: 0;
+      opacity: 0.4;
       transition: opacity 0.9s var(--settle);
     }
     .wbsk-screening__film[data-centre="true"] .wbsk-screening__text {
@@ -41,12 +61,6 @@
       }
     }
   }
-  @media (prefers-reduced-motion: reduce) {
-    html:has(.wbsk-filmspage) {
-      scroll-snap-type: none;
-    }
-  }
-
   /* Our team: a dark, lit chapter (Decision 07). The grain is part of the page, so nothing repaints. */
   .wbsk-teampage {
     padding-bottom: var(--gap-block);
@@ -59,25 +73,53 @@
   .wbsk-teampage__line {
     color: var(--color-gold);
   }
+  /* The founder beside a large portrait; the crew together, as one team. */
   .wbsk-person {
     display: grid;
-    gap: 28px clamp(32px, 6vw, 112px);
+    gap: 28px clamp(32px, 5vw, 88px);
     align-items: center;
-    padding-block: var(--gap-block);
+    padding-block: clamp(24px, 3vw, 48px);
   }
   @media (min-width: 900px) {
     .wbsk-person[data-lead] {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 7fr 5fr;
     }
-    .wbsk-person[data-side="left"]:not([data-lead]) {
-      grid-template-columns: 1fr 2fr;
+    .wbsk-person[data-lead] .wbsk-person__photo {
+      max-width: 460px;
+      justify-self: end;
     }
-    .wbsk-person[data-side="right"]:not([data-lead]) {
-      grid-template-columns: 2fr 1fr;
+  }
+  .wbsk-crewgrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(32px, 3.6vw, 56px) clamp(16px, 2.4vw, 36px);
+    margin-block: clamp(24px, 3vw, 48px) 0;
+    padding-block: clamp(24px, 3vw, 48px);
+    border-top: 1px solid rgb(221 175 58 / 0.2);
+    list-style: none;
+  }
+  @media (min-width: 760px) {
+    .wbsk-crewgrid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
-    .wbsk-person[data-side="right"]:not([data-lead]) .wbsk-person__photo {
-      order: 2;
+  }
+  @media (min-width: 1200px) {
+    .wbsk-crewgrid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
+  }
+  .wbsk-crewgrid .wbsk-person__name {
+    margin: 16px 0 6px;
+    font-size: var(--text-h3);
+  }
+  .wbsk-crewgrid .wbsk-label {
+    letter-spacing: 0.16em;
+  }
+  .wbsk-crewgrid .wbsk-person__lines {
+    margin-top: 8px;
+    font-size: var(--text-small);
+    line-height: 1.35;
+    color: rgb(245 239 230 / 0.82);
   }
   .wbsk-person__photo {
     position: relative;
@@ -131,15 +173,31 @@
   }
 
   /* Careers. */
+  /* Open roles as printed cards, side by side. */
   .wbsk-roles {
     padding-bottom: var(--gap-block);
   }
+  .wbsk-roles > ul {
+    display: grid;
+    gap: clamp(16px, 2vw, 28px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 760px) {
+    .wbsk-roles > ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
   .wbsk-roles > ul > li {
-    padding-block: clamp(24px, 3vw, 40px);
-    border-bottom: 1px solid rgb(35 28 22 / 0.16);
+    padding: clamp(24px, 3vw, 40px);
+    background: url("../textures/card-stock.webp") 0 0 / 512px;
+    border-radius: var(--radius-wbsk);
+    box-shadow: var(--shadow-card-rest);
   }
   .wbsk-roles .wbsk-lead {
     margin-top: 12px;
+    color: var(--color-muted);
   }
 
   /* Pre-wedding. */
@@ -314,7 +372,7 @@
   }
   .wbsk-carousel__film {
     flex: none;
-    width: min(84vw, 1280px);
+    width: clamp(280px, 44vw, 680px);
     scroll-snap-align: start;
   }
   .wbsk-carousel__frame {

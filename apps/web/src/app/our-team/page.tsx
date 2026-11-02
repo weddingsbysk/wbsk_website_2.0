@@ -33,21 +33,22 @@ export default async function Page() {
           </GlideIn>
         </section>
       ) : null}
-      {core.map((member, index) => {
-        const side = index % 2 === 0 ? "left" : "right";
-        return (
-          <section key={member.name} className="wbsk-container wbsk-person" data-side={side}>
-            <GlideIn side={side}>
-              {member.portrait ? <WbskImage image={member.portrait} slot="card" sizes="(min-width: 900px) 32vw, 92vw" aspectRatio={4 / 5} /> : null}
-            </GlideIn>
-            <Reveal className="wbsk-person__text">
-              <h2 className="wbsk-h2 wbsk-person__name">{member.name}</h2>
-              <p className="wbsk-label">{member.role}</p>
-              {member.lines ? <p className="wbsk-person__lines">{member.lines}</p> : null}
-            </Reveal>
-          </section>
-        );
-      })}
+      {core.length ? (
+        <ul className="wbsk-container wbsk-crewgrid">
+          {core.map((member, index) => (
+            <li key={member.name} className="wbsk-person" data-side="grid" style={{ padding: 0, display: "block" }}>
+              <GlideIn side={index % 2 === 0 ? "left" : "right"}>
+                {member.portrait ? <WbskImage image={member.portrait} slot="card" sizes="(min-width: 1200px) 18vw, (min-width: 760px) 30vw, 46vw" aspectRatio={4 / 5} /> : null}
+              </GlideIn>
+              <Reveal className="wbsk-person__text">
+                <h2 className="wbsk-person__name wbsk-h3">{member.name}</h2>
+                <p className="wbsk-label">{member.role}</p>
+                {member.lines ? <p className="wbsk-person__lines">{member.lines}</p> : null}
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {others.length ? (
         <ul className="wbsk-container wbsk-crewrow">
           {others.map((member) => (
