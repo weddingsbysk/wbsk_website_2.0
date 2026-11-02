@@ -101,12 +101,13 @@ export function OpeningIntro() {
       const { softSettle, travel } = motionTokens;
       const hero = document.querySelector(".wbsk-hero .wbsk-frame");
 
-      add(glide.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, fill: "forwards" }));
-      add(video.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: "forwards" }));
+      // The still is the clip's own last frame. It comes up first and the clip goes after, so nothing dips.
+      add(glide.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 80, fill: "forwards" }));
+      add(video.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 80, delay: 80, fill: "both" }));
       const move = add(
         glide.animate([{ transform: from }, { transform: to }], {
           duration: 1000,
-          delay: 140,
+          delay: 200,
           easing: travel,
           fill: "forwards",
         }),

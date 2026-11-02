@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { WbskImageSource } from "../image";
 import { prefersReducedMotion } from "../motion";
 
+const POSTER_MELT_MS = 950;
+
 type NetworkInfo = { saveData?: boolean; effectiveType?: string };
 
 const posterUrl = (image: WbskImageSource | null | undefined, width: number) =>
@@ -44,7 +46,23 @@ export function CoverVideo({
     const source = portrait ? phone : desktop;
     let position = 0;
     let onScreen = true;
+    const posterAddress = portrait ? posterUrl(posterPhone ?? posterDesktop, 1080) : posterUrl(posterDesktop, 1920);
+    let cover: HTMLDivElement | null = null;
+    const melt = () => {
+      if (!cover) return;
+      const gone = cover;
+      cover = null;
+      gone.dataset.gone = "";
+      window.setTimeout(() => gone.remove(), POSTER_MELT_MS);
+    };
+    video.addEventListener("playing", melt);
     const load = () => {
+      if (posterAddress && !video.currentTime && !video.hasAttribute("src")) {
+        cover = document.createElement("div");
+        cover.className = "wbsk-covervideo__poster";
+        cover.style.backgroundImage = `url("${posterAddress}")`;
+        video.after(cover);
+      }
       if (video.getAttribute("src") !== source) {
         video.src = source;
         video.currentTime = position;
@@ -82,9 +100,11 @@ export function CoverVideo({
       observer.disconnect();
       view.disconnect();
       window.removeEventListener("load", onLoad);
+      video.removeEventListener("playing", melt);
+      cover?.remove();
       video.pause();
     };
-  }, [desktop, phone]);
+  }, [desktop, phone, posterDesktop, posterPhone]);
 
   const landscape = posterUrl(posterDesktop, 1920);
   const upright = posterUrl(posterPhone ?? posterDesktop, 1080);
