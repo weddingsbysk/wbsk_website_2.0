@@ -16,9 +16,14 @@ const LOGO_MELT_MS = 400;
 const REVEAL_MS = 2600;
 const HERO_SETTLE_EXTRA_MS = 1000;
 
-/** Where the closed-up WBSK sits in the 1920 × 1080 clip. */
-const MARK = { x: 844, y: 512.5, width: 232 };
-const CLIP = { width: 1920, height: 1080, nameWidth: 1260 };
+/**
+ * The clip holds only the band the name occupies, at the master's full 4K sharpness (2640 × 200).
+ * These sizes are half that: a 1320 × 100 band, centred in a 1920 × 1080 frame. MARK is where the
+ * closed-up WBSK sits inside it.
+ */
+const MARK = { x: 544, y: 22.5, width: 232 };
+const CLIP = { width: 1320, height: 100, nameWidth: 1260 };
+const FRAME = { width: 1920, height: 1080 };
 const PHONE_BELOW = 820;
 
 /** React's development mode starts each effect twice, so a stop only counts if no second start follows. */
@@ -28,7 +33,7 @@ function clipScale() {
   const { innerWidth: w, innerHeight: h } = window;
   // On phones the name is sized to the screen, not the clip's wide black frame.
   if (w < PHONE_BELOW) return (w * 0.88) / CLIP.nameWidth;
-  return Math.min(w / CLIP.width, h / CLIP.height);
+  return Math.min(w / FRAME.width, h / FRAME.height);
 }
 
 export function OpeningIntro() {

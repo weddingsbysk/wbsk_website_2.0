@@ -9,14 +9,14 @@ import "./globals.css";
 
 const playfair = localFont({
   src: "../fonts/playfair-display.woff2",
-  weight: "400 900",
+  weight: "500 700",
   variable: "--font-playfair",
   display: "swap",
   adjustFontFallback: "Times New Roman",
 });
 const playfairItalic = localFont({
   src: "../fonts/playfair-display-italic.woff2",
-  weight: "400 900",
+  weight: "500 700",
   style: "italic",
   variable: "--font-playfair-italic",
   display: "swap",
@@ -25,14 +25,14 @@ const playfairItalic = localFont({
 });
 const cormorant = localFont({
   src: "../fonts/cormorant-garamond.woff2",
-  weight: "300 700",
+  weight: "400 500",
   variable: "--font-cormorant",
   display: "swap",
   adjustFontFallback: "Times New Roman",
 });
 const cormorantItalic = localFont({
   src: "../fonts/cormorant-garamond-italic.woff2",
-  weight: "300 700",
+  weight: "400 500",
   style: "italic",
   variable: "--font-cormorant-italic",
   display: "swap",
@@ -41,7 +41,7 @@ const cormorantItalic = localFont({
 });
 const outfit = localFont({
   src: "../fonts/outfit.woff2",
-  weight: "100 900",
+  weight: "400 500",
   variable: "--font-outfit",
   display: "swap",
   preload: false,

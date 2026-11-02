@@ -2,14 +2,14 @@
 
 import "@wbsk/ui/css/home.css";
 import { canHover, ClientCard, pressThen, setCardHot, tiltCard, useCardMotion, WbskLink, type WeddingSummary } from "@wbsk/ui";
-import { capFling, DRAG_START, MOMENTUM_TAU, nearestLoop, scalePush, SECONDS_PER_CARD, shouldDrift, stepDrift, targetForCard, type DriftNumbers } from "@wbsk/ui/drift";
+import { capFling, DRAG_START, MOMENTUM_TAU, nearestLoop, roundsToFill, scalePush, SECONDS_PER_CARD, shouldDrift, stepDrift, targetForCard, type DriftNumbers } from "@wbsk/ui/drift";
 import { loadGsap, peekGsap, prefersReducedMotion, setExpandSource, travelEase, watchRestedWheel } from "@wbsk/ui/motion";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { CrossfadeLine } from "./CrossfadeLine";
 
 type Mode = "plain" | "still" | "drift";
 type Gsap = Awaited<ReturnType<typeof loadGsap>>;
-type Layout = { step: number; cardWidth: number; setWidth: number; rowWidth: number; gutter: number; count: number };
+type Layout = { step: number; cardWidth: number; setWidth: number; rowWidth: number; gutter: number; count: number; rounds: number };
 
 const GLIDE_SECONDS = 1.1;
 const RESUME_AFTER_MS = 1500;
@@ -60,6 +60,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
   const weddings = limit === null ? allWeddings : allWeddings.slice(0, limit);
   const [mode, setMode] = useState<Mode>("plain");
   const [fits, setFits] = useState(false);
+  const [rounds, setRounds] = useState(1);
   const [paused, setPaused] = useState(false);
   const [atEnds, setAtEnds] = useState({ start: true, end: false });
   const [description, setDescription] = useState("");
@@ -110,12 +111,14 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       rowWidth: row.clientWidth,
       gutter: parseFloat(getComputedStyle(track).paddingLeft) || 0,
       count: real.length,
+      rounds: roundsToFill(step * real.length, row.clientWidth),
     };
     layoutRef.current = layout;
     // A new card size keeps the same place in the loop, so resizing never shows a jump.
     if (before && before.setWidth) numbers.current.x *= layout.setWidth / before.setWidth;
-    const drifting = !prefersReducedMotion() && shouldDrift(real.length, layout.setWidth, layout.rowWidth);
+    const drifting = !prefersReducedMotion() && shouldDrift(real.length);
     setMode(drifting ? "drift" : "still");
+    setRounds(layout.rounds);
     setFits(layout.setWidth - gap + layout.gutter * 2 <= layout.rowWidth);
     renderRef.current();
   }, []);
@@ -173,9 +176,10 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       const layout = layoutRef.current;
       if (!layout) return;
       if (!f.gliding && !f.focus) n.x = wrapped();
-      if (n.x === lastX) return;
-      lastX = n.x;
-      track.style.transform = `translate3d(${(-(layout.setWidth + n.x)).toFixed(2)}px, 0, 0)`;
+      const at = layout.setWidth * layout.rounds + n.x;
+      if (at === lastX) return;
+      lastX = at;
+      track.style.transform = `translate3d(${(-at).toFixed(2)}px, 0, 0)`;
     };
     renderRef.current = render;
 
@@ -267,7 +271,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       const box = row.getBoundingClientRect();
       const trackBox = track.getBoundingClientRect();
       if (clientY < trackBox.top || clientY > trackBox.bottom) return null;
-      const along = clientX - box.left - layout.gutter + layout.setWidth + n.x;
+      const along = clientX - box.left - layout.gutter + layout.setWidth * layout.rounds + n.x;
       const slot = Math.floor(along / layout.step);
       if (along - slot * layout.step > layout.cardWidth) return null;
       const item = cards()[slot];
@@ -291,7 +295,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       const layout = layoutRef.current;
       if (!layout) return;
       const box = row.getBoundingClientRect();
-      const along = clientX - box.left - layout.gutter + layout.setWidth + n.x;
+      const along = clientX - box.left - layout.gutter + layout.setWidth * layout.rounds + n.x;
       const slot = Math.floor(along / layout.step);
       const all = cards();
       const near = new Set<HTMLElement>();
@@ -429,7 +433,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       if (!layout || !item) return;
       setDescription(weddingsRef.current[real().indexOf(item as HTMLElement)]?.shortDescription ?? "");
       const index = real().indexOf(item as HTMLElement);
-      const highest = layout.setWidth * 2 + layout.gutter - layout.rowWidth;
+      const highest = layout.setWidth * (layout.rounds + 1) + layout.gutter - layout.rowWidth;
       const goal = targetForCard(index, wrapped(), layout.step, layout.cardWidth, layout.rowWidth, layout.gutter);
       const current = wrapped();
       if (goal === current) return;
@@ -721,14 +725,14 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
   };
 
   const showArrows = (mode === "drift" || mode === "still") && !fits;
-  const copies = mode === "drift" ? weddings : [];
+  const copies = mode === "drift" ? Array.from({ length: rounds }, (_, round) => weddings.map((wedding) => ({ wedding, round }))).flat() : [];
 
   return (
     <>
-      <div ref={rowRef} className="wbsk-drift" data-mode={mode} data-fits={fits} data-paused={paused}>
+      <div ref={rowRef} className="wbsk-drift" data-cursor="Scroll" data-mode={mode} data-fits={fits} data-paused={paused}>
         <ul ref={trackRef} className="wbsk-drift__track" aria-label="Featured weddings">
-          {copies.map((wedding) => (
-            <li key={`before-${wedding.slug}`} aria-hidden="true" inert>
+          {copies.map(({ wedding, round }) => (
+            <li key={`before-${round}-${wedding.slug}`} aria-hidden="true" inert>
               <ClientCard wedding={wedding} sizes={ROW_SIZES} copy />
             </li>
           ))}
@@ -737,8 +741,8 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
               <ClientCard wedding={wedding} onShow={setDescription} sizes={ROW_SIZES} />
             </li>
           ))}
-          {copies.map((wedding) => (
-            <li key={`after-${wedding.slug}`} aria-hidden="true" inert>
+          {copies.map(({ wedding, round }) => (
+            <li key={`after-${round}-${wedding.slug}`} aria-hidden="true" inert>
               <ClientCard wedding={wedding} sizes={ROW_SIZES} copy />
             </li>
           ))}

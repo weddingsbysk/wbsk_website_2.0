@@ -44,7 +44,8 @@ export function Header({ items, enquireHref, homeHref, logoSrc, currentPath, cle
           className="wbsk-header__logo"
           aria-label="Weddings By Siddhant Kapoor, home"
         >
-          <img src={logoSrc} alt="" width="130" height="30" />
+          {/* On standard screens its hairlines are thickened a touch, so they stay sharp at this small size. */}
+          <img src={logoSrc} srcSet={`${logoSrc.replace(".svg", "-1x.svg")} 1x, ${logoSrc} 2x`} alt="" width="104" height="24" />
         </WbskLink>
         <nav aria-label="Main" className="wbsk-header__nav">
           <ul>

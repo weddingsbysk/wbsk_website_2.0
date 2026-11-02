@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { capFling, FLING_CAP, nearestLoop, PUSH_CAP, scalePush, shouldDrift, stepDrift, targetForCard, type DriftNumbers } from "../../packages/ui/src/drift";
+import { capFling, FLING_CAP, nearestLoop, PUSH_CAP, roundsToFill, scalePush, shouldDrift, stepDrift, targetForCard, type DriftNumbers } from "../../packages/ui/src/drift";
 
 const start = (over: Partial<DriftNumbers> = {}): DriftNumbers => ({ x: 0, velocity: 0, drift: 0, push: 0, pushTarget: 0, ...over });
 const run = (state: DriftNumbers, seconds: number, hz: number, target = 1) => {
@@ -38,10 +38,12 @@ describe("the homepage row's movement (Decision 30)", () => {
     expect(capFling(99999)).toBe(FLING_CAP);
   });
 
-  it("stays still when the cards are few or don't fill the screen", () => {
-    expect(shouldDrift(2, 5000, 390)).toBe(false);
-    expect(shouldDrift(8, 2000, 1440)).toBe(false);
-    expect(shouldDrift(8, 3800, 1440)).toBe(true);
+  it("stays still only when the cards are few, and repeats enough for any screen", () => {
+    expect(shouldDrift(2)).toBe(false);
+    expect(shouldDrift(3)).toBe(true);
+    expect(roundsToFill(2400, 1440)).toBe(1);
+    expect(roundsToFill(2400, 2560)).toBe(2);
+    expect(roundsToFill(900, 2560)).toBe(3);
   });
 
   it("brings a card fully into view, and leaves one that already is", () => {

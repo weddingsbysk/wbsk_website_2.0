@@ -4,24 +4,40 @@
   /* Our Philosophy: a dark scene, one big quote, and the numbers. */
   .wbsk-philosophy {
     position: relative;
-    padding-block: clamp(120px, 12vw, 176px);
+    padding-block: 0 clamp(64px, 7vw, 104px);
+    overflow: clip;
     text-align: center;
   }
-  .wbsk-philosophy::before,
-  .wbsk-philosophy::after {
+  /* The old site's strip of words, in the gold of the labels. */
+  .wbsk-ticker {
+    margin-bottom: clamp(56px, 6.4vw, 96px);
+    padding-block: 16px;
+    overflow: hidden;
+    border-bottom: 1px solid rgb(221 175 58 / 0.18);
+  }
+  .wbsk-ticker p {
+    display: flex;
+    gap: 3.2em;
+    width: max-content;
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--text-label);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: rgb(245 239 230 / 0.66);
+  }
+  .wbsk-ticker span {
+    display: inline-flex;
+    gap: 3.2em;
+    align-items: center;
+  }
+  .wbsk-ticker span::after {
     content: "";
-    position: absolute;
-    left: 50%;
-    width: 1px;
-    height: clamp(48px, 5vw, 72px);
+    width: 5px;
+    height: 5px;
     background: var(--color-gold);
-    opacity: 0.45;
-  }
-  .wbsk-philosophy::before {
-    top: 0;
-  }
-  .wbsk-philosophy::after {
-    bottom: 0;
+    border-radius: 50%;
   }
   .wbsk-philosophy__quote {
     max-width: 16em;
@@ -324,15 +340,24 @@
     gap: 40px;
   }
 
-  .wbsk-teamline {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px 40px;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-top: clamp(24px, 3vw, 40px);
+  /* The team: a modest picture beside a few words, not a whole screen. */
+  .wbsk-teamblock {
+    display: grid;
+    gap: 24px clamp(32px, 4vw, 64px);
+    align-items: center;
+    padding-block: clamp(48px, 5vw, 80px);
   }
-
+  @media (min-width: 900px) {
+    .wbsk-teamblock {
+      grid-template-columns: 7fr 5fr;
+    }
+  }
+  .wbsk-teamblock__text > * + * {
+    margin-top: 14px;
+  }
+  .wbsk-teamblock .wbsk-frame {
+    aspect-ratio: 21 / 9 !important;
+  }
   /* Reviews (Decision 07). */
   .wbsk-reviews__slide {
     display: grid;
@@ -447,5 +472,113 @@
   .wbsk-enquiry {
     display: grid;
     gap: clamp(40px, 5vw, 80px);
+  }
+}
+
+@layer components {
+  /* Reviews: one couple's words, centred and given room. */
+  .wbsk-reviews {
+    max-width: 54rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+  .wbsk-reviews__slide {
+    justify-items: center;
+  }
+  .wbsk-reviews__quote {
+    font-family: var(--font-serif);
+    font-size: clamp(1.625rem, 2.7vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.22;
+    text-wrap: balance;
+  }
+  .wbsk-reviews__controls {
+    justify-content: center;
+  }
+  /* Reactions: the same dark tray as the weddings, smaller. */
+  .wbsk-reactions {
+    margin-top: var(--gap-block);
+  }
+  .wbsk-reactions .wbsk-sectionhead__title,
+  .wbsk-homesection .wbsk-featuredon-title {
+    font-size: var(--text-h2);
+  }
+  .wbsk-reactions .wbsk-siderow__list {
+    --focus: var(--color-gold);
+    margin-inline: 0;
+    padding: 24px;
+    color: var(--color-ivory);
+    background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
+    border-radius: clamp(16px, 1.8vw, 24px);
+    box-shadow: inset 0 2px 18px rgb(0 0 0 / 0.55);
+  }
+  .wbsk-reactions .wbsk-siderow__bar {
+    margin-top: 12px;
+  }
+  .wbsk-reactions .wbsk-siderow__reaction {
+    width: clamp(150px, 13vw, 200px);
+  }
+  .wbsk-reactions .wbsk-film__icon {
+    width: 44px;
+    height: 44px;
+  }
+  /* Featured on: a quiet strip of credits. */
+  .wbsk-featuredon {
+    max-width: 760px;
+    margin-inline: auto;
+  }
+  /* The enquiry: the invitation beside the form, not a long page of fields. */
+  .wbsk-enquiry {
+    display: grid;
+    gap: clamp(32px, 4vw, 64px);
+    align-items: start;
+  }
+  @media (min-width: 1100px) {
+    .wbsk-enquiry {
+      grid-template-columns: 4fr 8fr;
+    }
+    .wbsk-enquiry__aside {
+      position: sticky;
+      top: calc(var(--header-height) + 32px);
+    }
+  }
+  .wbsk-enquiry__title {
+    margin: 16px 0 0;
+    font-family: var(--font-serif);
+    font-size: var(--text-h1);
+    font-weight: 700;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  .wbsk-enquiry__title em {
+    font-family: var(--font-playfair-italic), var(--font-serif);
+    color: var(--color-deep-gold);
+  }
+  .wbsk-enquiry .wbsk-packages {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin-top: clamp(24px, 2.6vw, 36px);
+  }
+  .wbsk-enquiry .wbsk-packages > li {
+    padding: 14px 18px;
+  }
+  .wbsk-enquiry .wbsk-packages strong {
+    font-size: 1.0625rem;
+  }
+  .wbsk-enquiry .wbsk-form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    padding: clamp(20px, 2.6vw, 40px);
+    background: url("../textures/card-stock.webp") 0 0 / 512px;
+    box-shadow: var(--shadow-card-rest);
+  }
+  .wbsk-enquiry .wbsk-form__next ol {
+    display: grid;
+    gap: 12px 24px;
+  }
+  @media (min-width: 700px) {
+    .wbsk-enquiry .wbsk-form__next ol {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 }

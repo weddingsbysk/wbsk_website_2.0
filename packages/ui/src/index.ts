@@ -1,4 +1,5 @@
 export { CoverVideo } from "./components/CoverVideo";
+export { CursorLabel } from "./components/CursorLabel";
 export { FilmPlayer } from "./components/FilmPlayer";
 export { Footer } from "./components/Footer";
 export { Gallery } from "./components/Gallery";

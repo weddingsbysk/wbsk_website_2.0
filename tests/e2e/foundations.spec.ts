@@ -226,7 +226,7 @@ test("the header is clear over the hero, then solid", async ({ page }) => {
 test("sections below the screen rise in once, and stay", async ({ page }) => {
   await page.goto("");
   await page.waitForLoadState("networkidle");
-  const target = page.locator("#enquire [data-reveal]");
+  const target = page.locator("#enquire [data-reveal]").first();
   await expect(target).toHaveAttribute("data-reveal", "waiting");
   await target.scrollIntoViewIfNeeded();
   await expect(target).toHaveAttribute("data-reveal", "shown");

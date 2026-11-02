@@ -33,9 +33,9 @@
     --hover: 0.3s;
     --settle: cubic-bezier(0.22, 1, 0.36, 1);
     --travel: cubic-bezier(0.65, 0, 0.35, 1);
-    --gutter: clamp(20px, 3.6vw, 56px);
-    --section: clamp(112px, 13vw, 208px);
-    --gap-block: clamp(64px, 8vw, 128px);
+    --gutter: clamp(20px, round(3.6vw, 1px), 56px);
+    --section: clamp(72px, 8vw, 128px);
+    --gap-block: clamp(52px, 5.5vw, 88px);
     /* A wide scale: the drama comes from the distance between headline and text (Warm Cinema). */
     --text-display: clamp(3.25rem, 6.7vw, 6rem);
     --text-h1: clamp(2.5rem, 4.2vw, 3.75rem);
@@ -205,7 +205,7 @@
     display: grid;
     justify-items: center;
     max-width: 46rem;
-    margin: 0 auto clamp(44px, 5vw, 72px);
+    margin: 0 auto clamp(32px, 3.4vw, 52px);
     text-align: center;
   }
   .wbsk-sectionhead__title {
@@ -309,6 +309,48 @@
         }
       }
     }
+  }
+
+  /* A ring that trails the cursor over rows and galleries, naming what's possible there. */
+  .wbsk-cursor {
+    position: fixed;
+    top: -40px;
+    left: -40px;
+    z-index: 60;
+    display: grid;
+    width: 80px;
+    height: 80px;
+    place-items: center;
+    font-family: var(--font-ui);
+    font-size: 0.625rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-dusk);
+    background: rgb(221 175 58 / 0.92);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+  }
+  @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+    .wbsk-cursor {
+      display: none;
+    }
+  }
+  /* The last impression: the mark, very large, running off the bottom of the page. */
+  .wbsk-footer__mark {
+    margin-top: clamp(32px, 4vw, 64px);
+    margin-bottom: -6vw;
+    padding-inline: var(--gutter);
+    opacity: 0.1;
+    pointer-events: none;
+  }
+  .wbsk-footer__mark img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .wbsk-lit {
+    display: inline;
   }
 
   /* Real materials: cotton paper on the light scenes, dark woven cloth on the dark ones. */
@@ -498,9 +540,17 @@
     flex: none;
     border-radius: 2px;
   }
+  /* Whole pixels only, so the browser never has to blur the logo to place it. */
   .wbsk-header__logo img {
-    width: auto;
-    height: clamp(20px, 1.7vw, 24px);
+    display: block;
+    width: 86px;
+    height: 20px;
+  }
+  @media (min-width: 900px) {
+    .wbsk-header__logo img {
+      width: 104px;
+      height: 24px;
+    }
   }
   .wbsk-header__nav {
     margin-left: auto;
@@ -577,7 +627,7 @@
 
   /* Footer */
   .wbsk-footer {
-    padding-block: clamp(64px, 7vw, 112px) 32px;
+    padding-block: clamp(48px, 5vw, 72px) 0;
   }
   .wbsk-footer__inner {
     display: flex;
@@ -589,6 +639,11 @@
   .wbsk-footer__logo img {
     width: auto;
     height: 24px;
+  }
+  /* Every footer link is a comfortable target, on touch screens too. */
+  .wbsk-footer__links a {
+    display: inline-block;
+    padding-block: 6px;
   }
   .wbsk-footer__links {
     display: flex;
@@ -883,7 +938,7 @@
     height: 100%;
     opacity: 0;
     mix-blend-mode: screen;
-    will-change: opacity, transform, filter;
+    will-change: opacity, transform;
   }
   .wbsk-intro__glide {
     position: fixed;

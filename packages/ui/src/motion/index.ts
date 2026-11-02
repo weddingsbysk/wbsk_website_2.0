@@ -85,6 +85,7 @@ export function createWheelClassifier() {
 }
 
 const REST_MS = 280;
+const PAGE_STILL_MS = 450;
 
 /**
  * Lets a wheel move something only when the cursor had already come to rest on it. A page scroll
@@ -96,6 +97,10 @@ export function watchRestedWheel(el: HTMLElement, onMove: (pixels: number) => vo
   let lastWheelAt = -Infinity;
   let claimed = false;
   let travelled = 0;
+  let pageMovedAt = -Infinity;
+  const onPageScroll = (event: Event) => {
+    pageMovedAt = event.timeStamp;
+  };
   const onEnter = (event: PointerEvent) => {
     if (event.pointerType === "mouse") enteredAt = event.timeStamp;
   };
@@ -104,7 +109,9 @@ export function watchRestedWheel(el: HTMLElement, onMove: (pixels: number) => vo
   };
   const onAnyWheel = (event: WheelEvent) => {
     if (event.timeStamp - lastWheelAt > GESTURE_GAP_MS) {
-      claimed = event.composedPath().includes(el) && event.timeStamp - enteredAt >= REST_MS;
+      // Still moving from a moment ago counts as the same scroll, even after a slow frame.
+      const pageIsStill = event.timeStamp - pageMovedAt >= PAGE_STILL_MS;
+      claimed = pageIsStill && event.composedPath().includes(el) && event.timeStamp - enteredAt >= REST_MS;
       travelled = 0;
     }
     lastWheelAt = event.timeStamp;
@@ -125,7 +132,9 @@ export function watchRestedWheel(el: HTMLElement, onMove: (pixels: number) => vo
   el.addEventListener("pointerleave", onLeave);
   el.addEventListener("wheel", onWheel, { passive: false });
   window.addEventListener("wheel", onAnyWheel, { capture: true, passive: true });
+  window.addEventListener("scroll", onPageScroll, { passive: true });
   return () => {
+    window.removeEventListener("scroll", onPageScroll);
     el.removeEventListener("pointerenter", onEnter);
     el.removeEventListener("pointerleave", onLeave);
     el.removeEventListener("wheel", onWheel);

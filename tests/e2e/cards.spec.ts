@@ -174,6 +174,32 @@ test.describe("the moving row (Decision 30)", () => {
     await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 }).toBeGreaterThan(before + 100);
   });
 
+  test("on large monitors too, the row loops and the wheel moves it", async ({ page, browserName }) => {
+    test.skip(browserName !== "chromium" || isPhone(page), "Screen size is what's being tested.");
+    for (const size of [1920, 2560, 3440]) {
+      await page.setViewportSize({ width: size, height: 1000 });
+      const row = await gotoRow(page);
+      await driftReady(page);
+      await page.waitForTimeout(3600);
+      const a = await offset(page);
+      await expect.poll(() => offset(page), { timeout: 8000 }).toBeGreaterThan(a + 10);
+      // No gaps: the track always reaches past both edges of the row.
+      const covered = await row.evaluate((el) => {
+        const t = el.querySelector(".wbsk-drift__track")!.getBoundingClientRect();
+        const b = el.getBoundingClientRect();
+        return t.left <= b.left && t.right >= b.right;
+      });
+      expect(covered).toBe(true);
+      const box = (await row.boundingBox())!;
+      await page.mouse.move(box.x + box.width / 2, Math.min(box.y + 150, 700));
+      await page.waitForTimeout(700);
+      const b = await offset(page);
+      await page.mouse.wheel(0, 100);
+      await expect.poll(async () => Math.abs((await offset(page)) - b), { timeout: 3000 }).toBeGreaterThan(100);
+      await page.mouse.move(2, 2);
+    }
+  });
+
   test("with the cursor resting on the row, the wheel moves the cards and the page stays", async ({ page }) => {
     test.skip(isPhone(page), "Mouse wheel.");
     const row = await gotoRow(page);

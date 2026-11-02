@@ -313,7 +313,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
   // the one on that side forward. Vertical movement stays with the page.
   const pointer = pointerRef.current;
   return (
-    <div ref={stackRef} className="wbsk-stack" data-scene="grow" role="group" aria-roledescription="carousel" aria-label="Featured films">
+    <div ref={stackRef} className="wbsk-stack" data-scene="grow" data-cursor="Scroll" role="group" aria-roledescription="carousel" aria-label="Featured films">
       <div
         ref={stageRef}
         className="wbsk-stack__cards"

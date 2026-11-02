@@ -46,6 +46,10 @@ export function Footer({ items, privacyHref, homeHref, logoSrc, social }: Props)
         </nav>
         <p className="wbsk-footer__legal">© {new Date().getFullYear()} Weddings By Siddhant Kapoor</p>
       </div>
+      {/* The mark set very large, running off the bottom edge, as a quiet last impression. */}
+      <div className="wbsk-footer__mark" aria-hidden="true">
+        <img src={logoSrc} alt="" width="2160" height="500" loading="lazy" />
+      </div>
     </footer>
   );
 }

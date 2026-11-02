@@ -11,7 +11,6 @@ export const PUSH_CAP = 320;
 export const FLING_CAP = 2800;
 export const DRAG_START = 6;
 export const MIN_DRIFT_CARDS = 3;
-export const MIN_FILL = 1.5;
 
 export type DriftNumbers = {
   x: number;
@@ -49,8 +48,10 @@ export function stepDrift(state: DriftNumbers, dt: number, baseSpeed: number, dr
   state.pushTarget *= Math.exp(-dt / PUSH_FALL_TAU);
 }
 
-export const shouldDrift = (cards: number, setWidth: number, rowWidth: number) =>
-  cards >= MIN_DRIFT_CARDS && setWidth >= rowWidth * MIN_FILL;
+/** Any row of three or more drifts, however wide the screen: it's repeated as often as it needs. */
+export const shouldDrift = (cards: number) => cards >= MIN_DRIFT_CARDS;
+/** How many whole sets are needed on each side so the row never runs out, on any screen. */
+export const roundsToFill = (setWidth: number, rowWidth: number) => Math.max(1, Math.ceil(rowWidth / Math.max(setWidth, 1)));
 
 /** Where the row should sit for a card to be fully on screen; unchanged if it already is. */
 export function targetForCard(index: number, x: number, step: number, cardWidth: number, rowWidth: number, gutter: number) {

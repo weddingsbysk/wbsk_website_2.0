@@ -8,18 +8,19 @@ import { getHomepageContent, mainPageMetadata } from "../lib/content";
 
 export const generateMetadata = () => mainPageMetadata("homepage", "Weddings By Siddhant Kapoor");
 
-/** Sets the one chosen word of the quote in gold italic. */
-function emphasised(quote: string, word?: string) {
-  const at = word ? quote.indexOf(word) : -1;
-  if (!word || at < 0) return quote;
-  return (
-    <>
-      {quote.slice(0, at)}
-      <em>{word}</em>
-      {quote.slice(at + word.length)}
-    </>
-  );
+/** The quote as separate words, which light up in turn with the scroll; one chosen word is gold italic. */
+function quoteWords(quote: string, word?: string) {
+  return quote.split(" ").map((part, index) => {
+    const bare = part.replace(/[^\p{L}\p{N}'’-]/gu, "");
+    return (
+      <span key={`${part}-${index}`} className="wbsk-lit">
+        {word && bare === word ? <em>{part}</em> : part}{" "}
+      </span>
+    );
+  });
 }
+
+const TICKER = ["Weddings", "Films", "Candid moments", "Haldi ceremonies", "Portraits", "Destinations", "Pre-weddings"];
 
 export default async function HomePage() {
   const home = await getHomepageContent();
@@ -39,11 +40,18 @@ export default async function HomePage() {
       </section>
 
       <section data-tone="dark" className="wbsk-philosophy" aria-labelledby="philosophy-quote">
+        <div className="wbsk-ticker" aria-hidden="true">
+          <p>
+            {[...TICKER, ...TICKER, ...TICKER].map((word, index) => (
+              <span key={`${word}-${index}`}>{word}</span>
+            ))}
+          </p>
+        </div>
         <div className="wbsk-container">
           <Reveal>
             <p className="wbsk-label">Our perspective</p>
             <h2 id="philosophy-quote" className="wbsk-philosophy__quote">
-              &ldquo;{emphasised(home.whoWeAre ?? "", home.quoteEmphasis)}&rdquo;
+              {quoteWords(`“${home.whoWeAre ?? ""}”`, home.quoteEmphasis)}
             </h2>
             {home.quoteBy ? <p className="wbsk-philosophy__by">{home.quoteBy}</p> : null}
           </Reveal>
@@ -79,14 +87,15 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <section className="wbsk-section wbsk-container" aria-label="The team">
+      <section className="wbsk-container wbsk-teamblock" aria-label="The team">
         {home.teamPhoto ? (
           <Letterbox>
-            <WbskImage image={home.teamPhoto} slot="coverDesktop" sizes="(min-width: 1680px) 1570px, 100vw" aspectRatio={21 / 9} parallax />
+            <WbskImage image={home.teamPhoto} slot="coverDesktop" sizes="(min-width: 900px) 56vw, 100vw" aspectRatio={21 / 9} parallax />
           </Letterbox>
         ) : null}
-        <Reveal className="wbsk-teamline">
-          <SectionHead>{home.teamLine ?? "The people behind your story"}</SectionHead>
+        <Reveal className="wbsk-teamblock__text">
+          <p className="wbsk-label">Our team</p>
+          <h2 className="wbsk-h2">{home.teamLine ?? "The people behind your story"}</h2>
           <WbskLink href="/our-team/" className="wbsk-link wbsk-morelink">
             Meet the people →
           </WbskLink>
@@ -142,18 +151,26 @@ export default async function HomePage() {
       ) : null}
 
       <section id="enquire" className="wbsk-section wbsk-container wbsk-enquiry">
-        {home.packages.length ? (
+        <div className="wbsk-enquiry__aside">
           <Reveal>
-            <ul className="wbsk-packages">
-              {home.packages.map((item) => (
-                <li key={item.name}>
-                  <strong>{item.name}</strong>
-                  <span>{item.line}</span>
-                </li>
-              ))}
-            </ul>
+            <p className="wbsk-label">Get in touch</p>
+            <h2 className="wbsk-enquiry__title">
+              Let&rsquo;s create something <em>beautiful</em> together
+            </h2>
           </Reveal>
-        ) : null}
+          {home.packages.length ? (
+            <Reveal delayIndex={1}>
+              <ul className="wbsk-packages">
+                {home.packages.map((item) => (
+                  <li key={item.name}>
+                    <strong>{item.name}</strong>
+                    <span>{item.line}</span>
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+          ) : null}
+        </div>
         <EnquiryForm config={home.form} />
       </section>
     </>
