@@ -21,9 +21,6 @@ const MARK = { x: 844, y: 512.5, width: 232 };
 const CLIP = { width: 1920, height: 1080, nameWidth: 1260 };
 const PHONE_BELOW = 820;
 
-/** Starts the small files downloading as soon as the veil is parsed, ahead of the page's scripts. */
-const loadScript = `(function(){if(document.documentElement.dataset.intro!=="play")return;document.querySelectorAll(".wbsk-intro [data-src]").forEach(function(e){e.src=e.dataset.src})})()`;
-
 /** React's development mode starts each effect twice, so a stop only counts if no second start follows. */
 let pendingEnd: number | undefined;
 
@@ -51,6 +48,11 @@ export function OpeningIntro() {
     const bold = boldRef.current;
     if (root.dataset.intro !== "play" || !veil || !video || !glide || !mark || !bold) return;
     (window as Window & { __wbskIntro?: boolean }).__wbskIntro = true;
+    // The head script usually has these downloading already; this covers it finishing later than the page's scripts.
+    for (const element of [video, mark, bold]) {
+      const address = element.dataset.src;
+      if (address && !element.getAttribute("src")) element.src = address;
+    }
 
     const reduced = prefersReducedMotion();
     const animations: Animation[] = [];
@@ -231,7 +233,6 @@ export function OpeningIntro() {
           suppressHydrationWarning
         />
       </div>
-      <script dangerouslySetInnerHTML={{ __html: loadScript }} />
     </div>
   );
 }
