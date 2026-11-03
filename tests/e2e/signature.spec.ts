@@ -45,39 +45,25 @@ test.describe("opening intro", () => {
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   });
 
-  test("if a phone blocks the clip, the still logo still glides home and the page comes up", async ({ page }) => {
-    await page.addInitScript(() => {
-      HTMLMediaElement.prototype.play = () => Promise.reject(new DOMException("blocked", "NotAllowedError"));
+  test("the logo closes as vector words, with nothing to download, and it lands", async ({ page }) => {
+    const media: string[] = [];
+    page.on("request", (r) => {
+      if (/\/intro\//.test(r.url())) media.push(r.url());
     });
     await page.goto("./");
-    const html = page.locator("html");
-    await expect(html).toHaveAttribute("data-intro", "play");
-    await expect(page.locator(".wbsk-intro__glide")).toHaveCSS("opacity", "1", { timeout: 4000 });
-    await expect(html).not.toHaveAttribute("data-intro", "play", { timeout: 9000 });
-    await expect(page.locator(".wbsk-header__logo img")).toHaveCSS("opacity", "1");
-  });
-
-  test("the logo closes: video on computers, film strip on phones, and it lands", async ({ page }) => {
-    await page.goto("./");
-    const phone = (page.viewportSize()?.width ?? 0) < 820;
-    if (phone) {
-      const image = page.locator(".wbsk-intro__strip img");
-      await expect(image).toHaveAttribute("src", /intro-strip\.webp/, { timeout: 5000 });
-      await expect.poll(() => image.evaluate((el) => (el as HTMLImageElement).naturalWidth), { timeout: 5000 }).toBeGreaterThan(0);
-      await expect(page.locator(".wbsk-intro video")).not.toHaveAttribute("src", /.+/);
-      await expect
-        .poll(() => image.evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42), { timeout: 9000 })
-        .toBeLessThan(-100);
-    } else {
-      await expect
-        .poll(() => page.evaluate(() => document.querySelector<HTMLVideoElement>(".wbsk-intro video")?.currentTime ?? -1), { timeout: 9000 })
-        .toBeGreaterThan(0.3);
-    }
+    const words = page.locator(".wbsk-intro__word");
+    await expect(words).toHaveCount(4);
+    const first = words.first();
+    const opening = await first.evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m41);
+    await expect
+      .poll(() => first.evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m41), { timeout: 9000 })
+      .toBeGreaterThan(opening + 20);
     await expect(page.locator("html")).not.toHaveAttribute("data-intro", "play", { timeout: 9000 });
     await expect(page.locator(".wbsk-header__logo img")).toHaveCSS("opacity", "1");
+    expect(media).toEqual([]);
   });
 
-  test("on a real touch profile the intro uses the strip, finishes, and a tap fades it away", async ({ browser, browserName }) => {
+  test("on a real touch profile the intro plays, finishes, and a tap fades it away", async ({ browser, browserName }) => {
     test.skip(browserName === "firefox", "Firefox has no phone profile.");
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: browserName === "chromium", deviceScaleFactor: 3 });
     const phone = await context.newPage();
@@ -85,10 +71,10 @@ test.describe("opening intro", () => {
     phone.on("pageerror", (e) => errors.push(e.message));
     await phone.goto("http://127.0.0.1:4173/wbsk_website_2.0/");
     const html = phone.locator("html");
-    await expect(phone.locator(".wbsk-intro__strip")).toHaveCSS("opacity", "1", { timeout: 6000 });
+    await expect(phone.locator(".wbsk-intro__name")).toHaveCSS("opacity", "1", { timeout: 6000 });
     await expect(html).not.toHaveAttribute("data-intro", "play", { timeout: 9000 });
     await phone.reload();
-    await expect(phone.locator(".wbsk-intro__strip")).toHaveCSS("opacity", "1", { timeout: 6000 });
+    await expect(phone.locator(".wbsk-intro__name")).toHaveCSS("opacity", "1", { timeout: 6000 });
     await phone.touchscreen.tap(195, 500);
     await expect(html).not.toHaveAttribute("data-intro", "play", { timeout: 1500 });
     expect(errors).toEqual([]);
@@ -165,8 +151,7 @@ test.describe("opening intro", () => {
   test("reduced motion gets a brief still and no glide", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("./");
-    await expect(page.locator(".wbsk-intro video")).toHaveCSS("opacity", "0");
-    await expect(page.locator(".wbsk-intro__strip")).toHaveCSS("opacity", "0");
+    await expect(page.locator(".wbsk-intro__name")).toHaveCSS("opacity", "0");
     await expect(page.locator(".wbsk-intro__veil")).toBeHidden({ timeout: 3000 });
   });
 

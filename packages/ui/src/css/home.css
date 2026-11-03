@@ -152,91 +152,44 @@
     opacity: 0.32;
   }
   /* The homepage weddings row (Decision 30). Without scripts it's a plain sideways row. */
-  /* A rounded tray of dark cloth that the cards move through (owner, 2 November 2026). */
-  .wbsk-drift {
-    --drift-card: clamp(220px, 18.5vw, 280px);
-    --drift-gap: clamp(18px, 2vw, 28px);
-    margin-inline: var(--gutter);
-    padding-block: 36px 40px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
-    border: 1px solid rgb(221 175 58 / 0.22);
-    border-radius: clamp(16px, 1.8vw, 24px);
-    box-shadow:
-      inset 0 2px 18px rgb(0 0 0 / 0.55),
-      0 18px 40px -22px rgb(35 28 22 / 0.5);
-  }
-  .wbsk-drift::-webkit-scrollbar {
-    display: none;
-  }
-  .wbsk-drift[data-mode="drift"] {
-    overflow: clip;
-    touch-action: pan-y;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .wbsk-drift[data-mode="drift"],
-    .wbsk-drift[data-mode="still"][data-fits="false"] {
-      cursor: grab;
-    }
-    .wbsk-drift[data-mode="drift"] .wbsk-card__link {
-      cursor: inherit;
-    }
-    .wbsk-drift[data-over-card="true"] {
-      cursor: pointer !important;
-    }
-    .wbsk-drift[data-dragging="true"] {
-      cursor: grabbing !important;
-    }
-  }
-  .wbsk-drift__track {
-    display: flex;
-    gap: var(--drift-gap);
-    width: max-content;
-    margin: 0;
-    padding: 0 clamp(16px, 2vw, 32px);
-    list-style: none;
-  }
-  .wbsk-drift__track[data-moving="true"] {
-    will-change: transform;
-  }
-  .wbsk-drift__track > li {
-    position: relative;
-    flex: none;
-    width: var(--drift-card);
-  }
-  .wbsk-drift__track > li[data-hot] {
-    z-index: 3;
-  }
-  @media (max-width: 699px) {
-    .wbsk-drift {
-      --drift-card: 62vw;
-      --drift-gap: 16px;
-    }
-  }
+  /* The moving row's tray, its albums and its ribbon are in album.css. */
   .wbsk-drift__below {
     position: relative;
     z-index: 1;
   }
-  /* The description sits on the dark tray here, so it's light. */
-  .wbsk-drift .wbsk-card__description {
-    padding-inline: 4px;
-    color: rgb(245 239 230 / 0.82);
-  }
   .wbsk-drift__line {
-    min-height: 1.5em;
-    margin-top: 24px;
-    margin-bottom: 12px;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 12px;
+    /* Room for the description and "View story", so the page below never moves when an album opens. */
+    min-height: 2.9em;
+    margin-top: 20px;
+    margin-bottom: 8px;
     font-size: var(--text-small);
     line-height: 1.4;
     color: var(--color-ink);
   }
-  @media (hover: none), (pointer: coarse), (max-width: 699px) {
-    .wbsk-drift__line {
-      display: none;
+  /* On a phone the buttons sit straight under the tray, and the description's room falls below them. */
+  @media (max-width: 699px) {
+    .wbsk-drift__below {
+      display: flex;
+      flex-direction: column;
     }
+    .wbsk-drift__below > .wbsk-drift__bar {
+      order: -1;
+    }
+    .wbsk-drift__line {
+      min-height: 4.3em;
+      margin-top: 14px;
+      margin-bottom: 0;
+    }
+  }
+  .wbsk-drift__go {
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
   }
   .wbsk-drift__bar {
     margin-top: 16px;

@@ -26,6 +26,7 @@ export const homepage = defineType({
     defineField({ name: "quoteEmphasis", title: "Word in gold", type: "string", group: "who", description: "One word from the quote, spelt exactly as it is there. It shows in gold italic." }),
     defineField({ name: "quoteBy", title: "Who said it", type: "string", group: "who" }),
     defineField({ name: "weddingsLine", title: "Line under Recent Weddings", type: "string", group: "who" }),
+    defineField({ name: "albumLabel", title: "Small line on each album's cover", type: "string", group: "who", description: 'Empty reads "Our wedding".' }),
     defineField({
       name: "counters",
       type: "array",

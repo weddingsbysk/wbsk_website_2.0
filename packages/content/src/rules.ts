@@ -7,6 +7,7 @@ export type SizeRule = {
 
 export const imageRules = {
   card: { width: 1600, height: 2000 },
+  albumCover: { width: 900, height: 2100 },
   coverDesktop: { width: 2560 },
   coverPhone: { width: 1500, height: 2000 },
   gallery: { longEdge: 2560 },

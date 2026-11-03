@@ -4,15 +4,17 @@ Oct 31, 2026 · @Siddhant
 
 Export every website photo as an sRGB JPEG at quality 88, sized to its slot below. This guide is for whoever prepares photos for WBSK Studio.
 
-**Status: approved** 31 October 2026 (Decision 06, Area 6b, and the two-poster hero change in Decision 04). Menu names are from Lightroom Classic and may differ slightly between versions.
+**Status: approved** 31 October 2026 (Decision 06, Area 6b, and the two-poster hero change in Decision 04). Updated 3 November 2026 for the homepage album. Menu names are from Lightroom Classic and may differ slightly between versions.
 
 ## Crop ratios
 
-Each wedding needs five kinds of image. Crop the card, covers and posters to their exact ratio in Lightroom; leave gallery photos uncropped unless the edit calls for it.
+Each wedding needs six required photos and its gallery: the album cover, the bride and groom pages, the card, and the two page covers. Crop these, and any posters, to their exact ratio in Lightroom; leave gallery photos uncropped unless the edit calls for it.
 
 | Slot | Ratio | Orientation | Lightroom crop setting | Where it appears |
 | --- | --- | --- | --- | --- |
-| Card photo | 4:5 | Portrait | 4 x 5 / 8 x 10 | Homepage row, Weddings page |
+| Album cover | 3:7 | Tall portrait | Enter Custom… 3 x 7 | Front of the homepage album |
+| Bride photo, Groom photo | 4:5 | Portrait | 4 x 5 / 8 x 10 | The left and right pages inside the homepage album |
+| Card photo | 4:5 | Portrait | 4 x 5 / 8 x 10 | Card on the Weddings page |
 | Desktop cover | 21:9 | Landscape | Enter Custom… 21 x 9 | Top of the couple's page on computers; Weddings page lead story |
 | Mobile cover | 3:4 | Portrait | 4 x 3, then press X to turn it portrait | Top of the couple's page on phones |
 | Gallery photo | Original | Any | Original (no forced ratio) | Masonry gallery and full-screen view |
@@ -24,8 +26,36 @@ Each wedding needs five kinds of image. Crop the card, covers and posters to the
 
 - **Covers:** the ivory name label covers the bottom-left corner of the cover, so keep faces and key details away from the lower-left area.
 - **Desktop cover (21:9):** a very wide frame. Wide venue, landscape or couple-in-scene shots work best; tight portraits lose heads or feet.
+- **Album cover (3:7):** a tall frame, so a full-length couple works best. See The homepage album below.
+- **Bride photo and groom photo (4:5):** a matching pair of portraits, one on each page of the open album. See The homepage album below.
 - **Card photo (4:5):** one clear, emotional moment; it is seen small, so avoid busy group shots.
 - The Studio still asks for a focal point on every image. It fine-tunes the crop at each screen size.
+
+## The homepage album
+
+On the homepage every wedding is shown as a modern photo album, moving slowly along a dark table. It has three photos of its own, and each one has a job.
+
+**1. The cover (3:7, tall and narrow).** The closed album is white paper on the left, with the couple's names in large thin capitals, and your photo on the right, running from the top edge to the bottom edge and out to the side.
+
+- **Choose a full-length or three-quarter photo of the two of them.** A standing couple fills this tall frame well; a wide scene does not.
+- **Fill the frame with the couple.** The album is small on screen, about 130 px wide for the photo on a computer, so faces should be easy to read at that size.
+- **Quiet backgrounds work best.** A simple or dark background looks strongest beside the white paper.
+- **Don't add anything to the photo.** The names, place and date are set by the website, on the paper beside it, so no text or logo goes on the image.
+- **Crop it on purpose.** Crop to 3 x 7 in Lightroom yourself, then set the focal point in the Studio. It fine-tunes the crop if a screen needs it.
+
+**2. The left page: the bride (4:5).** One portrait of her. When the album opens, it fills most of the left page, with her name under it.
+
+**3. The right page: the groom (4:5).** One portrait of him, on the right page, with his name under it.
+
+**Making the two pages a pair:** they are seen side by side, so treat them as one picture.
+
+- Use the same framing for both, such as both head and shoulders or both half-length.
+- Use the same grade and a similar brightness, ideally from the same part of the day.
+- Have them face the middle of the album, so she looks to the right and he looks to the left. Facing outwards looks as if they have turned away from each other.
+- Keep faces away from the very edge next to the fold, where the page curves into a soft shadow.
+- Export both in full colour or both in black and white, never one of each.
+
+The album opens to these two pages only. Nothing else turns, so these are the two photographs a visitor sees before choosing to open the couple's story.
 
 ## Export settings (Lightroom Classic)
 
@@ -55,6 +85,8 @@ Export at the recommended long edge. The minimum is the smallest size WBSK Studi
 
 | Slot | Ratio | Long edge to export | Result | Minimum accepted | Approx. file size |
 | --- | --- | --- | --- | --- | --- |
+| Album cover | 3:7 | 2800 px | 1200 × 2800 | 900 × 2100 | 0.6–1.2 MB |
+| Bride photo, Groom photo | 4:5 | 2000 px | 1600 × 2000 | 1600 × 2000 | 0.8–1.5 MB |
 | Card photo | 4:5 | 2000 px | 1600 × 2000 | 1600 × 2000 | 0.8–1.5 MB |
 | Desktop cover | 21:9 | 3000 px | 3000 × 1286 | 2560 px wide | 1–2 MB |
 | Mobile cover | 3:4 | 2000 px | 1500 × 2000 | 1500 × 2000 | 0.8–1.5 MB |
@@ -63,19 +95,20 @@ Export at the recommended long edge. The minimum is the smallest size WBSK Studi
 
 File sizes are estimates and vary with detail and noise.
 
-**What the Studio does with a too-small photo**: card photos and covers below the minimum are refused with a friendly message; a smaller gallery photo shows a warning but can still be added.
+**What the Studio does with a too-small photo**: album photos, card photos and covers below the minimum are refused with a friendly message; a smaller gallery photo shows a warning but can still be added.
 
-**Save nine presets** so nobody retypes settings. Set up the Export panel once, change only Resize to Fit, then click Add (bottom left) for each:
+**Save ten presets** so nobody retypes settings. Set up the Export panel once, change only Resize to Fit, then click Add (bottom left) for each:
 
-1. WBSK – Card 4x5 (2000)
-2. WBSK – Desktop cover 21x9 (3000)
-3. WBSK – Mobile cover 3x4 (2000)
-4. WBSK – Gallery (3000)
-5. WBSK – Poster 16x9 (1920)
-6. WBSK – Hero poster desktop 16x9 (2560)
-7. WBSK – Hero poster mobile 9x16 (2400)
-8. WBSK – Team portrait B&W 4x5 (2000)
-9. WBSK – Reaction poster 9x16 (1920)
+1. WBSK – Album cover 3x7 (2800)
+2. WBSK – Card 4x5 (2000), also for the bride and groom pages
+3. WBSK – Desktop cover 21x9 (3000)
+4. WBSK – Mobile cover 3x4 (2000)
+5. WBSK – Gallery (3000)
+6. WBSK – Poster 16x9 (1920)
+7. WBSK – Hero poster desktop 16x9 (2560)
+8. WBSK – Hero poster mobile 9x16 (2400)
+9. WBSK – Team portrait B&W 4x5 (2000)
+10. WBSK – Reaction poster 9x16 (1920)
 
 ## Homepage fallback images and client card photos
 
@@ -96,7 +129,7 @@ The homepage hero needs still images that show instantly while the video starts,
 
 **Client card photos**
 
-- One card photo per wedding. It is a separate image from the covers.
+- One card photo per wedding, shown on the Weddings page. It is a separate image from the album cover and the page covers, though it can be the same moment cropped differently.
 - Cards are seen small (roughly 260–400px wide on screen), so choose one clear, emotional moment with the couple large in the frame.
 - On desktop the photo zooms gently inside its frame on hover, trimming a little off every edge: leave some breathing room around faces and hands.
 - Nothing is printed over the card photo; names and place sit in the caption below, so the whole frame is visible.
@@ -142,7 +175,7 @@ Pre-wedding work has no cards: it's shown through destination records and destin
 
 The same rules apply in the Lightroom app; only the menus differ.
 
-1. Crop: open Crop, pick the ratio (4 x 5, 16 x 9, 4 x 3 turned portrait, or Custom 21 x 9).
+1. Crop: open Crop, pick the ratio (4 x 5, 16 x 9, 4 x 3 turned portrait, or Custom 21 x 9 or 3 x 7).
 2. Share or Export > Custom settings.
 3. File type JPG, quality 88, dimensions Custom with the long edge from the table above.
 4. Colour space sRGB.
@@ -153,7 +186,9 @@ The same rules apply in the Lightroom app; only the menus differ.
 
 Run through this for each wedding before opening WBSK Studio.
 
-- [ ] Card photo 4:5, desktop cover 21:9 and mobile cover 3:4 are all exported (all three are required)
+- [ ] Album cover 3:7, bride photo 4:5, groom photo 4:5, card photo 4:5, desktop cover 21:9 and mobile cover 3:4 are all exported (all six are required)
+- [ ] The album cover is a tall photo with the couple large in the frame, and no text on it
+- [ ] The bride and groom photos look like a pair, and face the middle of the album
 - [ ] No faces in the lower-left corner of either cover
 - [ ] 50–60 gallery photos, numbered in the order they should appear
 - [ ] A 16:9 poster for the teaser and for the highlight film, if those links will be added

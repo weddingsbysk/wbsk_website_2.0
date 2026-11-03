@@ -39,6 +39,15 @@ const cormorantItalic = localFont({
   preload: false,
   adjustFontFallback: false,
 });
+/** Capitals only, for the names on the homepage albums: about 8 KB, and asked for only when the row is near. */
+const bodoniAlbum = localFont({
+  src: "../fonts/bodoni-moda-album.woff2",
+  weight: "400 500",
+  variable: "--font-bodoni-album",
+  display: "swap",
+  preload: false,
+  adjustFontFallback: false,
+});
 const outfit = localFont({
   src: "../fonts/outfit.woff2",
   weight: "400 500",
@@ -61,7 +70,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${playfairItalic.variable} ${cormorant.variable} ${cormorantItalic.variable} ${outfit.variable}`}
+      className={`${playfair.variable} ${playfairItalic.variable} ${cormorant.variable} ${cormorantItalic.variable} ${bodoniAlbum.variable} ${outfit.variable}`}
       suppressHydrationWarning
     >
       <head>

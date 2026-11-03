@@ -17,6 +17,11 @@ export type WeddingSummary = {
   shortDescription: string;
   storyTitle?: string;
   cardPhoto: WbskImageSource | null;
+  /** The homepage album's cover and two pages. */
+  albumCover?: WbskImageSource | null;
+  bridePhoto?: WbskImageSource | null;
+  groomPhoto?: WbskImageSource | null;
+  isSample?: boolean;
 };
 
 export function CoupleNames({ first, second }: { first: string; second: string }) {

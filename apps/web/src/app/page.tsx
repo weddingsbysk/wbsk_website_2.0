@@ -4,6 +4,7 @@ import { CoverVideo, HeroDrift, Letterbox, Reveal, SectionHead, TitleWords, Wbsk
 import { EnquiryForm } from "../components/EnquiryForm";
 import { FeaturedRow } from "../components/DriftRow";
 import { Counter, FilmStack, ReactionRow, ReviewsLoop } from "../components/HomeSections";
+import { IntroMark, IntroName } from "../components/IntroLogo";
 import { OpeningIntro } from "../components/OpeningIntro";
 import { getHomepageContent, mainPageMetadata } from "../lib/content";
 
@@ -40,7 +41,7 @@ export default async function HomePage() {
   const ticker = home.tickerWords?.length ? home.tickerWords : TICKER;
   return (
     <>
-      <OpeningIntro />
+      <OpeningIntro name={<IntroName />} mark={<IntroMark />} />
       <section id="hero" data-tone="dark" className="wbsk-hero">
         <div className="wbsk-hero__media">
           <CoverVideo desktop={home.videoDesktop} phone={home.videoPhone} posterDesktop={home.posterDesktop} posterPhone={home.posterPhone} label="the WBSK film" />
@@ -88,7 +89,7 @@ export default async function HomePage() {
               <SectionHead line={home.weddingsLine}>Recent Weddings</SectionHead>
             </Reveal>
           </div>
-          <FeaturedRow weddings={home.weddings} seeAllHref="/weddings/" />
+          <FeaturedRow weddings={home.weddings} seeAllHref="/weddings/" albumLabel={home.albumLabel} />
         </section>
       ) : null}
 

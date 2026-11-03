@@ -973,35 +973,33 @@
   html[data-intro="play"] .wbsk-hero .wbsk-frame {
     transform: scale(1.05);
   }
-  .wbsk-intro video {
+  /* The name is vector, so it's sharp at any size; each word sits in its own moving window. */
+  .wbsk-intro__name {
     position: fixed;
     z-index: 71;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
-    width: 100%;
-    height: 100%;
+    top: 0;
+    left: 0;
     opacity: 0;
-    mix-blend-mode: screen;
     will-change: opacity, transform;
+    color: #fcfcfc;
   }
-  /* The phones' film strip: one image stepped behind a window. */
-  .wbsk-intro__strip {
-    position: fixed;
-    z-index: 71;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
+  .wbsk-intro__word {
+    position: absolute;
+    top: 0;
+    left: 0;
     overflow: hidden;
-    opacity: 0;
-    will-change: opacity, transform;
-  }
-  .wbsk-intro__strip img {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-width: none;
     will-change: transform;
+  }
+  .wbsk-intro__word[data-gold] {
+    color: #ddaf3a;
+  }
+  .wbsk-intro__word svg {
+    display: block;
+    will-change: transform;
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: var(--intro-stroke, 0);
+    stroke-linejoin: round;
   }
   .wbsk-intro__glide {
     position: fixed;
@@ -1013,6 +1011,7 @@
     pointer-events: none;
     will-change: transform, opacity;
   }
+  .wbsk-intro__glide svg,
   .wbsk-intro__glide img {
     position: absolute;
     top: 0;
@@ -1021,7 +1020,7 @@
     width: 100%;
     height: auto;
   }
-  .wbsk-intro__glide img + img {
+  .wbsk-intro__glide img {
     opacity: 0;
   }
   @media (prefers-reduced-motion: reduce) {

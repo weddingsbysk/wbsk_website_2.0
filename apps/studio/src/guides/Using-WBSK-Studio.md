@@ -24,7 +24,12 @@ Open **Weddings → + New wedding** and fill the five tabs, in any order. Your w
 
 1. **Couple** — names, Destination or Local, city, venue, wedding date. The page address (e.g. `/client/meera-arjun`) is made for you.
 2. **Photos**
-   - **Card photo** 4:5, at least 1600 × 2000.
+   - **Homepage album** — three photos, grouped together at the top of the tab:
+     - **Album cover** 3:7, at least 900 × 2100. A tall photo beside the couple's names.
+     - **Left page: bride** 4:5, at least 1600 × 2000. The first name goes under it.
+     - **Right page: groom** 4:5, at least 1600 × 2000. The second name goes under it.
+     - The **Preview** tab shows the album closed and open, so you can check all three.
+   - **Card photo** 4:5, at least 1600 × 2000, for the Weddings page.
    - **Desktop cover** 21:9, at least 2560 px wide.
    - **Phone cover** 3:4, at least 1500 × 2000.
    - Too small? The Studio refuses it and tells you the size needed.
@@ -33,7 +38,7 @@ Open **Weddings → + New wedding** and fill the five tabs, in any order. Your w
    - **Every photo needs a description**, e.g. "Meera and Arjun laughing during the varmala, Goa". Publishing waits until all are done. Allow 10–15 minutes.
 3. **Story** — a short description (about 120 characters, shown under the card) and "Their story" (60–120 words).
 4. **Films & reels** — teaser and highlight film as YouTube links, **each with its 16:9 poster**; Instagram reel links with an optional label (e.g. "Sangeet").
-5. **Homepage** — switch on **Featured** to show the card on the homepage.
+5. **Homepage** — switch on **Featured** to show the album on the homepage.
 
 Photos come from Lightroom first: follow the **Photo Export Guide**.
 

@@ -5,6 +5,7 @@ export { Footer } from "./components/Footer";
 export { Gallery } from "./components/Gallery";
 export { GalleryLightbox } from "./components/GalleryLightbox";
 export { Header, type NavItem } from "./components/Header";
+export { AlbumCard } from "./components/Album";
 export { ArrowIcon, CloseIcon, MenuIcon } from "./components/icons";
 export { GlideIn } from "./components/GlideIn";
 export { HeroDrift } from "./components/HeroDrift";

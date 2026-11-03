@@ -1,11 +1,17 @@
 "use client";
 
 import { motionTokens, prefersReducedMotion } from "@wbsk/ui/motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { publicAsset } from "../lib/site";
+import motion from "./intro-logo-motion.json";
 
-/** A clip that hasn't arrived by now gets the still instead, so nobody waits on a slow network. */
-const VIDEO_WAIT_MS = 1800;
+const WORD_PAD = 2;
+const BAND_HEIGHT = 200;
+/** Hairlines are about this wide in the master, in master pixels. */
+const HAIRLINE = 2.5;
+/** Below this on screen a hairline starts to break up, so it gains just enough weight to hold. */
+const HAIRLINE_MIN_DEVICE_PX = 1.15;
+
 const STILL_MS = 600;
 /** Long enough for the slowest word of the hero title to finish arriving. */
 const TITLE_DONE_MS = 4000;
@@ -17,23 +23,17 @@ const REVEAL_MS = 2600;
 const HERO_SETTLE_EXTRA_MS = 1000;
 
 /**
- * The clip holds only the band the name occupies, at the master's full 4K sharpness (2640 × 200).
- * These sizes are half that: a 1320 × 100 band, centred in a 1920 × 1080 frame. MARK is where the
- * closed-up WBSK sits inside it.
+ * The name is the band it occupies in the 4K master (2640 × 200). These sizes are half that: a
+ * 1320 × 100 band, centred in a 1920 × 1080 frame. MARK is where the closed-up WBSK sits inside it.
  */
 const MARK = { x: 544, y: 22.5, width: 232 };
 const CLIP = { width: 1320, height: 100, nameWidth: 1260 };
 const FRAME = { width: 1920, height: 1080 };
 const PHONE_BELOW = 820;
-/**
- * Phones and tablets get the closing logo as a strip of frames with real transparency, played by
- * stepping one image. A video, with blending, blur and movement on top, proved unreliable on iPhones.
- */
-const STRIP = { frames: 36, width: 960, height: 72, ms: 1160 };
 const SKIP_FADE_MS = 320;
 const LAND_SPARE_MS = 800;
 
-const usesStrip = () =>
+const isTouch = () =>
   window.matchMedia("(hover: none), (pointer: coarse)").matches || window.innerWidth < PHONE_BELOW;
 
 /** React's development mode starts each effect twice, so a stop only counts if no second start follows. */
@@ -46,33 +46,25 @@ function clipScale() {
   return Math.min(w / FRAME.width, h / FRAME.height);
 }
 
-export function OpeningIntro() {
+export function OpeningIntro({ name, mark: markShape }: { name: ReactNode; mark: ReactNode }) {
   const veilRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const stripRef = useRef<HTMLDivElement>(null);
-  const stripImageRef = useRef<HTMLImageElement>(null);
+  const nameRef = useRef<HTMLDivElement>(null);
   const glideRef = useRef<HTMLDivElement>(null);
-  const markRef = useRef<HTMLImageElement>(null);
   const boldRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     window.clearTimeout(pendingEnd);
     const root = document.documentElement;
     const veil = veilRef.current;
-    const video = videoRef.current;
-    const strip = stripRef.current;
-    const stripImage = stripImageRef.current;
+    const clip = nameRef.current;
     const glide = glideRef.current;
-    const mark = markRef.current;
+    const mark = glide?.querySelector("svg");
     const bold = boldRef.current;
-    if (root.dataset.intro !== "play" || !veil || !video || !strip || !stripImage || !glide || !mark || !bold) return;
+    const words = [...(clip?.querySelectorAll<HTMLElement>(".wbsk-intro__word") ?? [])];
+    if (root.dataset.intro !== "play" || !veil || !clip || !glide || !mark || !bold || words.length !== motion.words.length) return;
     (window as Window & { __wbskIntro?: boolean }).__wbskIntro = true;
-    // The head script usually has these downloading already; this covers it finishing later than the page's scripts.
-    const stripped = usesStrip();
-    const clip: HTMLElement = stripped ? strip : video;
-    for (const element of [stripped ? stripImage : video, mark, bold]) {
-      if (element.dataset.src && !element.getAttribute("src")) element.src = element.dataset.src;
-    }
+    // The head script usually has this downloading already; this covers it finishing later than the page's scripts.
+    if (bold.dataset.src && !bold.getAttribute("src")) bold.src = bold.dataset.src;
 
     const reduced = prefersReducedMotion();
     const animations: Animation[] = [];
@@ -90,7 +82,6 @@ export function OpeningIntro() {
       ended = true;
       timers.forEach((timer) => window.clearTimeout(timer));
       animations.forEach((animation) => animation.cancel());
-      video.pause();
       removeSkip();
       return true;
     };
@@ -126,12 +117,42 @@ export function OpeningIntro() {
     }
 
     const k = clipScale();
+    // On whole device pixels, or the resting logo would be drawn between two and soften.
+    const dpr = window.devicePixelRatio || 1;
+    const snap = (value: number) => Math.round(value * dpr) / dpr;
+    const unit = k / 2;
     clip.style.width = `${CLIP.width * k}px`;
-    clip.style.height = `${stripped ? (CLIP.width * k * STRIP.height) / STRIP.width : CLIP.height * k}px`;
+    clip.style.height = `${CLIP.height * k}px`;
     const origin = {
-      x: (window.innerWidth - CLIP.width * k) / 2,
-      y: (window.innerHeight - CLIP.height * k) / 2,
+      x: snap((window.innerWidth - CLIP.width * k) / 2),
+      y: snap((window.innerHeight - CLIP.height * k) / 2),
     };
+    clip.style.left = `${origin.x}px`;
+    clip.style.top = `${origin.y}px`;
+    clip.style.setProperty("--intro-stroke", String(Math.min(1.2, Math.max(0, HAIRLINE_MIN_DEVICE_PX / (unit * dpr) - HAIRLINE))));
+
+    // Each word is rigid, and slides out from behind its first letter: the outer box is the window,
+    // the inner shape moves the opposite way, so the reveal is drawn by the compositor alone.
+    const parts = motion.words.map((word, index) => {
+      const outer = words[index]!;
+      const inner = outer.firstElementChild as SVGSVGElement;
+      const width = (word.width + WORD_PAD * 2) * unit;
+      outer.style.width = `${width}px`;
+      outer.style.height = `${BAND_HEIGHT * unit}px`;
+      inner.style.width = `${width}px`;
+      inner.style.height = `${BAND_HEIGHT * unit}px`;
+      const openAt = snap((word.openX - WORD_PAD) * unit);
+      const closedAt = snap((word.closedX - WORD_PAD) * unit);
+      const frames = word.spread.map((spread, sample) => {
+        const reveal = word.reveal[sample]!;
+        const shown = (word.initial + reveal * (word.width - word.initial) + WORD_PAD * (1 + reveal)) * unit;
+        const at = closedAt + spread * (openAt - closedAt);
+        return { outer: at + shown - width, inner: width - shown };
+      });
+      outer.style.transform = `translateX(${frames[0]!.outer}px)`;
+      inner.style.transform = `translateX(${frames[0]!.inner}px)`;
+      return { outer, inner, frames };
+    });
     const start = { x: origin.x + MARK.x * k, y: origin.y + MARK.y * k, width: MARK.width * k };
     glide.style.width = `${start.width}px`;
     const from = `translate(${start.x}px, ${start.y}px) scale(1)`;
@@ -156,31 +177,10 @@ export function OpeningIntro() {
       reveal.addEventListener("finish", finish);
     };
 
-    // No clip to play, such as an iPhone in Low Power Mode: the still logo takes the same journey.
-    const glideStill = () => {
-      if (ended) return;
-      const target = document.querySelector(".wbsk-header__logo img")?.getBoundingClientRect();
-      if (!target) return finish();
-      const to = `translate(${target.left}px, ${target.top}px) scale(${target.width / start.width})`;
-      add(
-        glide.animate([{ transform: from }, { transform: to }], {
-          duration: GLIDE_MS,
-          delay: GLIDE_DELAY_MS,
-          easing: motionTokens.travel,
-          fill: "both",
-        }),
-      );
-      add(bold.animate([{ opacity: 0 }, { opacity: 1 }], { duration: LOGO_MELT_MS, delay: GLIDE_DELAY_MS + LOGO_MELT_AT_MS, fill: "both" }));
-      add(mark.animate([{ opacity: 1 }, { opacity: 0 }], { duration: LOGO_MELT_MS, delay: GLIDE_DELAY_MS + LOGO_MELT_AT_MS + LOGO_MELT_MS / 2, fill: "both" }));
-      revealPage();
-    };
-
     const showStill = () => {
-      if (landing) return;
       landing = true;
-      add(clip.animate([{ opacity: 0 }], { duration: 0, fill: "forwards" }));
       add(glide.animate([{ opacity: 1 }], { duration: 0, fill: "forwards" }));
-      timers.push(window.setTimeout(reduced ? finish : glideStill, STILL_MS));
+      timers.push(window.setTimeout(finish, STILL_MS));
     };
 
     const land = () => {
@@ -239,52 +239,37 @@ export function OpeningIntro() {
     if (reduced) {
       showStill();
     } else {
-      const waiting = window.setTimeout(showStill, VIDEO_WAIT_MS);
-      timers.push(waiting);
       const play = () => {
         if (landing || ended) return;
         // If the end never reports in, the logo still goes home.
-        timers.push(window.setTimeout(land, (stripped ? STRIP.ms : 1200) + LAND_SPARE_MS));
-        if (stripped) {
-          add(
-            stripImage.animate([{ transform: "translateY(0)" }, { transform: `translateY(${(-100 * (STRIP.frames - 1)) / STRIP.frames}%)` }], {
-              duration: STRIP.ms,
-              easing: `steps(${STRIP.frames - 1}, end)`,
-              fill: "forwards",
-            }),
-          ).addEventListener("finish", land);
-        } else {
-          video.play().catch(showStill);
-        }
-      };
-      const begin = () => {
-        if (landing || ended) return;
-        window.clearTimeout(waiting);
-        const blur = stripped ? {} : { filter: "blur(10px)" };
-        const sharp = stripped ? {} : { filter: "blur(0px)" };
-        clipFade = add(
-          clip.animate(
-            [
-              { opacity: 0, transform: "scale(1.04)", ...blur },
-              { opacity: 1, transform: "scale(1)", ...sharp },
-            ],
-            { duration: 1000, easing: motionTokens.softSettle, fill: "forwards" },
-          ),
-        );
-        clipFade.addEventListener("finish", () => {
-          timers.push(window.setTimeout(play, 500));
+        timers.push(window.setTimeout(land, motion.seconds * 1000 + LAND_SPARE_MS));
+        const timing = { duration: motion.seconds * 1000, easing: "linear", fill: "forwards" as const };
+        const moves = parts.flatMap(({ outer, inner, frames }) => [
+          outer.animate(frames.map((frame) => ({ transform: `translateX(${frame.outer}px)` })), timing),
+          inner.animate(frames.map((frame) => ({ transform: `translateX(${frame.inner}px)` })), timing),
+        ]);
+        // All on one clock, so a word and its window never drift apart.
+        const now = document.timeline.currentTime;
+        moves.forEach((move) => {
+          add(move);
+          move.startTime = now;
         });
+        moves[0]!.addEventListener("finish", land);
       };
-      if (stripped) {
-        // Fully decoded before it shows, so the first frame and every step after it are ready.
-        stripImage.decode().then(begin, showStill);
-      } else {
-        video.addEventListener("ended", land);
-        video.addEventListener("error", showStill, { once: true });
-        if (video.error) showStill();
-        else if (video.readyState >= 2) begin();
-        else video.addEventListener("loadeddata", begin, { once: true });
-      }
+      const blur = isTouch() ? {} : { filter: "blur(10px)" };
+      const sharp = isTouch() ? {} : { filter: "blur(0px)" };
+      clipFade = add(
+        clip.animate(
+          [
+            { opacity: 0, transform: "scale(1.04)", ...blur },
+            { opacity: 1, transform: "scale(1)", ...sharp },
+          ],
+          { duration: 1000, easing: motionTokens.softSettle, fill: "forwards" },
+        ),
+      );
+      clipFade.addEventListener("finish", () => {
+        timers.push(window.setTimeout(play, 500));
+      });
     }
 
     return () => {
@@ -295,20 +280,11 @@ export function OpeningIntro() {
   return (
     <div className="wbsk-intro" aria-hidden="true">
       <div ref={veilRef} className="wbsk-intro__veil" />
-      <video
-        ref={videoRef}
-        data-src={publicAsset("/intro/intro-reverse.mp4")}
-        data-only="video"
-        muted
-        playsInline
-        preload="auto"
-        suppressHydrationWarning
-      />
-      <div ref={stripRef} className="wbsk-intro__strip">
-        <img ref={stripImageRef} data-src={publicAsset("/intro/intro-strip.webp")} data-only="strip" alt="" suppressHydrationWarning />
+      <div ref={nameRef} className="wbsk-intro__name">
+        {name}
       </div>
       <div ref={glideRef} className="wbsk-intro__glide">
-        <img ref={markRef} data-src={publicAsset("/intro/wbsk-mark-gold.png")} alt="" suppressHydrationWarning />
+        {markShape}
         <img
           ref={boldRef}
           data-src={publicAsset("/wbsk-logo.svg")}

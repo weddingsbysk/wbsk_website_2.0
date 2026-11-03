@@ -112,6 +112,9 @@ type WeddingResult = {
   storyTitle?: string;
   theirStory: string;
   cardPhoto: ImageResult;
+  albumCover: ImageResult;
+  bridePhoto: ImageResult;
+  groomPhoto: ImageResult;
   coverDesktop: ImageResult;
   coverPhone: ImageResult;
   gallery: ImageResult[] | null;
@@ -140,8 +143,11 @@ function toFilm(film: StoryFilmResult) {
 }
 
 function toWedding(item: WeddingResult) {
+  // A wedding made before the album existed shows its card photo on the cover and its first gallery photos on the pages.
+  const firstPhotos = (item.gallery ?? []).slice(0, 2);
   return {
     id: item._id,
+    isSample: item.isSample,
     featured: item.featured,
     slug: item.slug,
     href: `/client/${item.slug}/`,
@@ -157,6 +163,9 @@ function toWedding(item: WeddingResult) {
     storyTitle: item.storyTitle,
     theirStory: item.theirStory,
     cardPhoto: withoutInlinePreview(toImage(item.cardPhoto)),
+    albumCover: withoutInlinePreview(toImage(item.albumCover ?? item.cardPhoto)),
+    bridePhoto: withoutInlinePreview(toImage(item.bridePhoto ?? firstPhotos[0] ?? item.cardPhoto)),
+    groomPhoto: withoutInlinePreview(toImage(item.groomPhoto ?? firstPhotos[1] ?? item.cardPhoto)),
     coverDesktop: toImage(item.coverDesktop),
     coverPhone: toImage(item.coverPhone),
     gallery: (item.gallery ?? []).map(toImage).filter(Boolean).map(withoutInlinePreview) as SanityImage[],
@@ -193,6 +202,9 @@ export function getWeddings() {
       shortDescription,
       theirStory,
       cardPhoto${imageFields},
+      albumCover${imageFields},
+      bridePhoto${imageFields},
+      groomPhoto${imageFields},
       coverDesktop${imageFields},
       coverPhone${imageFields},
       gallery[]${imageFields},
@@ -370,6 +382,7 @@ export async function getHomepageContent() {
       quoteEmphasis?: string;
       quoteBy?: string;
       weddingsLine?: string;
+      albumLabel?: string;
       heroPosterDesktop: ImageResult;
       heroPosterPhone: ImageResult;
       teamPhoto: ImageResult;
@@ -384,7 +397,7 @@ export async function getHomepageContent() {
     settings: { googleRating?: number; googleReviewCount?: number; googleProfile?: string } | null;
   }>(/* groq */ `{
     "home": *[_id == "homepage"][0]{
-      heroLine, heroEyebrow, tickerWords, enquiryTitle, enquiryEmphasis, whoWeAre, quoteEmphasis, quoteBy, weddingsLine, teamLine, showFeaturedOn, counters[]{value, label},
+      heroLine, heroEyebrow, tickerWords, enquiryTitle, enquiryEmphasis, whoWeAre, quoteEmphasis, quoteBy, weddingsLine, albumLabel, teamLine, showFeaturedOn, counters[]{value, label},
       heroPosterDesktop${imageFields}, heroPosterPhone${imageFields}, teamPhoto${imageFields},
       "videoDesktop": heroVideoDesktop.asset->url, "videoPhone": heroVideoPhone.asset->url,
       "weddingOrder": featuredWeddings[]._ref, "filmOrder": featuredFilms[]._ref
@@ -409,8 +422,8 @@ export async function getHomepageContent() {
   const weddings = listed
     .filter((wedding) => wedding.featured)
     .sort((a, b) => rank(home?.weddingOrder, a.id) - rank(home?.weddingOrder, b.id))
-    .map(({ slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, storyTitle, cardPhoto }) => ({
-      slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, storyTitle, cardPhoto,
+    .map(({ slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, storyTitle, cardPhoto, albumCover, bridePhoto, groomPhoto, isSample }) => ({
+      slug, href, first, second, place, placeLabel, city, venue, monthYear, shortDescription, storyTitle, cardPhoto, albumCover, bridePhoto, groomPhoto, isSample,
     }));
   const google = data.settings;
   return {
@@ -423,6 +436,7 @@ export async function getHomepageContent() {
     quoteEmphasis: home?.quoteEmphasis,
     quoteBy: home?.quoteBy,
     weddingsLine: home?.weddingsLine,
+    albumLabel: home?.albumLabel,
     teamLine: home?.teamLine,
     counters: home?.counters ?? [],
     posterDesktop: toImage(home?.heroPosterDesktop ?? null),

@@ -46,7 +46,7 @@ test("featured cards open a couple's page; See all goes to Weddings", async ({ p
   await page.locator('.wbsk-drift[data-mode="drift"]').waitFor({ timeout: 15000 });
   // A paused row holds still for the test's click; a person simply presses it as it drifts.
   await page.getByRole("button", { name: "Pause moving weddings" }).click();
-  const card = page.locator(".wbsk-drift li[data-real] .wbsk-card__link").first();
+  const card = page.locator(".wbsk-drift li[data-real] .wbsk-album__link").first();
   await card.scrollIntoViewIfNeeded();
   await card.click();
   await expect(page).toHaveURL(/client\//);

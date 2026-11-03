@@ -1,5 +1,5 @@
 import { sanityProject, shownQuestions, type FormQuestion } from "@wbsk/content";
-import { CoupleNames, Gallery, Header, LinkProvider, StoryCover, type SanityImage, type WbskImageSource, type WbskLinkProps } from "@wbsk/ui";
+import { AlbumCard, CoupleNames, Gallery, Header, LinkProvider, StoryCover, type SanityImage, type WbskImageSource, type WbskLinkProps } from "@wbsk/ui";
 import { navItems } from "@wbsk/content";
 import logoUrl from "../../../web/public/wbsk-logo.svg";
 
@@ -36,6 +36,46 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** The homepage album, closed and lying open, so its three photos can be checked as they go in. */
+function AlbumPreview({ doc, first, second }: { doc: DraftDocument; first: string; second: string }) {
+  const city = (doc.city as string) || "City";
+  const date = doc.weddingDate ? new Date(`${doc.weddingDate as string}T00:00:00Z`).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" }) : "Month and year";
+  const wedding = {
+    slug: "preview",
+    href: "#preview",
+    first,
+    second,
+    place: "",
+    placeLabel: (doc.placeLabel as string) || "",
+    city,
+    venue: (doc.venue as string) || "",
+    monthYear: date,
+    shortDescription: "",
+    cardPhoto: draftImage(doc.cardPhoto as DraftImage),
+    albumCover: draftImage(doc.albumCover as DraftImage),
+    bridePhoto: draftImage(doc.bridePhoto as DraftImage),
+    groomPhoto: draftImage(doc.groomPhoto as DraftImage),
+    isSample: Boolean(doc.isSample),
+  };
+  return (
+    <div className="wbsk-container" style={{ marginBlock: 32 }}>
+      <p className="wbsk-label">On the homepage</p>
+      <div className="wbsk-drifttray" style={{ marginInline: 0, marginTop: 12, ["--drift-card" as string]: "min(180px, 26vw)" }}>
+        <div className="wbsk-drift" data-near="true" data-mode="still">
+          <ul className="wbsk-drift__track" style={{ width: "auto", justifyContent: "center" }}>
+            <li>
+              <AlbumCard wedding={wedding} label="Our wedding" photos />
+            </li>
+            <li data-open="" data-lying-open="">
+              <AlbumCard wedding={wedding} label="Our wedding" photos copy />
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function WeddingBody({ doc }: { doc: DraftDocument }) {
   const first = (doc.firstName as string) || "First name";
   const second = (doc.secondName as string) || "Second name";
@@ -53,6 +93,7 @@ function WeddingBody({ doc }: { doc: DraftDocument }) {
       <div className="wbsk-container wbsk-story">
         <p className="wbsk-lead wbsk-measure">{(doc.theirStory as string) || "Their story appears here as you type."}</p>
       </div>
+      <AlbumPreview doc={doc} first={first} second={second} />
       {gallery.length ? (
         <div className="wbsk-container">
           <Gallery photos={gallery} limit={PREVIEW_PHOTOS} />

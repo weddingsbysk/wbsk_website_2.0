@@ -36,6 +36,7 @@ type PhotoOptions = {
   rule: SizeRule;
   required?: boolean;
   group?: string;
+  fieldset?: string;
   description?: string;
   hidden?: (context: { document?: Record<string, unknown> }) => boolean;
   components?: { input: ComponentType<never> };
@@ -43,12 +44,13 @@ type PhotoOptions = {
   check?: (ref: string) => true | string;
 };
 
-export function photoField({ name, title, slot, rule, required, group, description, hidden, components, check }: PhotoOptions) {
+export function photoField({ name, title, slot, rule, required, group, fieldset, description, hidden, components, check }: PhotoOptions) {
   return defineField({
     name,
     title,
     type: "image",
     group,
+    fieldset,
     hidden,
     components: components as never,
     description: description ?? `At least ${describeRule(rule)}.`,

@@ -1,10 +1,12 @@
 "use client";
 
 import "@wbsk/ui/css/home.css";
-import { canHover, ClientCard, pressThen, setCardHot, tiltCard, useCardMotion, WbskLink, type WeddingSummary } from "@wbsk/ui";
+import "@wbsk/ui/css/album.css";
+import { AlbumCard, canHover, pressThen, WbskLink, type WeddingSummary } from "@wbsk/ui";
 import { capFling, DRAG_START, MOMENTUM_TAU, nearestLoop, roundsToFill, scalePush, SECONDS_PER_CARD, shouldDrift, stepDrift, targetForCard, type DriftNumbers } from "@wbsk/ui/drift";
 import { loadGsap, peekGsap, prefersReducedMotion, setExpandSource, travelEase, watchRestedWheel } from "@wbsk/ui/motion";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createShelf, type AlbumSlot, type Shelf } from "./albumMotion";
 import { CrossfadeLine } from "./CrossfadeLine";
 
 type Mode = "plain" | "still" | "drift";
@@ -21,17 +23,7 @@ const TOUCH_SCROLL_REST_MS = 400;
 const FRESH_MOVE_MS = 80;
 const PAUSED_KEY = "wbsk-drift-paused";
 const RETURN_KEY = "wbsk-drift-return";
-/** The arc's opening, laid out straight (Decision 13): a stack rises, then fans out, nearest first. */
-const STACK_RISE_S = 0.9;
-const FAN_AT_S = 0.75;
-const FAN_S = 1.5;
-const FAN_RIPPLE_S = 0.14;
-const STACK_SCALE = 0.82;
-const STACK_DROP = 70;
-const STACK_TURN = 2.5;
-/** Dock-style swell under the cursor, as on the records. */
-const SWELL = 0.09;
-const ROW_SIZES = "(min-width: 1520px) 270px, (min-width: 1190px) 18vw, (min-width: 700px) 210px, 60vw";
+const DEFAULT_ALBUM_LABEL = "Our wedding";
 
 function readSession(key: string) {
   try {
@@ -49,14 +41,50 @@ function writeSession(key: string, value: string | null) {
   }
 }
 
+/**
+ * A press on an album. On a touch screen the first tap opens it and the second opens the story; with a mouse it
+ * has usually opened already, and a press goes straight to the story.
+ */
+function pressAlbum(
+  event: MouseEvent,
+  shelf: Shelf | null,
+  beforeLeaving: (slot: AlbumSlot) => void,
+  follow: (slot: AlbumSlot, go: (action: () => void) => void) => void,
+) {
+  if (!shelf) return;
+  const target = event.target as Element;
+  const link = target.closest<HTMLAnchorElement>(".wbsk-album__link");
+  const fromKeyboard = event.detail === 0;
+  const slot = (fromKeyboard ? null : shelf.slotAtPoint(event.clientX, event.clientY)) ?? shelf.slotOf(target);
+  if (!slot) return;
+  if (!fromKeyboard && !canHover() && shelf.openSlot() !== slot) {
+    event.preventDefault();
+    event.stopPropagation();
+    shelf.open(slot);
+    return;
+  }
+  beforeLeaving(slot);
+  setExpandSource(slot.li);
+  // The real link under a mouse or keyboard simply carries on. A copy takes no events, so its real album is pressed for it.
+  if (link === slot.link && (fromKeyboard || canHover())) return;
+  event.preventDefault();
+  event.stopPropagation();
+  follow(slot, (action) =>
+    pressThen(slot.link, () => {
+      setExpandSource(slot.li);
+      action();
+    }),
+  );
+}
+
 const Arrow = ({ d }: { d: string }) => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
     <path d={d} />
   </svg>
 );
 
-/** Featured weddings, floating slowly and endlessly like film through a projector (Decision 30). */
-export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: WeddingSummary[]; seeAllHref: string }) {
+/** Featured weddings as albums, floating slowly and endlessly along a table (Decision 30; owner, 3 November 2026). */
+export function FeaturedRow({ weddings: allWeddings, seeAllHref, albumLabel }: { weddings: WeddingSummary[]; seeAllHref: string; albumLabel?: string }) {
   const [limit, setLimit] = useState<number | null>(null);
   const weddings = limit === null ? allWeddings : allWeddings.slice(0, limit);
   const [mode, setMode] = useState<Mode>("plain");
@@ -65,6 +93,9 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
   const [paused, setPaused] = useState(false);
   const [atEnds, setAtEnds] = useState({ start: true, end: false });
   const [description, setDescription] = useState("");
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  // The pages' photographs are only asked for once an album has been opened.
+  const [opened, setOpened] = useState<ReadonlySet<string>>(() => new Set());
   const [bundle, setBundle] = useState<Gsap | null>(() => peekGsap());
 
   const weddingsRef = useRef(weddings);
@@ -72,10 +103,13 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     weddingsRef.current = weddings;
   }, [weddings]);
 
+  const trayRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLUListElement>(null);
+  const shelfRef = useRef<Shelf | null>(null);
   const layoutRef = useRef<Layout | null>(null);
   const numbers = useRef<DriftNumbers>({ x: 0, velocity: 0, drift: 0, push: 0, pushTarget: 0 });
+  const cursorRef = useRef({ x: 0, y: 0 });
   const flags = useRef({ hover: false, focus: false, touch: false, holding: false, gliding: false, frozen: false, userPaused: false, holdUntil: 0 });
   const renderRef = useRef<() => void>(() => {});
   const glideRef = useRef<(to: number) => void>(() => {});
@@ -91,8 +125,6 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     flags.current.userPaused = readSession(PAUSED_KEY) === "1";
     setPaused(flags.current.userPaused);
   }, []);
-
-  useCardMotion(rowRef, { pointer: false });
 
   const measure = useCallback(() => {
     const row = rowRef.current;
@@ -121,6 +153,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     setMode(drifting ? "drift" : "still");
     setRounds(layout.rounds);
     setFits(layout.setWidth - gap + layout.gutter * 2 <= layout.rowWidth);
+    if (before?.cardWidth !== layout.cardWidth) shelfRef.current?.refresh();
     renderRef.current();
   }, []);
 
@@ -132,6 +165,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     const begin = () => {
       if (done) return;
       done = true;
+      row.dataset.near = "true";
       void loadGsap().then(setBundle);
     };
     if (readSession(RETURN_KEY)) begin();
@@ -149,6 +183,48 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     observer.observe(row);
     return () => observer.disconnect();
   }, [bundle, measure, limit]);
+
+  // The albums' own motion, whichever way the row is moving.
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    const track = trackRef.current;
+    const tray = trayRef.current;
+    if (mode === "plain" || !bundle || !row || !track || !tray || !layoutRef.current) return;
+    const drifting = mode === "drift";
+    const shelf = createShelf({
+      gsap: bundle.gsap,
+      row,
+      track,
+      tray,
+      layout: () => layoutRef.current,
+      at: () => (drifting ? (layoutRef.current?.setWidth ?? 0) * (layoutRef.current?.rounds ?? 0) + numbers.current.x : row.scrollLeft),
+      calm: prefersReducedMotion(),
+      culling: drifting,
+      moving: () => Math.abs(numbers.current.velocity) > 20,
+      gliding: () => flags.current.gliding,
+      onShow: (index) => setDescription(index < 0 ? "" : (weddingsRef.current[index]?.shortDescription ?? "")),
+      onOpen: (index) => {
+        setOpenIndex(index);
+        const slug = index === null ? undefined : weddingsRef.current[index]?.slug;
+        if (slug) setOpened((now) => (now.has(slug) ? now : new Set(now).add(slug)));
+      },
+      onMove: (distance) => {
+        if (drifting) glideRef.current(numbers.current.x + distance);
+        else row.scrollBy({ left: distance, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+      },
+      onStop: () => {
+        numbers.current.velocity = 0;
+        numbers.current.push = 0;
+        numbers.current.pushTarget = 0;
+      },
+    });
+    shelfRef.current = shelf;
+    return () => {
+      shelf.destroy();
+      shelfRef.current = null;
+      setOpenIndex(null);
+    };
+  }, [mode, bundle, rounds, weddings.length]);
 
   // The drift itself. One ticker, and one transform on the track; nothing here reads the layout.
   useLayoutEffect(() => {
@@ -176,11 +252,13 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     const render = () => {
       const layout = layoutRef.current;
       if (!layout) return;
-      if (!f.gliding && !f.focus) n.x = wrapped();
+      // An open or closing album stays where it is: the row can't jump a whole loop under it.
+      if (!f.gliding && !f.focus && !shelfRef.current?.busy()) n.x = wrapped();
       const at = layout.setWidth * layout.rounds + n.x;
       if (at === lastX) return;
       lastX = at;
       track.style.transform = `translate3d(${(-at).toFixed(2)}px, 0, 0)`;
+      shelfRef.current?.depth();
     };
     renderRef.current = render;
 
@@ -198,14 +276,14 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       const layout = layoutRef.current;
       if (!layout || f.frozen || f.holding || f.gliding) return;
       const dt = Math.min(deltaMs / 1000, FRAME_CAP);
-      // Negative: the cards travel from left to right (owner, 2 November 2026).
-      const base = -layout.step / SECONDS_PER_CARD;
-      const free = !f.userPaused && !f.hover && !f.focus && !f.touch && performance.now() >= f.holdUntil && Math.abs(n.velocity) < Math.abs(base);
+      // The albums travel from right to left (owner, 3 November 2026).
+      const base = layout.step / SECONDS_PER_CARD;
+      const free = !f.userPaused && !f.hover && !f.focus && !f.touch && !shelfRef.current?.openSlot() && performance.now() >= f.holdUntil && Math.abs(n.velocity) < Math.abs(base);
       stepDrift(n, dt, base, free ? 1 : 0);
       render();
       const speed = Math.abs(n.velocity) + Math.abs(n.push) + n.drift * Math.abs(base);
-      // Cards passing under a resting cursor come into focus in turn.
-      if (f.hover && Math.abs(n.velocity) > 4) focusUnderCursor();
+      // Albums passing under a resting cursor come up in turn.
+      if (f.hover && Math.abs(n.velocity) > 4) shelfRef.current?.pointer(cursor.x, cursor.y);
       const nowMoving = speed > 0.5;
       if (nowMoving !== moving) {
         moving = nowMoving;
@@ -241,7 +319,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
           f.holdUntil = performance.now() + TOUCH_SCROLL_REST_MS;
           return;
         }
-        if (!f.userPaused && !f.focus && !f.holding && !f.gliding && performance.now() >= pushFrom) n.pushTarget = scalePush(-self.getVelocity());
+        if (!f.userPaused && !f.focus && !f.holding && !f.gliding && performance.now() >= pushFrom) n.pushTarget = scalePush(self.getVelocity());
       },
     });
 
@@ -270,80 +348,18 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     };
     glideRef.current = glideTo;
 
-    // Which card, real or copy, is under this point. Copies are inert, so they can't say for themselves.
-    const cards = () => [...track.querySelectorAll<HTMLElement>(":scope > li")];
-    const cardAt = (clientX: number, clientY: number) => {
-      const layout = layoutRef.current;
-      if (!layout) return null;
-      const box = row.getBoundingClientRect();
-      const trackBox = track.getBoundingClientRect();
-      if (clientY < trackBox.top || clientY > trackBox.bottom) return null;
-      const along = clientX - box.left - layout.gutter + layout.setWidth * layout.rounds + n.x;
-      const slot = Math.floor(along / layout.step);
-      if (along - slot * layout.step > layout.cardWidth) return null;
-      const item = cards()[slot];
-      if (!item) return null;
-      return { item, card: item.querySelector<HTMLElement>(".wbsk-card"), index: ((slot % layout.count) + layout.count) % layout.count };
-    };
-
-    let hot: HTMLElement | null = null;
-    const setHot = (next: HTMLElement | null) => {
-      if (next === hot) return;
-      if (hot) setCardHot(hot, false);
-      if (next) setCardHot(next, true);
-      hot = next;
-      if (next) row.dataset.overCard = "true";
-      else delete row.dataset.overCard;
-    };
-
-    // Cards near the cursor swell, their neighbours a little less, then settle back.
-    const swollen = new Set<HTMLElement>();
-    const swell = (clientX: number, on: boolean) => {
-      const layout = layoutRef.current;
-      if (!layout) return;
-      const box = row.getBoundingClientRect();
-      const along = clientX - box.left - layout.gutter + layout.setWidth * layout.rounds + n.x;
-      const slot = Math.floor(along / layout.step);
-      const all = cards();
-      const near = new Set<HTMLElement>();
-      if (on) {
-        for (let at = slot - 2; at <= slot + 2; at += 1) {
-          const card = all[at]?.querySelector<HTMLElement>(".wbsk-card");
-          if (!card) continue;
-          const distance = (at + 0.5) - (along / layout.step);
-          near.add(card);
-          swollen.add(card);
-          gsap.to(card, { scale: 1 + SWELL * Math.exp(-distance * distance * 1.6), duration: 0.45, ease: "power3.out", overwrite: "auto" });
-          if (at === slot) all[at]!.dataset.hot = "";
-          else delete all[at]!.dataset.hot;
-        }
-      }
-      swollen.forEach((card) => {
-        if (near.has(card)) return;
-        gsap.to(card, { scale: 1, duration: 0.5, ease: "power3.out", overwrite: "auto" });
-        delete card.parentElement?.dataset.hot;
-        swollen.delete(card);
-      });
-    };
-
-    const cursor = { x: 0, y: 0 };
-    const focusUnderCursor = () => {
-      const over = cardAt(cursor.x, cursor.y);
-      setHot(over?.card ?? null);
-      swell(cursor.x, Boolean(over));
-      if (over?.card) {
-        tiltCard(over.card, cursor.x, cursor.y);
-        setDescription(weddingsRef.current[over.index]?.shortDescription ?? "");
-      }
-    };
+    const cursor = cursorRef.current;
     // With the cursor resting on the row, scrolling moves the cards: one notch is about one card.
     const stopWheel = watchRestedWheel(
       row,
       (pixels) => {
         const layout = layoutRef.current;
+        // Scrolling the row is a clear wish to get on with it, so the intro makes way.
+        skipIntroRef.current();
         if (!layout || f.frozen) return;
         glide?.kill();
         f.gliding = false;
+        shelfRef.current?.release(true);
         n.velocity = capFling(n.velocity + (pixels / 100) * (layout.step / MOMENTUM_TAU));
       },
       () => (layoutRef.current?.setWidth ?? 0) * 1.5,
@@ -361,10 +377,10 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerId !== pointer.id) {
         if (event.pointerType === "mouse" && !f.holding) {
-          if (f.frozen) return;
           cursor.x = event.clientX;
           cursor.y = event.clientY;
-          focusUnderCursor();
+          if (f.frozen) return;
+          shelfRef.current?.pointer(cursor.x, cursor.y);
         }
         return;
       }
@@ -383,8 +399,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
         row.dataset.dragging = "true";
         track.dataset.moving = "true";
         moving = true;
-        setHot(null);
-        swell(0, false);
+        shelfRef.current?.release(true);
       }
       const step = event.clientX - pointer.lastX;
       const elapsed = Math.max(event.timeStamp - pointer.lastT, 1) / 1000;
@@ -417,8 +432,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       if (event.pointerType !== "mouse") return;
       f.hover = false;
       f.holdUntil = performance.now() + RESUME_AFTER_MS;
-      setHot(null);
-      swell(0, false);
+      shelfRef.current?.release(true);
     };
     // Only a clearly sideways gesture is ever taken. Vertical wheel and swipes stay with the page.
     const onWheel = (event: WheelEvent) => {
@@ -426,6 +440,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       event.preventDefault();
       glide?.kill();
       f.gliding = false;
+      shelfRef.current?.release(true);
       n.x += event.deltaX;
       n.drift = 0;
       f.holdUntil = performance.now() + WHEEL_RESUME_MS;
@@ -437,24 +452,30 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       f.focus = true;
       const layout = layoutRef.current;
       const item = target.closest("li");
-      if (!layout || !item) return;
-      setDescription(weddingsRef.current[real().indexOf(item as HTMLElement)]?.shortDescription ?? "");
+      const shelf = shelfRef.current;
+      if (!layout || !item || !shelf) return;
       const index = real().indexOf(item as HTMLElement);
-      const highest = layout.setWidth * (layout.rounds + 1) + layout.gutter - layout.rowWidth;
-      const goal = targetForCard(index, wrapped(), layout.step, layout.cardWidth, layout.rowWidth, layout.gutter);
       const current = wrapped();
-      if (goal === current) return;
-      n.x = nearestLoop(current, goal, layout.setWidth, highest);
-      glideTo(goal);
+      let goal = targetForCard(index, current, layout.step, layout.cardWidth, layout.rowWidth, layout.gutter);
+      // The album opens as it arrives, so the whole spread has to lie on the table.
+      goal += shelf.fitFor(index * layout.step + layout.gutter - goal);
+      const highest = layout.setWidth * (layout.rounds + 1) + layout.gutter - layout.rowWidth;
+      if (goal !== current) {
+        n.x = nearestLoop(current, goal, layout.setWidth, highest);
+        glideTo(goal);
+      }
+      const slot = shelf.slotOf(item);
+      if (slot) shelf.open(slot, { glide: false });
     };
     const real = () => [...track.querySelectorAll<HTMLElement>("li[data-real]")];
     const onFocusOut = (event: FocusEvent) => {
       if (row.contains(event.relatedTarget as Node | null)) return;
       f.focus = false;
       f.holdUntil = performance.now() + RESUME_AFTER_MS;
+      shelfRef.current?.release(true);
     };
 
-    // A press stops the row at once, so the page grows from exactly where the card is.
+    // A press stops the row at once, so the page grows from exactly where the album is.
     let replaying = false;
     const onClick = (event: MouseEvent) => {
       if (event.metaKey || event.ctrlKey || event.shiftKey) return;
@@ -465,34 +486,25 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
         return;
       }
       if (replaying) return;
-      const layout = layoutRef.current;
-      if (!layout) return;
-      const link = (event.target as Element).closest<HTMLAnchorElement>(".wbsk-card__link");
-      const over = link ? null : cardAt(event.clientX, event.clientY);
-      const realItem = link ? link.closest("li")! : real()[over?.index ?? -1];
-      if (!realItem) return;
-      const realLink = realItem.querySelector<HTMLAnchorElement>(".wbsk-card__link");
-      if (!realLink) return;
-      const source = (over?.card ?? realItem.querySelector<HTMLElement>(".wbsk-card"))!;
-      const index = real().indexOf(realItem as HTMLElement);
-      f.frozen = true;
-      glide?.kill();
-      // Measured from the card's slot: the card itself is swollen under the cursor.
-      const offset = (source.closest("li") ?? source).getBoundingClientRect().left - row.getBoundingClientRect().left - layout.gutter;
-      writeSession(RETURN_KEY, JSON.stringify({ index, offset }));
-      const go = () => {
-        replaying = true;
-        setExpandSource(source);
-        realLink.click();
-        replaying = false;
-      };
-      if (link && canHover()) {
-        setExpandSource(source);
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-      pressThen((over?.card ?? realItem).querySelector<HTMLElement>(".wbsk-card__link") ?? realLink, go);
+      pressAlbum(
+        event,
+        shelfRef.current,
+        (slot) => {
+          f.frozen = true;
+          glide?.kill();
+          const layout = layoutRef.current;
+          if (layout && shelfRef.current) writeSession(RETURN_KEY, JSON.stringify({ index: slot.index, offset: shelfRef.current.leftOf(slot) - layout.gutter }));
+        },
+        (slot, go) => {
+          const realLink = real()[slot.index]?.querySelector<HTMLAnchorElement>(".wbsk-album__link");
+          if (!realLink) return;
+          go(() => {
+            replaying = true;
+            realLink.click();
+            replaying = false;
+          });
+        },
+      );
     };
     const onDragStart = (event: Event) => event.preventDefault();
     // A press that leaves the row without changing page must not leave it frozen.
@@ -523,8 +535,6 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       glide?.kill();
       push.kill();
       screen.disconnect();
-      setHot(null);
-      swell(0, false);
       document.removeEventListener("visibilitychange", sync);
       row.removeEventListener("pointerdown", onPointerDown);
       row.removeEventListener("pointermove", onPointerMove);
@@ -540,7 +550,6 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       window.removeEventListener("pageshow", onPageShow);
       renderRef.current = () => {};
       delete track.dataset.moving;
-      delete row.dataset.overCard;
       delete row.dataset.dragging;
     };
   }, [mode, bundle]);
@@ -549,7 +558,10 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
   useEffect(() => {
     const row = rowRef.current;
     if (mode !== "still" || !row) return;
-    const ends = () => setAtEnds({ start: row.scrollLeft <= 2, end: row.scrollLeft + row.clientWidth >= row.scrollWidth - 2 });
+    const ends = () => {
+      setAtEnds({ start: row.scrollLeft <= 2, end: row.scrollLeft + row.clientWidth >= row.scrollWidth - 2 });
+      shelfRef.current?.depth();
+    };
     ends();
     row.addEventListener("scroll", ends, { passive: true });
     const drag = { active: false, x: 0, left: 0, moved: false };
@@ -571,12 +583,35 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       delete row.dataset.dragging;
     };
     const onClick = (event: MouseEvent) => {
-      if (!drag.moved) return;
-      drag.moved = false;
-      event.preventDefault();
-      event.stopPropagation();
+      if (drag.moved) {
+        drag.moved = false;
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+      pressAlbum(event, shelfRef.current, () => {}, (slot, go) => go(() => slot.link.click()));
     };
     const onDragStart = (event: Event) => event.preventDefault();
+    const onHover = (event: PointerEvent) => {
+      if (event.pointerType === "mouse" && !drag.active) shelfRef.current?.pointer(event.clientX, event.clientY);
+    };
+    const onLeave = (event: PointerEvent) => {
+      if (event.pointerType === "mouse") shelfRef.current?.release(true);
+    };
+    const onFocusIn = (event: FocusEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.matches?.(":focus-visible")) return;
+      const slot = shelfRef.current?.slotOf(target);
+      if (slot) shelfRef.current?.open(slot);
+    };
+    const onFocusOut = (event: FocusEvent) => {
+      if (!row.contains(event.relatedTarget as Node | null)) shelfRef.current?.release(true);
+    };
+    row.addEventListener("pointermove", onHover);
+    row.addEventListener("pointerleave", onLeave);
+    row.addEventListener("focusin", onFocusIn);
+    row.addEventListener("focusout", onFocusOut);
     row.addEventListener("pointerdown", onDown);
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
@@ -584,6 +619,10 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     row.addEventListener("dragstart", onDragStart);
     return () => {
       row.removeEventListener("scroll", ends);
+      row.removeEventListener("pointermove", onHover);
+      row.removeEventListener("pointerleave", onLeave);
+      row.removeEventListener("focusin", onFocusIn);
+      row.removeEventListener("focusout", onFocusOut);
       row.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
@@ -592,41 +631,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     };
   }, [mode]);
 
-  // Hover in the still row uses the ordinary card motion, since it has no copies.
-  useEffect(() => {
-    const row = rowRef.current;
-    if (mode !== "still" || !row) return;
-    let hot: HTMLElement | null = null;
-    const onOver = (event: PointerEvent) => {
-      if (event.pointerType !== "mouse") return;
-      const card = (event.target as Element).closest?.(".wbsk-card__link")?.closest<HTMLElement>(".wbsk-card") ?? null;
-      if (card === hot) return;
-      if (hot) setCardHot(hot, false);
-      if (card) {
-        setCardHot(card, true);
-        const index = [...row.querySelectorAll(".wbsk-card")].indexOf(card);
-        setDescription(weddingsRef.current[index]?.shortDescription ?? "");
-      }
-      hot = card;
-    };
-    const onMoveTilt = (event: PointerEvent) => {
-      if (hot && event.pointerType === "mouse") tiltCard(hot, event.clientX, event.clientY);
-    };
-    row.addEventListener("pointermove", onMoveTilt);
-    const onLeave = () => {
-      if (hot) setCardHot(hot, false);
-      hot = null;
-    };
-    row.addEventListener("pointerover", onOver);
-    row.addEventListener("pointerleave", onLeave);
-    return () => {
-      row.removeEventListener("pointerover", onOver);
-      row.removeEventListener("pointermove", onMoveTilt);
-      row.removeEventListener("pointerleave", onLeave);
-    };
-  }, [mode]);
-
-  // The row introduces itself once, when most of it is on screen (Decisions 13 and 30).
+  // The albums introduce themselves once, when most of the row is on screen (owner, 3 November 2026).
   useLayoutEffect(() => {
     const row = rowRef.current;
     const track = trackRef.current;
@@ -638,36 +643,21 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     const items = [...track.querySelectorAll<HTMLElement>(":scope > li")];
     gsap.set(items, { opacity: 0 });
     f.frozen = true;
-    let timeline: { progress: (value: number) => unknown } | null = null;
+    let timeline: { progress: (value: number) => unknown; kill: () => unknown } | null = null;
     let finished = false;
     const done = () => {
       finished = true;
       f.frozen = false;
       skipIntroRef.current = () => {};
+      // A cursor that came to rest on an album during the intro now counts.
+      if (f.hover) shelfRef.current?.pointer(cursorRef.current.x, cursorRef.current.y);
     };
     const begin = () => {
-      const rowBox = row.getBoundingClientRect();
-      const centre = rowBox.left + rowBox.width / 2;
-      const placed = items
-        .map((item) => {
-          const box = item.getBoundingClientRect();
-          return { item, away: box.left + box.width / 2 - centre, on: box.right > rowBox.left && box.left < rowBox.right };
-        })
-        .filter((entry) => entry.on)
-        .sort((a, b) => Math.abs(a.away) - Math.abs(b.away));
-      gsap.set(items, { opacity: 1 });
-      const tl = gsap.timeline({
-        onComplete: () => {
-          gsap.set(items, { clearProps: "transform,opacity,zIndex" });
-          done();
-        },
-      });
-      placed.forEach(({ item, away }, rank) => {
-        gsap.set(item, { x: -away, y: STACK_DROP, scale: STACK_SCALE, rotation: (rank % 2 ? 1 : -1) * Math.min(rank, 3) * STACK_TURN * 0.5, zIndex: placed.length - rank, opacity: 0 });
-        tl.to(item, { y: 0, opacity: 1, duration: STACK_RISE_S, ease: "power3.out" }, 0);
-        tl.to(item, { x: 0, scale: 1, rotation: 0, duration: FAN_S, ease: "expo.out" }, FAN_AT_S + rank * FAN_RIPPLE_S);
-      });
-      timeline = tl;
+      timeline = shelfRef.current?.playIntro(done) ?? null;
+      if (!timeline && !finished) {
+        gsap.set(items, { clearProps: "opacity" });
+        done();
+      }
     };
     const watch = new IntersectionObserver(
       ([entry]) => {
@@ -675,7 +665,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
         watch.disconnect();
         begin();
       },
-      { threshold: 0.45 },
+      { threshold: 0.7 },
     );
     watch.observe(row);
     const skip = () => {
@@ -701,7 +691,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
       row.removeEventListener("wheel", onSideways);
       // Development mode starts effects twice, and a change of mode starts again; neither should lose the intro.
       if (!finished) {
-        (timeline as { kill?: () => void } | null)?.kill?.();
+        (timeline as { kill: () => unknown } | null)?.kill();
         introDone.current = false;
       }
     };
@@ -709,6 +699,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
 
   const moveByCard = (direction: 1 | -1) => {
     skipIntroRef.current();
+    shelfRef.current?.release(true);
     const layout = layoutRef.current;
     const row = rowRef.current;
     if (!layout || !row) return;
@@ -732,33 +723,54 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref }: { weddings: W
     setPaused(next);
   };
 
+  const label = albumLabel ?? DEFAULT_ALBUM_LABEL;
+  const openWedding = openIndex === null ? null : weddings[openIndex];
   const showArrows = (mode === "drift" || mode === "still") && !fits;
   const copies = mode === "drift" ? Array.from({ length: rounds }, (_, round) => weddings.map((wedding) => ({ wedding, round }))).flat() : [];
 
   return (
     <>
-      <div ref={rowRef} className="wbsk-drift" data-mode={mode} data-fits={fits} data-paused={paused}>
-        <ul ref={trackRef} className="wbsk-drift__track" aria-label="Featured weddings">
-          {copies.map(({ wedding, round }) => (
-            <li key={`before-${round}-${wedding.slug}`} aria-hidden="true" inert>
-              <ClientCard wedding={wedding} sizes={ROW_SIZES} copy />
-            </li>
-          ))}
-          {weddings.map((wedding) => (
-            <li key={wedding.slug} data-real="" className="wbsk-cardslot">
-              <ClientCard wedding={wedding} onShow={setDescription} sizes={ROW_SIZES} />
-            </li>
-          ))}
-          {copies.map(({ wedding, round }) => (
-            <li key={`after-${round}-${wedding.slug}`} aria-hidden="true" inert>
-              <ClientCard wedding={wedding} sizes={ROW_SIZES} copy />
-            </li>
-          ))}
-        </ul>
+      <div ref={trayRef} className="wbsk-drifttray">
+        <span className="wbsk-drifttray__pool" aria-hidden="true" />
+        <div ref={rowRef} className="wbsk-drift" data-mode={mode} data-fits={fits} data-paused={paused}>
+          <ul ref={trackRef} className="wbsk-drift__track" aria-label="Featured weddings">
+            {copies.map(({ wedding, round }) => (
+              <li key={`before-${round}-${wedding.slug}`} aria-hidden="true" inert>
+                <AlbumCard wedding={wedding} label={label} photos={opened.has(wedding.slug)} copy />
+              </li>
+            ))}
+            {weddings.map((wedding) => (
+              <li key={wedding.slug} data-real="">
+                <AlbumCard wedding={wedding} label={label} photos={opened.has(wedding.slug)} />
+              </li>
+            ))}
+            {copies.map(({ wedding, round }) => (
+              <li key={`after-${round}-${wedding.slug}`} aria-hidden="true" inert>
+                <AlbumCard wedding={wedding} label={label} photos={opened.has(wedding.slug)} copy />
+              </li>
+            ))}
+          </ul>
+        </div>
+        <span className="wbsk-drifttray__sweep" aria-hidden="true" />
+        <span className="wbsk-drifttray__lamp" aria-hidden="true" />
       </div>
       <div className="wbsk-container wbsk-drift__below">
         <div className="wbsk-drift__line">
           <CrossfadeLine text={description} />
+          {openWedding ? (
+            <WbskLink
+              href={openWedding.href}
+              className="wbsk-link wbsk-drift__go"
+              data-transition="expand"
+              data-keeps-album=""
+              onClick={() => {
+                const slot = shelfRef.current?.openSlot();
+                if (slot) setExpandSource(slot.li);
+              }}
+            >
+              View story →
+            </WbskLink>
+          ) : null}
         </div>
         <div className="wbsk-drift__bar">
           <div className="wbsk-drift__controls">

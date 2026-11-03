@@ -2,6 +2,7 @@
 @import "@wbsk/ui/styles.css";
 @import "@wbsk/ui/css/forms.css";
 @import "@wbsk/ui/css/gallery.css";
+@import "@wbsk/ui/css/album.css";
 @source "../../../../packages/ui/src";
 
 @font-face {
@@ -24,6 +25,12 @@
   font-display: swap;
 }
 @font-face {
+  font-family: "WBSK Bodoni Album";
+  src: url("../../../web/src/fonts/bodoni-moda-album.woff2") format("woff2");
+  font-weight: 400 500;
+  font-display: swap;
+}
+@font-face {
   font-family: "WBSK Outfit";
   src: url("../../../web/src/fonts/outfit.woff2") format("woff2");
   font-weight: 400 500;
@@ -34,4 +41,5 @@
   --font-playfair-italic: "WBSK Playfair Italic";
   --font-cormorant: "WBSK Cormorant";
   --font-outfit: "WBSK Outfit";
+  --font-bodoni-album: "WBSK Bodoni Album";
 }

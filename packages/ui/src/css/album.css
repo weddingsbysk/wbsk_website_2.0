@@ -1,0 +1,554 @@
+/* The homepage's moving row of albums (owner, 3 November 2026). */
+@layer components {
+  /* The tray they lie on: dark cloth, under a lamp that stays still whatever the row does. */
+  .wbsk-drifttray {
+    --drift-card: clamp(180px, 16.5vw, 252px);
+    --drift-gap: clamp(30px, 3.4vw, 56px);
+    position: relative;
+    isolation: isolate;
+    margin-inline: var(--gutter);
+    overflow: hidden;
+    background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
+    border: 1px solid rgb(221 175 58 / 0.22);
+    border-radius: clamp(16px, 1.8vw, 24px);
+    box-shadow: 0 18px 40px -22px rgb(35 28 22 / 0.5);
+  }
+  @media (max-width: 699px) {
+    .wbsk-drifttray {
+      --drift-card: 47vw;
+      --drift-gap: 34px;
+    }
+  }
+  .wbsk-drifttray__pool,
+  .wbsk-drifttray__lamp,
+  .wbsk-drifttray__sweep {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+  .wbsk-drifttray__pool {
+    z-index: 0;
+    background: radial-gradient(ellipse 58% 95% at 46% 40%, rgb(150 112 72 / 0.46) 0%, rgb(96 72 48 / 0.2) 52%, rgb(31 25 20 / 0) 82%);
+  }
+  .wbsk-drifttray__lamp {
+    z-index: 4;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 68% 120% at 46% 42%, rgb(255 236 200 / 0.05) 0%, rgb(16 11 7 / 0) 46%, rgb(12 8 5 / 0.46) 100%);
+    box-shadow: inset 0 2px 22px rgb(0 0 0 / 0.55);
+  }
+  .wbsk-drifttray__sweep {
+    z-index: 3;
+    width: 46%;
+    opacity: 0;
+    background: linear-gradient(100deg, rgb(255 226 170 / 0) 0%, rgb(255 226 170 / 0.15) 50%, rgb(255 226 170 / 0) 100%);
+  }
+
+  .wbsk-drift {
+    position: relative;
+    z-index: 1;
+    padding-block: calc(var(--drift-card) * 0.27) calc(var(--drift-card) * 0.37);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .wbsk-drift::-webkit-scrollbar {
+    display: none;
+  }
+  .wbsk-drift[data-mode="drift"] {
+    overflow: clip;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .wbsk-drift[data-mode="drift"],
+    .wbsk-drift[data-mode="still"][data-fits="false"] {
+      cursor: grab;
+    }
+    .wbsk-drift[data-mode="drift"] .wbsk-album__link {
+      cursor: inherit;
+    }
+    .wbsk-drift[data-over-card="true"] {
+      cursor: pointer !important;
+    }
+    .wbsk-drift[data-dragging="true"] {
+      cursor: grabbing !important;
+    }
+  }
+  .wbsk-drift__track {
+    display: flex;
+    gap: var(--drift-gap);
+    width: max-content;
+    margin: 0;
+    padding: 0 calc(var(--drift-gap) * 0.6);
+    list-style: none;
+  }
+  .wbsk-drift__track[data-moving="true"] {
+    will-change: transform;
+  }
+  .wbsk-drift__track > li {
+    position: relative;
+    flex: none;
+    width: var(--drift-card);
+  }
+  .wbsk-drift__track > li[data-hot],
+  .wbsk-drift__track > li[data-open] {
+    z-index: 5;
+  }
+
+  /* ---- The album. 1em is its width, so everything holds at any size. */
+  .wbsk-album {
+    position: relative;
+    height: calc(var(--drift-card) * 1.27);
+  }
+  .wbsk-album__link {
+    --t: 0.1em;
+    --paper: #f3efe7;
+    --board: #cfc7b8;
+    --ink: #6c5f54;
+    position: absolute;
+    inset: 0;
+    display: block;
+    font-size: var(--drift-card);
+    color: inherit;
+    text-decoration: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wbsk-album__link[data-pressed] {
+    filter: brightness(0.97);
+  }
+  .wbsk-album__swell,
+  .wbsk-album__stage {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  /* Grows to hold both pages when open, so the whole spread is what moves into the couple's page. */
+  .wbsk-album__frame {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  [data-open] > .wbsk-album .wbsk-album__frame {
+    left: -100%;
+  }
+  .wbsk-album__body {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: block;
+    width: 1em;
+  }
+  .wbsk-album__3d {
+    position: absolute;
+    inset: 0;
+    display: block;
+    transform: rotateX(13deg);
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+  }
+  .wbsk-album__3d i,
+  .wbsk-album__3d > span,
+  .wbsk-album__hinge > span,
+  .wbsk-album__cover > span {
+    position: absolute;
+    display: block;
+    font-style: normal;
+  }
+  /* The board underneath, which also throws the album's shadow onto the table. */
+  .wbsk-album__back {
+    inset: 0;
+    transform: translateZ(calc(var(--t) / -2));
+    background: var(--board);
+    border-radius: 0.006em;
+    box-shadow:
+      0.006em 0.012em 0.012em rgb(0 0 0 / 0.72),
+      0.03em 0.06em 0.09em rgb(8 5 3 / 0.62),
+      0.07em 0.15em 0.28em rgb(8 5 3 / 0.5);
+  }
+  .wbsk-album__back--left {
+    inset: 0 100% 0 -100%;
+    opacity: 0;
+    visibility: hidden;
+  }
+  /* The spine's outer face: the same smooth paper, curving away from the light. */
+  .wbsk-album__spine {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--t);
+    transform-origin: 0 50%;
+    transform: translateZ(calc(var(--t) / -2)) rotateY(-90deg);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: linear-gradient(90deg, #8f8779, #e4ded2 46%, #b3ab9c);
+  }
+  /* The block of thick pages, seen from the side. */
+  .wbsk-album__edge {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background-color: #eee8dc;
+    background-image:
+      linear-gradient(var(--edge-dir), var(--board) 0 5%, transparent 5% 95%, var(--board) 95%),
+      linear-gradient(var(--edge-shade)),
+      repeating-linear-gradient(var(--edge-dir), rgb(70 58 42 / 0) 0 0.009em, rgb(70 58 42 / 0.3) 0.009em 0.0115em);
+  }
+  .wbsk-album__edge--right {
+    --edge-dir: 90deg;
+    --edge-shade: 90deg, rgb(26 18 10 / 0.3), rgb(26 18 10 / 0.46);
+    top: 0.004em;
+    bottom: 0.004em;
+    left: 100%;
+    width: var(--t);
+    transform-origin: 0 50%;
+    transform: translateZ(calc(var(--t) / 2)) rotateY(90deg);
+  }
+  .wbsk-album__edge--bottom {
+    --edge-dir: 180deg;
+    --edge-shade: 180deg, rgb(26 18 10 / 0.05), rgb(26 18 10 / 0.34);
+    top: 100%;
+    right: 0.004em;
+    left: 0.006em;
+    height: var(--t);
+    transform-origin: 50% 0;
+    transform: translateZ(calc(var(--t) / 2)) rotateX(-90deg);
+  }
+  .wbsk-album__edge--bottom-left {
+    right: 100%;
+    left: -100%;
+    opacity: 0;
+    visibility: hidden;
+  }
+  .wbsk-album__hinge {
+    position: absolute;
+    inset: 0;
+    display: block;
+    transform: translateZ(calc(var(--t) / 2));
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+  }
+  .wbsk-album__cover {
+    position: absolute;
+    inset: 0;
+    display: block;
+    transform-origin: 0 50%;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+  }
+  /* The front: smooth paper on the left, the photograph to the edge on the right. */
+  .wbsk-album__front {
+    inset: 0;
+    overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 0.006em;
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(90deg, rgb(52 42 30 / 0.14) 0, rgb(255 255 255 / 0.5) 1.5%, rgb(52 42 30 / 0.03) 2.8%, rgb(52 42 30 / 0.2) 3.7%, rgb(255 255 255 / 0.55) 4.4%, rgb(255 255 255 / 0) 6.2%),
+      linear-gradient(150deg, rgb(255 255 255 / 0.3) 0%, rgb(255 255 255 / 0) 42%, rgb(52 42 30 / 0.1) 100%),
+      url("../textures/card-stock.webp");
+    background-size: auto, auto, 384px;
+    background-blend-mode: normal, normal, multiply;
+    box-shadow:
+      inset 0.0025em 0.0025em 0.001em rgb(255 255 255 / 0.7),
+      inset -0.0025em -0.0025em 0.002em rgb(52 42 30 / 0.28);
+  }
+  .wbsk-album__photo {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0.456em;
+    display: block;
+    overflow: hidden;
+    background: #2a211a;
+    box-shadow: -0.001em 0 0 rgb(52 42 30 / 0.3);
+  }
+  .wbsk-album__photo .wbsk-frame,
+  .wbsk-album__print .wbsk-frame {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+  .wbsk-album__front i.wbsk-album__photo-edge {
+    inset: 0;
+    background: linear-gradient(150deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0) 40%, rgb(20 12 6 / 0.14) 100%);
+    box-shadow:
+      inset -0.0025em -0.0025em 0.002em rgb(0 0 0 / 0.3),
+      inset 0 0.0025em 0.001em rgb(255 255 255 / 0.22);
+  }
+  /* A soft satin sheen that slides as the album turns. It only shows over the photograph. */
+  .wbsk-album__front i.wbsk-album__glare {
+    inset: -6% -50%;
+    background: linear-gradient(112deg, rgb(255 255 255 / 0) 34%, rgb(255 255 255 / 0.07) 46%, rgb(255 255 255 / 0.1) 50%, rgb(255 255 255 / 0.03) 55%, rgb(255 255 255 / 0) 66%);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  [data-mode="drift"] .wbsk-album__front i.wbsk-album__glare {
+    will-change: transform, opacity;
+  }
+  /* The title: a small label, then large thin capitals with the second name stepping right. */
+  .wbsk-album__type {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0.075em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 0.35em;
+    color: var(--ink);
+  }
+  .wbsk-album__label {
+    display: block;
+    margin-bottom: 0.03em;
+    padding-left: 0.006em;
+    font-family: var(--font-ui);
+    font-size: max(7px, 0.0255em);
+    font-weight: 400;
+    line-height: 1.35;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+  }
+  .wbsk-album__names {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: var(--size, 0.11em);
+    font-weight: 400;
+    line-height: 1.06;
+    letter-spacing: 0.012em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  /* The font is only asked for once the row is nearly on screen, so it never competes with the first view. */
+  [data-near] .wbsk-album__names {
+    font-family: var(--font-bodoni-album), var(--font-serif);
+    font-optical-sizing: none;
+    font-variation-settings: "opsz" 20;
+  }
+  .wbsk-album__names > span {
+    display: block;
+  }
+  .wbsk-album__names > span + span {
+    margin-left: 0.5em;
+  }
+  .wbsk-album__when {
+    display: block;
+    margin-top: 0.04em;
+    padding-left: 0.006em;
+    font-family: var(--font-ui);
+    font-size: max(6.5px, 0.0225em);
+    font-weight: 400;
+    line-height: 1.45;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .wbsk-album__mark {
+    position: absolute;
+    bottom: 0.062em;
+    left: 0.006em;
+    font-family: var(--font-serif);
+    font-size: max(7.5px, 0.03em);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+  }
+  .wbsk-album__mark b {
+    font-weight: inherit;
+    color: #a9832a;
+  }
+  /* Thin lines need enough pixels: phones and ordinary-resolution screens get sturdier capitals (as the logo taught us). */
+  @media (max-width: 699px), (max-resolution: 1.4dppx) {
+    [data-near] .wbsk-album__names {
+      font-weight: 500;
+      font-variation-settings: "opsz" 11;
+    }
+  }
+  .wbsk-album__shade {
+    inset: 0;
+    background: #060403;
+    opacity: 0;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  /* The board's own edge, seen as it swings up. */
+  .wbsk-album__board-edge {
+    top: 0;
+    bottom: 0;
+    left: 100%;
+    width: 0.012em;
+    transform-origin: 0 50%;
+    transform: rotateY(90deg);
+    background: var(--board);
+    visibility: hidden;
+  }
+  /* Inside: bride on the left, groom on the right, photographs first. */
+  .wbsk-album__inner {
+    inset: 0;
+    transform: rotateY(180deg) translateZ(0.5px);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: var(--board);
+    border-radius: 0.006em;
+    visibility: hidden;
+  }
+  .wbsk-album__page {
+    position: absolute;
+    display: block;
+    overflow: hidden;
+    background: #f1ebdf url("../textures/card-stock.webp") 0 0 / 1.6em;
+    background-blend-mode: multiply;
+    box-shadow: 0 0.003em 0 #e6dfd1, 0 0.005em 0 #a99f8b, 0 0.007em 0 #e0d8c8, 0 0.009em 0 #a0957f;
+  }
+  .wbsk-album__page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .wbsk-album__page--left {
+    inset: 0.01em 0 0.01em 0.01em;
+    border-radius: 0.004em 0 0 0.004em;
+  }
+  .wbsk-album__page--left::after {
+    background: linear-gradient(270deg, rgb(30 20 10 / 0.42) 0, rgb(30 20 10 / 0.08) 1.5%, rgb(255 251 240 / 0.1) 3.2%, rgb(255 251 240 / 0) 6%, rgb(30 20 10 / 0) 92%, rgb(30 20 10 / 0.05) 100%);
+  }
+  .wbsk-album__3d > .wbsk-album__page--right {
+    top: 0.01em;
+    right: 0.01em;
+    bottom: 0.01em;
+    left: 0;
+    transform: translateZ(calc(var(--t) / 2 - 0.5px));
+    border-radius: 0 0.004em 0.004em 0;
+    visibility: hidden;
+  }
+  .wbsk-album__page--right::after {
+    background: linear-gradient(90deg, rgb(30 20 10 / 0.46) 0, rgb(30 20 10 / 0.09) 1.5%, rgb(255 251 240 / 0.09) 3.2%, rgb(255 251 240 / 0) 6%, rgb(30 20 10 / 0) 92%, rgb(30 20 10 / 0.06) 100%);
+  }
+  .wbsk-album__print {
+    position: absolute;
+    top: 4.6%;
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: #6c5a4a;
+    box-shadow: 0 0 0 0.001em rgb(60 40 20 / 0.2);
+  }
+  .wbsk-album__page--left .wbsk-album__print {
+    right: 8.5%;
+    left: 7.5%;
+  }
+  .wbsk-album__page--right .wbsk-album__print {
+    right: 7.5%;
+    left: 8.5%;
+  }
+  .wbsk-album__who {
+    position: absolute;
+    bottom: 3%;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.03em;
+    color: #2b2118;
+  }
+  .wbsk-album__page--left .wbsk-album__who {
+    right: 8.5%;
+    left: 7.5%;
+  }
+  .wbsk-album__page--right .wbsk-album__who {
+    right: 7.5%;
+    left: 8.5%;
+  }
+  .wbsk-album__who > span {
+    font-family: var(--font-serif);
+    font-size: max(10px, 0.05em);
+    font-weight: 500;
+    line-height: 1.08;
+  }
+  .wbsk-album__who > b {
+    flex: none;
+    font-family: var(--font-ui);
+    font-size: max(8.5px, 0.03em);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-deep-gold);
+  }
+  .wbsk-album__page i.wbsk-album__cast {
+    inset: 0;
+    background: linear-gradient(90deg, rgb(12 7 3 / 0.86), rgb(12 7 3 / 0.42) 58%, rgb(12 7 3 / 0.12));
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* Only an album being opened shows an inside at all, so the rest cost nothing to draw. */
+  [data-open] > .wbsk-album .wbsk-album__inner,
+  [data-open] > .wbsk-album .wbsk-album__page--right,
+  [data-open] > .wbsk-album .wbsk-album__board-edge,
+  [data-open] > .wbsk-album .wbsk-album__back--left,
+  [data-open] > .wbsk-album .wbsk-album__edge--bottom-left {
+    visibility: visible;
+  }
+  .wbsk-album__link:focus-visible .wbsk-album__front {
+    box-shadow: 0 0 0 max(2px, 0.008em) var(--color-gold);
+  }
+  .wbsk-album__link:focus-visible .wbsk-album__page {
+    outline: max(2px, 0.008em) solid var(--color-gold);
+    outline-offset: -0.012em;
+  }
+
+  /* The Studio's preview shows an album lying open, with no script to open it. */
+  [data-lying-open] {
+    margin-left: var(--drift-card);
+  }
+  [data-lying-open] .wbsk-album__3d {
+    transform: none;
+  }
+  [data-lying-open] .wbsk-album__cover {
+    transform: rotateY(-180deg);
+  }
+  [data-lying-open] .wbsk-album__front {
+    visibility: hidden;
+  }
+  [data-lying-open] .wbsk-album__back--left,
+  [data-lying-open] .wbsk-album__edge--bottom-left {
+    opacity: 1;
+  }
+  [data-lying-open] .wbsk-album__ribbon {
+    transform: translateX(-0.171em);
+  }
+
+  /* The ribbon: satin, lying under the album, in links that swing. It slides to the fold when the album opens. */
+  .wbsk-album__ribbon {
+    position: absolute;
+    top: calc(100% - 0.05em);
+    left: 0.15em;
+    display: block;
+    width: 0.042em;
+    height: 0;
+    pointer-events: none;
+  }
+  .wbsk-album__link-piece {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 0.068em;
+    transform-origin: 50% 0;
+    background: linear-gradient(90deg, #7a5c1c 0%, #c29a43 15%, #f0d995 37%, #d3ad57 55%, #ab8534 78%, #755718 100%);
+    box-shadow: 0.003em 0.006em 0.01em rgb(0 0 0 / 0.42);
+  }
+  .wbsk-album__link-piece .wbsk-album__link-piece {
+    top: calc(100% - 1.5px);
+  }
+  .wbsk-album__link-piece--tail {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 74%, 0 100%);
+    box-shadow: none;
+  }
+  [data-mode="drift"] .wbsk-album__ribbon,
+  [data-mode="drift"] .wbsk-album__link-piece {
+    will-change: transform;
+  }
+}
