@@ -30,7 +30,7 @@ const renderLink = ({ href: _href, onClick: _onClick, ...rest }: WbskLinkProps) 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <LinkProvider value={renderLink}>
-      <Header items={navItems} enquireHref="/#enquire" homeHref="/" logoSrc={logoUrl} currentPath="/client/" />
+      <Header items={navItems} enquireHref="/#enquire" homeHref="/" logoSrc={logoUrl} logoSrcSet={logoUrl} currentPath="/client/" />
       <main>{children}</main>
     </LinkProvider>
   );
@@ -60,9 +60,9 @@ function AlbumPreview({ doc, first, second }: { doc: DraftDocument; first: strin
   return (
     <div className="wbsk-container" style={{ marginBlock: 32 }}>
       <p className="wbsk-label">On the homepage</p>
-      <div className="wbsk-drifttray" style={{ marginInline: 0, marginTop: 12, ["--drift-card" as string]: "min(180px, 26vw)" }}>
+      <div className="wbsk-drifttray" style={{ marginInline: 0, marginTop: 12, ["--drift-card" as string]: "min(180px, 38vw)" }}>
         <div className="wbsk-drift" data-near="true" data-mode="still">
-          <ul className="wbsk-drift__track" style={{ width: "auto", justifyContent: "center" }}>
+          <ul className="wbsk-drift__track" style={{ width: "auto", flexWrap: "wrap", justifyContent: "center", rowGap: 48 }}>
             <li>
               <AlbumCard wedding={wedding} label="Our wedding" photos />
             </li>

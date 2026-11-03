@@ -10,7 +10,7 @@ const API = "2026-11-01";
 const SAMPLE_KINDS = ["wedding", "destination", "preWeddingShoot", "film", "review", "reactionVideo", "teamMember", "careerRole", "featuredOnItem"];
 
 const quick: [string, string, string | null, ComponentType][] = [
-  ["Add a wedding", "Names, three photos, gallery, films. Step by step.", "wedding", RingsLine],
+  ["Add a wedding", "Names, six photos, gallery, films. Step by step.", "wedding", RingsLine],
   ["Add a film", "YouTube link and poster, for the homepage or Films page.", "film", FilmLine],
   ["Add a review", "Paste a couple's words, add stars, approve.", "review", QuoteLine],
   ["Add a pre-wedding shoot", "Pick its destination; its page fills itself.", "preWeddingShoot", MapLine],

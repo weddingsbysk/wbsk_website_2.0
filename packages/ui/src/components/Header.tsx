@@ -11,12 +11,14 @@ type Props = {
   enquireHref: string;
   homeHref: string;
   logoSrc: string;
+  /** The Studio's preview has one hashed file, with no separate small version beside it. */
+  logoSrcSet?: string;
   currentPath: string;
   /** Over a hero the bar is clear; it turns solid when this element has scrolled away. */
   clearOverId?: string;
 };
 
-export function Header({ items, enquireHref, homeHref, logoSrc, currentPath, clearOverId }: Props) {
+export function Header({ items, enquireHref, homeHref, logoSrc, logoSrcSet, currentPath, clearOverId }: Props) {
   const [heroInView, setHeroInView] = useState(true);
   const solid = !clearOverId || !heroInView;
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -45,7 +47,7 @@ export function Header({ items, enquireHref, homeHref, logoSrc, currentPath, cle
           aria-label="Weddings By Siddhant Kapoor, home"
         >
           {/* On standard screens its hairlines are thickened a touch, so they stay sharp at this small size. */}
-          <img src={logoSrc} srcSet={`${logoSrc.replace(".svg", "-1x.svg")} 1x, ${logoSrc} 2x`} alt="" width="104" height="24" />
+          <img src={logoSrc} srcSet={logoSrcSet ?? `${logoSrc.replace(".svg", "-1x.svg")} 1x, ${logoSrc} 2x`} alt="" width="104" height="24" />
         </WbskLink>
         <nav aria-label="Main" className="wbsk-header__nav">
           <ul>
