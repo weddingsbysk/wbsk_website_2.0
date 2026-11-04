@@ -331,8 +331,10 @@ export function createShelf({ gsap, row, track, tray, layout, at, calm, culling,
     // The ribbon slides along to the fold, where a real bookmark sits.
     tl.fromTo(slot.ribbon, { x: 0 }, { x: -l.cardWidth * RIBBON_AT, duration: 1.2, ease: "power2.inOut" }, 0);
     tl.to(q(".wbsk-album__front > .wbsk-album__shade"), { opacity: 0.72, duration: 0.64, ease: "power1.in" }, 0.02);
-    // Past upright the front can't be seen, so it stops being drawn. Safari otherwise shows its names through the page.
+    // Past upright the front can't be seen, so it stops being drawn, and only then is the inside drawn.
+    // Safari otherwise shows each through the other, the wrong way round.
     tl.set(q(".wbsk-album__front"), { visibility: "hidden" }, 0.68);
+    tl.set(q(".wbsk-album__inner"), { visibility: "visible" }, 0.68);
     tl.fromTo(q(".wbsk-album__inner > .wbsk-album__shade"), { opacity: 0.8 }, { opacity: 0, duration: 0.74, ease: "power1.out" }, 0.58);
     tl.fromTo(q(".wbsk-album__cast"), { opacity: 1 }, { opacity: 0, duration: 0.95, ease: "sine.inOut" }, 0.24);
     tl.to(q(".wbsk-album__back--left, .wbsk-album__edge--bottom-left"), { opacity: 1, duration: 0.42, ease: "sine.in" }, 0.72);

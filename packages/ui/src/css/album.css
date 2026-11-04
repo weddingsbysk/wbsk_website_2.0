@@ -488,7 +488,6 @@
     pointer-events: none;
   }
   /* Only an album being opened shows an inside at all, so the rest cost nothing to draw. */
-  [data-open] > .wbsk-album .wbsk-album__inner,
   [data-open] > .wbsk-album .wbsk-album__page--right,
   [data-open] > .wbsk-album .wbsk-album__board-edge,
   [data-open] > .wbsk-album .wbsk-album__back--left,
@@ -515,6 +514,9 @@
   }
   [data-lying-open] .wbsk-album__front {
     visibility: hidden;
+  }
+  [data-lying-open] .wbsk-album__inner {
+    visibility: visible;
   }
   [data-lying-open] .wbsk-album__back--left,
   [data-lying-open] .wbsk-album__edge--bottom-left {

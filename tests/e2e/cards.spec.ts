@@ -399,6 +399,15 @@ test.describe("the moving row (Decision 30)", () => {
     await expect.poll(() => page.locator(".wbsk-drift").evaluate((el) => el.scrollLeft)).toBeGreaterThan(100);
   });
 
+  test("the first album's invitation lifts its cover without showing the inside through it", async ({ page }) => {
+    await page.goto("./");
+    await page.locator(".wbsk-drifttray").evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 120, behavior: "instant" }));
+    const lifted = page.locator(".wbsk-drift__track > li[data-open]");
+    await expect(lifted).toHaveCount(1, { timeout: 10000 });
+    expect(await lifted.locator(".wbsk-album__inner").evaluate((el) => getComputedStyle(el).visibility)).toBe("hidden");
+    expect(await lifted.locator(".wbsk-album__front").evaluate((el) => getComputedStyle(el).visibility)).toBe("visible");
+  });
+
   test("See all weddings sits below the row, on the right", async ({ page }) => {
     const row = await gotoRow(page);
     const link = page.getByRole("link", { name: "See all weddings →" });
