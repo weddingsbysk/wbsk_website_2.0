@@ -146,7 +146,6 @@ export function GalleryLightbox({
           aria-label={`${label}, scrollable`}
           tabIndex={0}
           data-native-wheel
-          data-cursor="Open"
         >
           {children}
         </div>

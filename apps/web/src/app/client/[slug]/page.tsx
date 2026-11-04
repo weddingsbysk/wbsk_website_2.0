@@ -1,8 +1,9 @@
 import { youTubeId } from "@wbsk/content";
-import { CoupleNames, FilmPlayer, Gallery, GalleryLightbox, Reveal, StoryCover, WbskImage, WbskLink, SectionHead } from "@wbsk/ui";
+import { CoupleNames, FilmPlayer, Gallery, GalleryLightbox, Reveal, RowBar, StoryCover, WbskImage, WbskLink, SectionHead } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EnquireButton } from "../../../components/EnquiryPanel";
+import { FirstVisitGuide } from "../../../components/FirstVisitGuide";
 import { GoneRedirect } from "../../../components/GoneRedirect";
 import { getWeddings, getWeddingsIntro, metadataFrom, withoutInlinePreview } from "../../../lib/content";
 import { publicAsset } from "../../../lib/site";
@@ -50,6 +51,7 @@ export default async function Page({ params }: Params) {
 
   return (
     <>
+      <FirstVisitGuide place="couple" hasGallery={wedding.gallery.length > 0} hasFilm={Boolean(highlightId && wedding.highlight?.poster)} />
       <StoryCover
         cover={wedding.coverDesktop}
         coverPhone={wedding.coverPhone}
@@ -81,7 +83,7 @@ export default async function Page({ params }: Params) {
         <section className="wbsk-container wbsk-story__gallery" aria-label="Photographs">
           <div className="wbsk-gallerybar">
             <h2 className="wbsk-h2">The Day, in Photographs</h2>
-            <p className="wbsk-card__meta">{wedding.gallery.length} photographs · scroll inside the frame</p>
+            <p className="wbsk-card__meta">{wedding.gallery.length} photographs</p>
           </div>
           <GalleryLightbox watermarkSrc={publicAsset("/wbsk-logo.svg")} scrolling>
             <Gallery photos={wedding.gallery} />
@@ -115,6 +117,7 @@ export default async function Page({ params }: Params) {
                 ))}
               </ul>
             ) : null}
+            {wedding.reels.length ? <RowBar /> : null}
           </div>
         </section>
       ) : null}

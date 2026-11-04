@@ -80,7 +80,6 @@ function rememberOpened(id: string) {
 export function RecordArc({ destinations, navigate }: Props) {
   const arcRef = useRef<HTMLElement>(null);
   const liveRef = useRef<HTMLParagraphElement>(null);
-  const hintRef = useRef<HTMLDivElement>(null);
   const coverRef = useRef<HTMLDivElement>(null);
   const reduced = useSyncExternalStore(never, prefersReducedMotion, () => false);
   const [drawn, setDrawn] = useState<"waiting" | "arc" | "row">("waiting");
@@ -173,7 +172,6 @@ export function RecordArc({ destinations, navigate }: Props) {
       let introTimeline: ReturnType<typeof gsap.timeline> | null = null;
       let idleTimer = 0;
       let lastDrag = 0;
-      let hinted = false;
       let lit: Item | null = null;
 
       const recordSize = () => items[0]!.rig.offsetWidth || 200;
@@ -458,16 +456,6 @@ export function RecordArc({ destinations, navigate }: Props) {
           .to(() => coverRef.current, { opacity: 1, duration: 0.9, ease: "power1.out" }, "-=0.7");
       };
 
-      const showHint = () => {
-        if (hinted) return;
-        hinted = true;
-        hintRef.current?.setAttribute("data-on", "true");
-        window.setTimeout(() => hintRef.current?.removeAttribute("data-on"), 2600);
-      };
-
-      const onEnter = (event: PointerEvent) => {
-        if (event.pointerType === "mouse" && introDone) showHint();
-      };
       const onHover = (event: PointerEvent) => {
         if (event.pointerType !== "mouse" || opened || !introDone) return;
         const box = arc.getBoundingClientRect();
@@ -513,7 +501,6 @@ export function RecordArc({ destinations, navigate }: Props) {
       window.addEventListener("pointermove", onMove);
       window.addEventListener("pointerup", onUp);
       window.addEventListener("pointercancel", onUp);
-      arc.addEventListener("pointerenter", onEnter);
       arc.addEventListener("pointermove", onHover);
       arc.addEventListener("pointerleave", onLeave);
       arc.addEventListener("click", onClick);
@@ -548,7 +535,6 @@ export function RecordArc({ destinations, navigate }: Props) {
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
         window.removeEventListener("pointercancel", onUp);
-        arc.removeEventListener("pointerenter", onEnter);
         arc.removeEventListener("pointermove", onHover);
         arc.removeEventListener("pointerleave", onLeave);
         arc.removeEventListener("click", onClick);
@@ -605,9 +591,6 @@ export function RecordArc({ destinations, navigate }: Props) {
               </div>
             ))
           : null}
-        <div ref={hintRef} className="wbsk-arc__hint">
-          Scroll to explore
-        </div>
         <ul className="wbsk-arc__row">
           {destinations.map((destination) => (
             <li key={destination.id}>

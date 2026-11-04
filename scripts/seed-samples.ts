@@ -5,6 +5,7 @@ import { execFileSync } from "node:child_process";
 import { createReadStream, existsSync, mkdirSync, statSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CAMERA_QUESTION } from "@wbsk/content";
 import sharp from "sharp";
 import { getCliClient } from "sanity/cli";
 
@@ -244,14 +245,6 @@ async function main() {
       order: i + 1, hidden: false,
     });
   });
-  await many(Array.from({ length: 5 }), async (_, i) => {
-    add({
-      _id: `sample-reaction-${i + 1}`, _type: "reactionVideo", isSample: true, url: TEST_CLIP,
-      poster: await image(1080, 1920, `Reaction ${i + 1} poster`),
-      names: `${couples[i]![0]} & ${couples[i]![1]}`, place: couples[i]![3],
-      linked: { _type: "reference", _ref: `sample-wedding-${i + 1}` }, featured: true, order: i + 1, hidden: false,
-    });
-  });
   for (let i = 0; i < 6; i += 1) {
     add({
       _id: `sample-review-${i + 1}`, _type: "review", isSample: true,
@@ -317,6 +310,7 @@ async function main() {
       wedQ("events", "Which events?", "many", { choices: ["Haldi", "Mehendi", "Sangeet", "Cocktail", "Wedding", "Reception", "Something else"] }),
       wedQ("days", "How many days?", "one", { choices: ["1", "2", "3", "4+"] }),
       wedQ("guests", "Roughly how many guests?", "one", { choices: ["Under 100", "100–250", "250–500", "500+"] }),
+      wedQ(CAMERA_QUESTION.key, CAMERA_QUESTION.label, "one", { choices: CAMERA_QUESTION.choices }),
       wedQ("coverage", "What would you like?", "one", { choices: ["Photographs and film", "Photographs only", "Film only"] }),
       wedQ("message", "Anything you'd like us to know", "long", { example: "Two days, about 200 guests, a sunset pheras…" }),
     ],
@@ -332,6 +326,7 @@ async function main() {
       wedQ("names", "Your names", "text", { ...locked, example: "Meera & Arjun" }),
       wedQ("date", "When are you thinking?", "text", { required: true, example: "December 2026" }),
       wedQ("place", "Where would you like to shoot?", "text", { required: true, example: "Santorini, Udaipur, the hills…" }),
+      wedQ(CAMERA_QUESTION.key, CAMERA_QUESTION.label, "one", { choices: CAMERA_QUESTION.choices }),
       wedQ("coverage", "What would you like?", "one", { choices: ["Full-length", "Concept"] }),
       wedQ("phone", "Phone (WhatsApp)", "phone", { locked: true }),
       wedQ("email", "Email", "email", { locked: true }),

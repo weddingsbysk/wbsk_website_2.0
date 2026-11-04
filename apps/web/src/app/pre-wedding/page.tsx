@@ -1,5 +1,6 @@
 import "@wbsk/ui/css/pages.css";
-import { CoverVideo, HeroDrift, FilmPlayer, Gallery, GalleryLightbox, Reveal, TitleWords, WbskImage, SectionHead } from "@wbsk/ui";
+import { CoverVideo, HeroDrift, FilmPlayer, Gallery, GalleryLightbox, Reveal, RowBar, TitleWords, WbskImage, SectionHead } from "@wbsk/ui";
+import { FirstVisitGuide } from "../../components/FirstVisitGuide";
 import type { Metadata } from "next";
 import { EnquiryForm } from "../../components/EnquiryForm";
 import { PreWeddingArc } from "../../components/PreWeddingArc";
@@ -13,6 +14,7 @@ export default async function Page() {
   const page = await getPreWeddingPage();
   return (
     <>
+      <FirstVisitGuide place="preWedding" />
       <section id="hero" data-tone="dark" className="wbsk-hero">
         <div className="wbsk-hero__media">
           <CoverVideo desktop={page.videoDesktop} phone={page.videoPhone} posterDesktop={page.posterDesktop} posterPhone={page.posterPhone} label="the pre-wedding film" />
@@ -68,6 +70,7 @@ export default async function Page() {
                     />
                   ))}
                 </div>
+                <RowBar />
                 {offering.gallery.length ? (
                   <div className="wbsk-offering__gallery" aria-label={`${offering.name} example photographs`} role="group">
                     <GalleryLightbox watermarkSrc={publicAsset("/wbsk-logo.svg")} scrolling label={`${offering.name} photographs`}>

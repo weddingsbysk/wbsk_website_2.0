@@ -113,6 +113,41 @@ test("Films: one scrolling tray; the page holds still while it moves", async ({ 
   expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(y, -1);
 });
 
+test("Films: posters drift inside the films window while the frame and the page stay", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 760, "The row runs sideways on phones.");
+  await page.goto("./films/");
+  const tray = page.locator(".wbsk-filmtray__window");
+  const film = page.locator(".wbsk-screening__film").nth(2);
+  const read = () =>
+    film.evaluate((el) => {
+      const frame = el.querySelector("[data-parallax]")!.getBoundingClientRect();
+      const img = el.querySelector("[data-parallax] img")!.getBoundingClientRect();
+      return { frame: frame.top, inset: img.top - frame.top };
+    });
+  await tray.evaluate((el) => (el.scrollTop = 60));
+  await page.waitForTimeout(500);
+  const a = await read();
+  const pageAt = await page.evaluate(() => window.scrollY);
+  await tray.evaluate((el) => (el.scrollTop = 220));
+  await page.waitForTimeout(800);
+  const b = await read();
+  expect(a.frame - b.frame).toBeCloseTo(160, -1);
+  // About 15% of the window's own scroll, in the direction the frame moves.
+  const rate = (a.inset - b.inset) / 160;
+  expect(rate).toBeGreaterThan(0.1);
+  expect(rate).toBeLessThan(0.2);
+  expect(await page.evaluate(() => window.scrollY)).toBe(pageAt);
+});
+
+test("Home: the lamps add depth without blocking anything, and reduced motion leaves them still", async ({ page }) => {
+  await page.goto("./");
+  const lamp = page.locator(".wbsk-lamp").first();
+  await expect(lamp).toBeAttached();
+  await expect(page.locator(".wbsk-lampwrap").first()).toHaveAttribute("aria-hidden", "true");
+  expect(await page.locator(".wbsk-lampwrap").first().evaluate((el) => getComputedStyle(el).pointerEvents)).toBe("none");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+});
+
 test("Our team: portraits and words drift at their own depths", async ({ page }) => {
   await page.goto("./our-team/");
   const layer = page.locator(".wbsk-person__photo [data-depth]").nth(1);
@@ -122,6 +157,33 @@ test("Our team: portraits and words drift at their own depths", async ({ page })
   const a = await place();
   await page.evaluate(() => window.scrollBy(0, 200));
   await expect.poll(place, { timeout: 4000 }).not.toBeCloseTo(a, 0);
+});
+
+test("Films: smaller films, two to a row, with the enquiry close by", async ({ page }) => {
+  await page.goto("./films/");
+  const films = page.locator(".wbsk-screening__film");
+  await expect(films.nth(1)).toBeVisible();
+  const first = (await films.nth(0).boundingBox())!;
+  const second = (await films.nth(1).boundingBox())!;
+  const width = page.viewportSize()?.width ?? 0;
+  if (width >= 700) {
+    expect(second.y).toBeCloseTo(first.y, 0);
+    expect(second.x).toBeGreaterThan(first.x + first.width);
+    expect(first.width).toBeLessThan(560);
+    const tray = await page.locator(".wbsk-filmtray__window").evaluate((el) => el.scrollHeight > el.clientHeight);
+    expect(tray).toBe(true);
+  } else {
+    // On phones the row runs sideways, with the next film peeking in.
+    expect(second.x).toBeGreaterThan(first.x + first.width - 1);
+    expect(second.x).toBeLessThan(width);
+  }
+  const chatTop = await page.locator(".wbsk-chat").evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+  // Close by: well under two screens down, whatever the screen.
+  expect(chatTop).toBeLessThan((page.viewportSize()?.height ?? 900) * 1.7);
+  // The title sits clear of the header.
+  const header = (await page.locator(".wbsk-header").boundingBox())!;
+  const title = (await page.locator(".wbsk-filmspage h1").boundingBox())!;
+  expect(title.y).toBeGreaterThanOrEqual(header.y + header.height - 2);
 });
 
 test("Films: dark, each film with its text, and no YouTube until pressed", async ({ page }) => {
@@ -135,6 +197,40 @@ test("Films: dark, each film with its text, and no YouTube until pressed", async
   await expect(films.first().locator(".wbsk-label")).toBeVisible();
   expect(youtube).toEqual([]);
   await checks(page);
+});
+
+test("Our team: the credits open the page once a visit, skip at a touch, and never take a click", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, viewport: { width: 1440, height: 900 } });
+  const page = await context.newPage();
+  await page.goto("./our-team/");
+  const intro = page.locator(".wbsk-teamintro");
+  await expect(intro).toBeVisible();
+  await expect(intro).toHaveAttribute("aria-hidden", "true");
+  expect(await intro.evaluate((el) => getComputedStyle(el).pointerEvents)).toBe("none");
+  await expect(intro).toBeHidden({ timeout: 7000 });
+  await expect(page.locator(".wbsk-teampage h1")).toBeVisible();
+  // Once a visit.
+  await page.reload();
+  await page.waitForTimeout(400);
+  await expect(intro).toBeHidden();
+  // A new visit, skipped at the first scroll.
+  await page.evaluate(() => sessionStorage.clear());
+  await page.reload();
+  await page.mouse.move(200, 400);
+  await page.waitForTimeout(400);
+  await page.mouse.wheel(0, 100);
+  await expect(intro).toBeHidden({ timeout: 1500 });
+  await context.close();
+});
+
+test("Our team: smaller on computers, and the words suit the width on phones", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("wbsk-intro-skip-for-tests", "1"));
+  await page.goto("./our-team/");
+  const lead = (await page.locator(".wbsk-person[data-lead] .wbsk-frame").boundingBox())!;
+  const width = page.viewportSize()?.width ?? 0;
+  if (width >= 1200) expect(lead.width).toBeLessThan(500);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+  await expect(page.locator(".wbsk-teamintro")).toBeHidden();
 });
 
 test("Our team: lead first and largest, crew alternate, closing links", async ({ page }) => {
@@ -203,7 +299,7 @@ test("a destination page: cover, films, gallery, full-screen photo, and Book", a
 });
 
 test("without scripts every photo still shows", async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
+  const context = await browser.newContext({ javaScriptEnabled: false, storageState: { cookies: [], origins: [] } });
   const page = await context.newPage();
   await page.goto("http://127.0.0.1:4173/wbsk_website_2.0/weddings/");
   await expect(page.locator(".wbsk-card__photo img").first()).toHaveCSS("opacity", "1");

@@ -8,7 +8,7 @@ Everything on wbsk.in is added and changed here, without code. Nothing you do re
 
 ## Finding your way
 
-- **The menu follows the website's pages:** Homepage, Weddings, Films, Pre-wedding (Destinations, Shoots), Our team, Careers. Then Couples' words (Reviews, Reaction videos), Forms (Enquiry forms, Packages) and Site settings.
+- **The menu follows the website's pages:** Homepage, Weddings, Films, Pre-wedding (Destinations, Shoots), Our team, Careers. Then Couples' words (Reviews, Featured on), Forms (Enquiry forms, Packages) and Site settings.
 - **Home** is where you start each day:
   - **Quick actions** — Add a wedding, Add a film, Add a review, and more.
   - **Waiting for you** — drafts, and reviews not yet approved.
@@ -60,9 +60,27 @@ Nothing you take down is lost; you can switch it back on any time.
 | --- | --- | --- |
 | **Archive** | Older weddings and destinations | Off the lists and homepage; its own page still works for Google and old links |
 | **Remove from website** | When a couple asks | Gone everywhere; its address leads to the Weddings (or Pre-wedding) page |
-| **Hide from website** | Films, reviews, reaction videos, shoots, team members, roles | Not shown anywhere |
+| **Hide from website** | Films, reviews, shoots, team members, roles | Not shown anywhere |
 
 **Never delete.** Permanent deletion is for the owner only.
+
+## Inside an entry
+
+- **Step by step:** under the form it says where you are, such as "Step 2 of 5", with **Back** and **Next**.
+- **How this works:** the button in the bar at the bottom opens the short version for that kind of entry, right beside your work.
+- **Saved just now:** everything saves by itself as you type. The bar tells you, so you never need to look for a Save button.
+- **Published:** a gold tick confirms it, and the website updates in about 10 minutes. **View on website** opens the page.
+
+## Making a quote
+
+Couples now answer one question at a time in a chat on the website. Their answers reach you as usual. To send them a rough figure:
+
+1. Open **Quotes** in the top menu.
+2. The first time, press **Change prices**, add your prices and press **Save prices**. Only people signed in to this Studio can see them.
+3. Fill in what the couple told the chat. The estimate updates as you go.
+4. Read the message, change anything you like, then press **Copy message**, **Open in WhatsApp** or **Open in email**.
+
+Nothing about a couple is saved here. You always send the quote yourself; the website never shows a price to visitors.
 
 ## Other everyday jobs
 
@@ -70,7 +88,6 @@ Nothing you take down is lost; you can switch it back on any time.
 | --- | --- | --- |
 | Add a film | Films → + New | YouTube link + 16:9 poster; **Featured** = homepage, **Show on Films page** = Films page; drag to order |
 | Add a review | Reviews → + New | Ask the couple's permission first; switch on **Approved** or it won't show |
-| Add a reaction video | Reaction videos → + New | YouTube link + 9:16 poster |
 | Add a pre-wedding shoot | Pre-wedding → Shoots → + New | Pick its destination(s) and Full-length or Concept; the destination page fills itself |
 | Add a destination | Pre-wedding → Destinations → + New | B&W transparent PNG + two covers; its record appears once it has a published shoot |
 | Add a team member | Our team → + New | B&W 4:5 portrait, already styled in Lightroom |

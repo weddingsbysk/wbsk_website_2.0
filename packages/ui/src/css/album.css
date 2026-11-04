@@ -2,13 +2,16 @@
 @layer components {
   /* The tray they lie on: dark cloth, under a lamp that stays still whatever the row does. */
   .wbsk-drifttray {
-    --drift-card: clamp(180px, 16.5vw, 252px);
-    --drift-gap: clamp(30px, 3.4vw, 56px);
+    --drift-card: clamp(254px, 23.4vw, 358px);
+    --drift-gap: clamp(24px, 2.6vw, 42px);
+    /* Above and below the albums, as a share of an album's width. The bottom holds the ribbon. */
+    --drift-pad-top: 0.14;
+    --drift-pad-bottom: 0.27;
     position: relative;
     isolation: isolate;
     margin-inline: var(--gutter);
     overflow: hidden;
-    background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
+    background: var(--lamp-dark), var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 320px;
     border: 1px solid rgb(221 175 58 / 0.22);
     border-radius: clamp(16px, 1.8vw, 24px);
     box-shadow: 0 18px 40px -22px rgb(35 28 22 / 0.5);
@@ -17,6 +20,8 @@
     .wbsk-drifttray {
       --drift-card: 47vw;
       --drift-gap: 34px;
+      --drift-pad-top: 0.27;
+      --drift-pad-bottom: 0.37;
     }
   }
   .wbsk-drifttray__pool,
@@ -47,7 +52,7 @@
   .wbsk-drift {
     position: relative;
     z-index: 1;
-    padding-block: calc(var(--drift-card) * 0.27) calc(var(--drift-card) * 0.37);
+    padding-block: calc(var(--drift-card) * var(--drift-pad-top)) calc(var(--drift-card) * var(--drift-pad-bottom));
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -519,7 +524,8 @@
     transform: translateX(-0.171em);
   }
 
-  /* The ribbon: satin, lying under the album, in links that swing. It slides to the fold when the album opens. */
+  /* The ribbon: satin, lying under the album. It's made of short overlapping pieces, each turned a little, so it
+     curves rather than kinks. It slides to the fold when the album opens. */
   .wbsk-album__ribbon {
     position: absolute;
     top: calc(100% - 0.05em);
@@ -535,17 +541,16 @@
     left: 0;
     display: block;
     width: 100%;
-    height: 0.068em;
+    height: 0.031em;
     transform-origin: 50% 0;
     background: linear-gradient(90deg, #7a5c1c 0%, #c29a43 15%, #f0d995 37%, #d3ad57 55%, #ab8534 78%, #755718 100%);
-    box-shadow: 0.003em 0.006em 0.01em rgb(0 0 0 / 0.42);
   }
   .wbsk-album__link-piece .wbsk-album__link-piece {
-    top: calc(100% - 1.5px);
+    top: calc(100% - max(1px, 0.005em));
   }
   .wbsk-album__link-piece--tail {
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 74%, 0 100%);
-    box-shadow: none;
+    height: 0.05em;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 62%, 0 100%);
   }
   [data-mode="drift"] .wbsk-album__ribbon,
   [data-mode="drift"] .wbsk-album__link-piece {

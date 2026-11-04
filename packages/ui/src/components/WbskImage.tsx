@@ -57,6 +57,8 @@ export function WbskImage({
           ease: "none",
           scrollTrigger: {
             trigger: frame,
+            // A picture inside a scrolling window follows that window, not the page.
+            scroller: frame.closest<HTMLElement>("[data-parallax-scroller]") ?? undefined,
             // A steady 15% of scroll at any frame size, matching the browser-native version.
             start: () => `center center+=${frame.offsetHeight * PARALLAX_TRAVEL}`,
             end: () => `center center-=${frame.offsetHeight * PARALLAX_TRAVEL}`,

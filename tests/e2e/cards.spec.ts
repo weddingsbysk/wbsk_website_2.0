@@ -420,7 +420,7 @@ test.describe("the moving row (Decision 30)", () => {
   });
 
   test("without scripts it is a plain sideways row of real links", async ({ browser }) => {
-    const context = await browser.newContext({ javaScriptEnabled: false });
+    const context = await browser.newContext({ javaScriptEnabled: false, storageState: { cookies: [], origins: [] } });
     const page = await context.newPage();
     await page.goto("http://127.0.0.1:4173/wbsk_website_2.0/");
     await expect(page.locator(".wbsk-drift .wbsk-album__link").first()).toHaveAttribute("href", /client\//);

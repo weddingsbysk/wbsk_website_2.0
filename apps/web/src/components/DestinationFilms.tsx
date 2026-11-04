@@ -1,6 +1,6 @@
 "use client";
 
-import { FilmPlayer, type WbskImageSource } from "@wbsk/ui";
+import { FilmPlayer, RowBar, type WbskImageSource } from "@wbsk/ui";
 import { useEffect, useRef, useState } from "react";
 
 export type DestinationFilm = {
@@ -34,6 +34,7 @@ export function DestinationFilms({ films }: { films: DestinationFilm[] }) {
     return () => observer.disconnect();
   }, []);
   return (
+    <>
     <ul
       ref={rowRef}
       className="wbsk-carousel"
@@ -83,5 +84,7 @@ export function DestinationFilms({ films }: { films: DestinationFilm[] }) {
         </li>
       ))}
     </ul>
+    <RowBar scrollerRef={rowRef} />
+    </>
   );
 }

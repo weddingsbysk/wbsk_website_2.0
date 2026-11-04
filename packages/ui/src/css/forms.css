@@ -122,6 +122,317 @@
     outline: 2px solid var(--color-deep-gold);
     outline-offset: 2px;
   }
+  /* The enquiry as a conversation: one question at a time, in its own window (owner, 4 November 2026). */
+  .wbsk-form.wbsk-chatform,
+  .wbsk-enquiry .wbsk-form.wbsk-chatform {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .wbsk-chat {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: clamp(480px, 70svh, 640px);
+    overflow: clip;
+    color: var(--color-ink);
+    background: #fffdf9 url("../textures/card-stock.webp") 0 0 / 512px;
+    border-radius: var(--radius-wbsk);
+    box-shadow: var(--shadow-card-rest);
+  }
+  .wbsk-panel .wbsk-chat {
+    height: clamp(420px, 62dvh, 620px);
+  }
+  .wbsk-chat__head {
+    position: relative;
+    display: flex;
+    flex: none;
+    gap: 14px;
+    align-items: center;
+    padding: 14px clamp(14px, 2vw, 22px);
+    border-bottom: 1px solid rgb(35 28 22 / 0.1);
+  }
+  .wbsk-chat__seal {
+    display: grid;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-gold);
+    background: var(--color-dusk);
+    border-radius: 50%;
+  }
+  .wbsk-chat__title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .wbsk-chat__sub {
+    margin: 2px 0 0;
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+  /* A thin gold line fills as the conversation goes on. */
+  .wbsk-chat__progress {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    overflow: hidden;
+  }
+  .wbsk-chat__progress > span {
+    display: block;
+    height: 100%;
+    background: var(--color-deep-gold);
+    transform-origin: left;
+    transition: transform 0.6s var(--settle);
+  }
+  .wbsk-chat__log {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 0;
+    padding: clamp(14px, 2vw, 24px);
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(122 92 23 / 0.4) transparent;
+  }
+  .wbsk-chat__log:focus-visible {
+    outline-offset: -3px;
+  }
+  .wbsk-chat__turn {
+    display: grid;
+    gap: 14px;
+  }
+  .wbsk-chat__notice {
+    outline: none;
+  }
+  .wbsk-chat__row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    max-width: 92%;
+  }
+  .wbsk-chat__row .wbsk-chat__seal {
+    width: 26px;
+    height: 26px;
+    font-size: 0.8125rem;
+  }
+  .wbsk-chat__bubble {
+    min-width: 0;
+    padding: 10px 14px;
+    overflow-wrap: anywhere;
+    font-size: var(--text-body);
+    line-height: 1.4;
+    background: rgb(35 28 22 / 0.06);
+    border-radius: 14px 14px 14px 3px;
+  }
+  .wbsk-chat__bubble p {
+    margin: 0;
+  }
+  .wbsk-chat__bubble p + p {
+    margin-top: 6px;
+  }
+  .wbsk-chat__row--them {
+    flex-direction: row-reverse;
+    gap: 10px;
+    align-items: center;
+    align-self: flex-end;
+    justify-self: end;
+  }
+  .wbsk-chat__row--them .wbsk-chat__bubble {
+    color: var(--color-ivory);
+    background: var(--color-dusk);
+    border-radius: 14px 14px 3px;
+  }
+  .wbsk-chat__row--them .wbsk-chat__bubble[data-skipped] {
+    color: var(--color-muted);
+    font-style: italic;
+    background: none;
+    box-shadow: inset 0 0 0 1px rgb(35 28 22 / 0.18);
+  }
+  .wbsk-chat__change,
+  .wbsk-chat__skip {
+    min-height: 32px;
+    padding: 0 4px;
+    color: var(--color-muted);
+    font: inherit;
+    font-size: var(--text-small);
+    text-decoration: underline;
+    text-decoration-color: rgb(107 94 82 / 0.5);
+    text-underline-offset: 3px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .wbsk-chat__change:hover,
+  .wbsk-chat__skip:hover {
+    color: var(--color-deep-gold);
+  }
+  @media (hover: hover) {
+    .wbsk-chat__row--them .wbsk-chat__change {
+      opacity: 0;
+      transition: opacity var(--hover) var(--settle);
+    }
+    .wbsk-chat__row--them:hover .wbsk-chat__change,
+    .wbsk-chat__row--them .wbsk-chat__change:focus-visible {
+      opacity: 1;
+    }
+  }
+  .wbsk-chat__composer {
+    flex: none;
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+    padding: 12px clamp(14px, 2vw, 22px) 14px;
+    border-top: 1px solid rgb(35 28 22 / 0.1);
+  }
+  .wbsk-chat__composer:empty {
+    display: none;
+  }
+  .wbsk-chat__type {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    width: 100%;
+  }
+  .wbsk-chat__type input,
+  .wbsk-chat__type textarea {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 0;
+    color: inherit;
+    font: inherit;
+    font-size: max(16px, var(--text-body));
+    background: none;
+    border: 0;
+    border-bottom: 1px solid rgb(35 28 22 / 0.42);
+    border-radius: 0;
+    resize: none;
+    transition: border-color var(--hover) var(--settle);
+  }
+  .wbsk-chat__type input:focus,
+  .wbsk-chat__type textarea:focus {
+    border-color: var(--color-deep-gold);
+    outline: none;
+  }
+  .wbsk-chat__type input::placeholder,
+  .wbsk-chat__type textarea::placeholder {
+    color: rgb(35 28 22 / 0.6);
+  }
+  .wbsk-chat__send {
+    display: grid;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    color: var(--color-ivory);
+    background: var(--color-deep-gold);
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color var(--hover) var(--settle);
+  }
+  .wbsk-chat__send:hover {
+    background: var(--color-dusk);
+  }
+  .wbsk-chat__choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .wbsk-chat__chip,
+  .wbsk-chat__done {
+    min-height: 44px;
+    padding: 0 16px;
+    color: inherit;
+    font: inherit;
+    font-size: var(--text-small);
+    background: none;
+    border: 1px solid rgb(35 28 22 / 0.42);
+    border-radius: var(--radius-wbsk);
+    cursor: pointer;
+    transition: color var(--hover) var(--settle), background-color var(--hover) var(--settle), border-color var(--hover) var(--settle);
+  }
+  .wbsk-chat__chip:hover {
+    border-color: var(--color-deep-gold);
+  }
+  .wbsk-chat__chip[data-on] {
+    color: var(--color-ivory);
+    background: var(--color-deep-gold);
+    border-color: var(--color-deep-gold);
+  }
+  .wbsk-chat__done {
+    color: var(--color-ivory);
+    background: var(--color-dusk);
+    border-color: var(--color-dusk);
+  }
+  .wbsk-chat__done:disabled {
+    color: var(--color-muted);
+    background: none;
+    border-color: rgb(35 28 22 / 0.18);
+    cursor: default;
+  }
+  .wbsk-chat__changing {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0;
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+  .wbsk-chat__dots {
+    display: flex;
+    gap: 5px;
+    padding-block: 15px;
+  }
+  .wbsk-chat__dots span {
+    width: 6px;
+    height: 6px;
+    background: var(--color-muted);
+    border-radius: 50%;
+    opacity: 0.4;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .wbsk-chat__turn:last-child > .wbsk-chat__row:first-child,
+    .wbsk-chat__notice {
+      animation: wbsk-chat-in 0.45s var(--settle) both;
+    }
+    .wbsk-chat__dots span {
+      animation: wbsk-chat-dot 1.1s ease-in-out infinite;
+    }
+    .wbsk-chat__dots span:nth-child(2) {
+      animation-delay: 0.16s;
+    }
+    .wbsk-chat__dots span:nth-child(3) {
+      animation-delay: 0.32s;
+    }
+    @keyframes wbsk-chat-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+    }
+    @keyframes wbsk-chat-dot {
+      50% {
+        opacity: 1;
+        transform: translateY(-3px);
+      }
+    }
+  }
   .wbsk-form__trap {
     position: absolute;
     width: 1px;

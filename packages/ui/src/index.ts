@@ -1,5 +1,4 @@
 export { CoverVideo } from "./components/CoverVideo";
-export { CursorLabel } from "./components/CursorLabel";
 export { FilmPlayer } from "./components/FilmPlayer";
 export { Footer } from "./components/Footer";
 export { Gallery } from "./components/Gallery";
@@ -12,8 +11,8 @@ export { HeroDrift } from "./components/HeroDrift";
 export { Letterbox } from "./components/Letterbox";
 export { Reveal } from "./components/Reveal";
 export { SectionHead } from "./components/SectionHead";
-export { SideRow } from "./components/SideRow";
 export { useScrollWindow } from "./components/useScrollWindow";
+export { LoopBar, placeLoopBar, RowBar } from "./components/PositionBar";
 export { canHover, pressThen, rippleIn, setCardHot, tiltCard, useCardEntrance, useCardMotion } from "./components/cardMotion";
 export { WbskImage } from "./components/WbskImage";
 export { ClientCard, CoupleNames, StoryCover, TitleWords, type WeddingSummary } from "./components/WeddingViews";

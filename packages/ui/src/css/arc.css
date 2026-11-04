@@ -8,7 +8,7 @@
     max-height: 760px;
     overflow: hidden;
     color: var(--color-ivory);
-    background: radial-gradient(ellipse 60% 55% at 50% 52%, rgb(90 70 48 / 0.34) 0%, rgb(31 25 20 / 0) 75%), var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
+    background: radial-gradient(ellipse 60% 55% at 50% 52%, rgb(90 70 48 / 0.34) 0%, rgb(23 16 11 / 0) 75%), var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 320px;
     touch-action: pan-y;
     user-select: none;
     outline: none;
@@ -25,7 +25,6 @@
   .wbsk-arc[data-state="opening"]:focus-visible {
     box-shadow: none;
   }
-  .wbsk-arc[data-state="opening"] .wbsk-arc__hint,
   .wbsk-arc[data-state="opening"] .wbsk-arc__item .wbsk-arc__name {
     opacity: 0;
   }
@@ -35,7 +34,7 @@
     position: absolute;
     inset: 0;
     z-index: 150;
-    background: linear-gradient(to top, var(--color-dusk), rgb(31 25 20 / 0) 16%);
+    background: linear-gradient(to top, var(--color-dusk), rgb(23 16 11 / 0) 16%);
     pointer-events: none;
   }
   /* At rest the layers let go of the graphics chip, so the browser redraws them crisp. */
@@ -218,24 +217,6 @@
   .wbsk-arc__item[data-centre="true"] .wbsk-arc__name {
     opacity: 1;
   }
-  .wbsk-arc__hint {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    z-index: 200;
-    font-size: 12px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    color: var(--color-ivory);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(-50%);
-    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .wbsk-arc__hint[data-on] {
-    opacity: 0.8;
-  }
   /* It matches the destination's cover exactly, so the page change can't be seen. */
   .wbsk-arc__cover {
     position: fixed;
@@ -306,8 +287,7 @@
       position: static;
       visibility: visible;
     }
-    .wbsk-arc__item,
-    .wbsk-arc__hint {
+    .wbsk-arc__item {
       display: none;
     }
   }

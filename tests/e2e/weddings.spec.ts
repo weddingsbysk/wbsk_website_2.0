@@ -15,10 +15,9 @@ test("Weddings page: lead story, grid, no accessibility problems, no sideways sc
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("./weddings/");
   await expect(page.locator("h1")).toHaveCount(1);
-  await expect(page.locator(".wbsk-lead-story")).toContainText("Sample");
   await expect(page.locator(".wbsk-card")).toHaveCount(12);
   // Newest first: the lead is the newest, and each card is older than the one before.
-  await expect(page.locator(".wbsk-lead-story")).toContainText("Sample Asha");
+  await expect(page.locator(".wbsk-lead-story")).toHaveAttribute("href", /sample-asha/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
   await page.locator(".wbsk-letterbox[data-letterbox='open']").waitFor({ timeout: 15000 });
   await page.evaluate(() =>
@@ -72,8 +71,9 @@ test("couple's page has every section, in order, with no accessibility problems"
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(LARGE);
-  await expect(page.locator("h1")).toContainText("Sample Asha");
-  await expect(page.locator(".wbsk-storycover__label")).toContainText("DESTINATION · GOA");
+  // The names and place are whatever the Studio holds, so this checks they're there, not what they say.
+  await expect(page.locator("h1")).toContainText("&");
+  await expect(page.locator(".wbsk-storycover__label .wbsk-label")).toContainText("·");
   await expect(page.locator(".wbsk-gallery li")).toHaveCount(60);
   await expect(page.locator(".wbsk-reel").first()).toHaveAttribute("target", "_blank");
   const tops = await page.evaluate(() =>
@@ -186,7 +186,8 @@ test("Next story goes to the next older wedding, and loops after the oldest", as
   await page.goBack();
   await expect(page).toHaveURL(/sample-asha/);
   await page.goto("./client/sample-pari-sample-dhruv/");
-  await expect(page.locator(".wbsk-nextstory")).toContainText("Sample Asha");
+  await page.locator(".wbsk-nextstory").click();
+  await expect(page).toHaveURL(/sample-asha/);
 });
 
 test("every gallery scrolls in its own window while the page holds still", async ({ page }) => {
@@ -219,7 +220,7 @@ test("reduced motion: no bars, instant pages", async ({ page }) => {
 });
 
 test("without scripts: photos show and every photo is a real link", async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
+  const context = await browser.newContext({ javaScriptEnabled: false, storageState: { cookies: [], origins: [] } });
   const page = await context.newPage();
   await page.goto(`http://127.0.0.1:4173/wbsk_website_2.0/${LARGE.slice(2)}`);
   await expect(page.locator(".wbsk-gallery__sharp").first()).toHaveCSS("opacity", "1");

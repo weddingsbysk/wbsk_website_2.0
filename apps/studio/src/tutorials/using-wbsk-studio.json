@@ -1,175 +1,399 @@
 {
- "duration": 142.45200000000003,
+ "duration": 242.47093023255815,
  "chapters": [
   {
    "title": "Welcome",
    "at": 0
   },
   {
-   "title": "Your home screen",
-   "at": 10.6
-  },
-  {
-   "title": "Search with ⌘K",
-   "at": 30.3
+   "title": "Home and search",
+   "at": 10.281
   },
   {
    "title": "Add a wedding",
-   "at": 39.7
+   "at": 28.866
   },
   {
-   "title": "Photos",
-   "at": 50.6
+   "title": "The six photos",
+   "at": 39.036
   },
   {
-   "title": "Story, films and Featured",
-   "at": 74.7
+   "title": "The homepage album",
+   "at": 76.308
   },
   {
-   "title": "What’s left",
-   "at": 85.40200000000003
+   "title": "Step by step",
+   "at": 87.471
   },
   {
-   "title": "Publish",
-   "at": 95.60200000000003
+   "title": "How this works",
+   "at": 108.401
   },
   {
-   "title": "Everyday jobs",
-   "at": 110.75200000000002
+   "title": "Saved and published",
+   "at": 119.564
+  },
+  {
+   "title": "Films, pre-wedding and more",
+   "at": 136.308
+  },
+  {
+   "title": "The chat enquiry",
+   "at": 164.215
+  },
+  {
+   "title": "Quotes",
+   "at": 183.75
+  },
+  {
+   "title": "Photo sizes and presets",
+   "at": 208.866
   },
   {
    "title": "Taking things down",
-   "at": 124.25200000000002
+   "at": 217.238
   },
   {
-   "title": "Three golden rules",
-   "at": 131.45200000000003
+   "title": "The status light",
+   "at": 224.215
+  },
+  {
+   "title": "Where to find help",
+   "at": 233.983
   }
  ],
  "captions": [
   {
-   "start": 11.7,
+   "start": 4.05,
+   "text": "Everything on your website starts here."
+  },
+  {
+   "start": 6.54,
+   "text": "The WBSK Studio. A short film, starring you."
+  },
+  {
+   "start": 11.38,
    "text": "Every morning starts here."
   },
   {
-   "start": 15,
-   "text": "Six big buttons for what you do most."
+   "start": 13.88,
+   "text": "Waiting for you: drafts, and reviews to approve."
   },
   {
-   "start": 18.25,
-   "text": "Unfinished things wait here for you."
+   "start": 16.88,
+   "text": "Worth a look: small fixes. No panic."
   },
   {
-   "start": 21.15,
-   "text": "Small fixes. No panic."
+   "start": 19.58,
+   "text": "Lost? Press ⌘K anywhere. (Windows: Ctrl + K.)"
   },
   {
-   "start": 23.95,
-   "text": "And what’s live on the website."
-  },
-  {
-   "start": 26.75,
-   "text": "A green dot up here means all is well."
-  },
-  {
-   "start": 30.3,
-   "text": "Lost? Two keys, anywhere. (Ctrl + K on Windows.)"
-  },
-  {
-   "start": 33.6,
+   "start": 22.43,
    "text": "Type a couple’s name…"
   },
   {
-   "start": 36.7,
+   "start": 23.81,
    "text": "…or a job. Press return, and you’re there."
   },
   {
-   "start": 40.1,
-   "text": "Five steps. Any order you like."
+   "start": 28.87,
+   "text": "Add a wedding. Names, six photos, a gallery and films."
   },
   {
-   "start": 42.9,
-   "text": "Watch the preview: it types along with you."
+   "start": 31.62,
+   "text": "A new wedding opens as five steps."
   },
   {
-   "start": 44.7,
+   "start": 34.92,
+   "text": "Type their names. The preview types along."
+  },
+  {
+   "start": 37.53,
    "text": "The page address writes itself."
   },
   {
-   "start": 47.3,
-   "text": "It saves itself as a draft. Drafts never go live."
+   "start": 41.16,
+   "text": "Six photos. Each has its own shape."
   },
   {
-   "start": 50.9,
-   "text": "Three photos, each with its own shape."
+   "start": 43.06,
+   "text": "Album cover: tall and narrow, 3:7."
   },
   {
-   "start": 55.2,
-   "text": "Too small? The Studio says no. Politely."
+   "start": 45.21,
+   "text": "Bride and groom pages: a matching pair, 4:5."
   },
   {
-   "start": 60.5,
-   "text": "Click on the couple. Keep faces above the pale band."
+   "start": 47.96,
+   "text": "Card, for the Weddings page: 4:5 again."
   },
   {
-   "start": 64.3,
-   "text": "Drop 50 or 60 at once. Then drag to reorder."
+   "start": 50.26,
+   "text": "Too small? The Studio refuses it, politely."
   },
   {
-   "start": 67.9,
+   "start": 53.66,
+   "text": "Desktop cover, 21:9. Phone cover, 3:4."
+  },
+  {
+   "start": 58.71,
+   "text": "The gallery: drop 50 or 60 at once. Drag to reorder."
+  },
+  {
+   "start": 61.81,
    "text": "Every photo needs a description. Yes, every one."
   },
   {
-   "start": 71.45,
-   "text": "Allow 10 to 15 minutes. Put some music on."
+   "start": 65.06,
+   "text": "Allow 10 to 15 minutes. Publishing waits for them."
   },
   {
-   "start": 75,
-   "text": "A line for the card, and their story."
+   "start": 68.13,
+   "text": "A short line for the card, and their story."
   },
   {
-   "start": 79.02,
-   "text": "Films are YouTube links. Each with its 16:9 poster."
+   "start": 70.84,
+   "text": "Films are YouTube links, each with a 16:9 poster."
   },
   {
-   "start": 82.1,
-   "text": "One switch puts them on the homepage."
+   "start": 73.85,
+   "text": "One switch puts their album on the homepage."
   },
   {
-   "start": 85.5,
-   "text": "Not sure what’s left? The bar always knows."
+   "start": 77.16,
+   "text": "On the homepage, albums drift along a dark table."
   },
   {
-   "start": 88.7,
-   "text": "Click anything on it, and it takes you there."
+   "start": 79.76,
+   "text": "Press one, and it opens to the bride and groom."
   },
   {
-   "start": 91.9,
-   "text": "Then check the desktop view. Only you can see drafts."
+   "start": 83.16,
+   "text": "Bride on the left. Groom on the right. Their names below."
   },
   {
-   "start": 95.8,
-   "text": "And now, the big moment."
+   "start": 87.47,
+   "text": "Step by step. A bar that says where you are, and what’s left."
   },
   {
-   "start": 98.8,
-   "text": "It takes a few minutes. Keep working if you like."
+   "start": 90.74,
+   "text": "It always says where you are: Step 2 of 5."
   },
   {
-   "start": 104.7,
-   "text": "Live on the website. Well done, you."
+   "start": 93.29,
+   "text": "Next and Back move you along. The line fills up."
   },
   {
-   "start": 107.75,
+   "start": 95.93,
+   "text": "Finished steps get a tick at the top."
+  },
+  {
+   "start": 97.98,
+   "text": "The ring fills up. Each chip names what’s left."
+  },
+  {
+   "start": 100.53,
+   "text": "Press a chip, and it takes you to the place."
+  },
+  {
+   "start": 106.08,
+   "text": "Nothing left? Ready to publish."
+  },
+  {
+   "start": 108.4,
+   "text": "How this works. Short steps, in a drawer, whenever you need them."
+  },
+  {
+   "start": 111.32,
+   "text": "Not sure how something works?"
+  },
+  {
+   "start": 113.07,
+   "text": "Short steps for this kind of entry, beside your work."
+  },
+  {
+   "start": 116.27,
+   "text": "A film has its own. So does a review, or a shoot."
+  },
+  {
+   "start": 119.56,
+   "text": "Saved and published. It saves itself. Nothing goes live until you say."
+  },
+  {
+   "start": 122.79,
+   "text": "See this pill? Every change saves itself."
+  },
+  {
+   "start": 125.24,
+   "text": "Nothing goes live until you press Publish."
+  },
+  {
+   "start": 130.03,
+   "text": "Published. On the website in about 10 minutes."
+  },
+  {
+   "start": 132.08,
+   "text": "When it’s ready, View on website takes you there."
+  },
+  {
+   "start": 134.33,
    "text": "Then look at it on your phone. Always."
   },
   {
-   "start": 124.75,
-   "text": "Nothing you take down is lost. Switch it back on any time."
+   "start": 136.31,
+   "text": "Films, pre-wedding and more. The other things you’ll look after."
   },
   {
-   "start": 129.15,
-   "text": "That one’s for the owner only."
+   "start": 139.68,
+   "text": "Films: a YouTube link, a poster, two switches."
+  },
+  {
+   "start": 142.33,
+   "text": "Featured: the homepage. Show on Films page: the Films page."
+  },
+  {
+   "start": 145.98,
+   "text": "Pre-wedding: add a destination, then its shoots."
+  },
+  {
+   "start": 148.63,
+   "text": "Its record appears once it has a published shoot."
+  },
+  {
+   "start": 152.18,
+   "text": "Reviews: ask the couple first, then switch on Approved."
+  },
+  {
+   "start": 155.58,
+   "text": "Team: a black and white 4:5 portrait."
+  },
+  {
+   "start": 158.13,
+   "text": "Open roles: on Careers, and in its form."
+  },
+  {
+   "start": 160.83,
+   "text": "Featured on: who has written about you."
+  },
+  {
+   "start": 164.22,
+   "text": "The chat enquiry. One question at a time, in your words."
+  },
+  {
+   "start": 167.17,
+   "text": "On the website, couples answer one question at a time."
+  },
+  {
+   "start": 170.37,
+   "text": "Their answers reach you as usual."
+  },
+  {
+   "start": 173.02,
+   "text": "In the Studio, Enquiry forms lets you reword them."
+  },
+  {
+   "start": 175.42,
+   "text": "How the chat asks it changes the question…"
+  },
+  {
+   "start": 177.77,
+   "text": "…What the chat says back changes its reply."
+  },
+  {
+   "start": 180.22,
+   "text": "Switch a question off, and the chat skips it."
+  },
+  {
+   "start": 183.75,
+   "text": "Quotes. A rough estimate, from your own prices."
+  },
+  {
+   "start": 187,
+   "text": "A new item in the top menu: Quotes."
+  },
+  {
+   "start": 188.85,
+   "text": "First, your prices. These are made up."
+  },
+  {
+   "start": 191.12,
+   "text": "Saved privately: only people signed in can see them."
+  },
+  {
+   "start": 193.92,
+   "text": "Then fill in what the couple told the chat."
+  },
+  {
+   "start": 198.09,
+   "text": "Up comes the estimate range, and how it was worked out."
+  },
+  {
+   "start": 200.94,
+   "text": "And a message, for you to read and change."
+  },
+  {
+   "start": 203.4,
+   "text": "Copy it, or open it in WhatsApp or email."
+  },
+  {
+   "start": 206.19,
+   "text": "Nothing about a couple is saved here."
+  },
+  {
+   "start": 208.87,
+   "text": "Good to know. Photo sizes, taking things down, the status light."
+  },
+  {
+   "start": 212.14,
+   "text": "Photos start in Lightroom. Nine presets size them for you."
+  },
+  {
+   "start": 217.99,
+   "text": "Three ways to take something down. Nothing is lost."
+  },
+  {
+   "start": 218,
+   "text": "Archive: older work. Off the lists and the homepage. Its own page still works for old links."
+  },
+  {
+   "start": 218.01,
+   "text": "Remove from website: when a couple asks. Gone everywhere. Its address leads back to the Weddings page."
+  },
+  {
+   "start": 218.02,
+   "text": "Hide from website: films, reviews, team, roles. Not shown anywhere, until you switch it back."
+  },
+  {
+   "start": 221.06,
+   "text": "Never delete."
+  },
+  {
+   "start": 221.24,
+   "text": "Deleting for good is for the owner only."
+  },
+  {
+   "start": 224.97,
+   "text": "This light says when your change is live."
+  },
+  {
+   "start": 227.17,
+   "text": "While it updates: gold, and Home’s record spins faster."
+  },
+  {
+   "start": 230.12,
+   "text": "If it turns red, your work is safe. Press Try again."
+  },
+  {
+   "start": 234.43,
+   "text": "Stuck?"
+  },
+  {
+   "start": 235.03,
+   "text": "Open the Guide: every step, written down. Or press ⌘K and search for anything."
+  },
+  {
+   "start": 237.67,
+   "text": "Now go and add a wedding."
   }
  ]
 }

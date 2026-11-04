@@ -1,6 +1,6 @@
 "use client";
 
-import { FilmPlayer, useScrollWindow, WbskLink, type WbskImageSource } from "@wbsk/ui";
+import { FilmPlayer, RowBar, useScrollWindow, WbskLink, type WbskImageSource } from "@wbsk/ui";
 import { useEffect, useRef, useState } from "react";
 
 export type ScreeningFilm = {
@@ -17,9 +17,9 @@ export type ScreeningFilm = {
 const FIRST_LOAD = 8;
 
 /**
- * The films in one scrolling section of dark cloth, while the page holds still (owner, 2 November
- * 2026). A film stops when scrolled away, so only one ever plays, and the first eight load until
- * the visitor reaches the end.
+ * The films, two to a row, in one scrolling window on the page's own cloth, so the enquiry stays
+ * close (owner, 4 November 2026). A film stops when scrolled away, so only one ever plays, and the
+ * first eight load until the visitor reaches the end.
  */
 export function FilmsList({ films }: { films: ScreeningFilm[] }) {
   const [shown, setShown] = useState(FIRST_LOAD);
@@ -37,11 +37,10 @@ export function FilmsList({ films }: { films: ScreeningFilm[] }) {
       (entries) => {
         for (const entry of entries) {
           const element = entry.target as HTMLElement;
-          element.dataset.centre = entry.isIntersecting ? "true" : "false";
           if (!entry.isIntersecting) setPlaying((current) => (current === element.dataset.film ? null : current));
         }
       },
-      { root: windowRef.current, rootMargin: "-30% 0px -30% 0px" },
+      { root: windowRef.current },
     );
     root.querySelectorAll("[data-film]").forEach((film) => observer.observe(film));
     return () => observer.disconnect();
@@ -60,7 +59,7 @@ export function FilmsList({ films }: { films: ScreeningFilm[] }) {
   return (
     <div className="wbsk-container">
       <div className="wbsk-filmtray">
-        <div ref={windowRef} className="wbsk-filmtray__window" role="region" aria-label="Films, scrollable" tabIndex={0} data-native-wheel>
+        <div ref={windowRef} className="wbsk-filmtray__window" role="region" aria-label="Films, scrollable" tabIndex={0} data-native-wheel data-parallax-scroller>
       <ol ref={rootRef} className="wbsk-screening">
         {films.slice(0, shown).map((film, index) => (
           <li key={film.id} className="wbsk-screening__film" data-film={film.id}>
@@ -69,23 +68,26 @@ export function FilmsList({ films }: { films: ScreeningFilm[] }) {
                 videoId={film.videoId}
                 poster={film.poster}
                 title={`${film.names}, ${film.kind}`}
-                sizes="(min-width: 900px) 56vw, 92vw"
+                sizes="(min-width: 700px) 46vw, 82vw"
                 active={playing === film.id}
                 onPlay={() => setPlaying(film.id)}
                 onStop={() => setPlaying((p) => (p === film.id ? null : p))}
                 priority={index === 0}
+                parallax
               />
               <div className="wbsk-screening__text">
-                <p className="wbsk-label">
-                  {film.kind} · {film.place}
-                </p>
+                <div className="wbsk-screening__meta">
+                  <p className="wbsk-label">
+                    {film.kind} · {film.place}
+                  </p>
+                  {film.href ? (
+                    <WbskLink href={film.href} className="wbsk-link wbsk-morelink">
+                      Their story →
+                    </WbskLink>
+                  ) : null}
+                </div>
                 <h2 className="wbsk-h3">{film.names}</h2>
                 <p className="wbsk-filmcaption__line">{film.line}</p>
-                {film.href ? (
-                  <WbskLink href={film.href} className="wbsk-link wbsk-morelink">
-                    Their story →
-                  </WbskLink>
-                ) : null}
               </div>
             </div>
           </li>
@@ -96,6 +98,8 @@ export function FilmsList({ films }: { films: ScreeningFilm[] }) {
         <span className="wbsk-gallerywindow__progress" aria-hidden="true">
           <span ref={progressRef} />
         </span>
+        {/* On phones the row runs sideways, so its mark does too. */}
+        <RowBar scrollerRef={windowRef} reserved />
       </div>
     </div>
   );

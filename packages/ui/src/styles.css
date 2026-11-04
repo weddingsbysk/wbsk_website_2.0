@@ -1,8 +1,8 @@
 /* WBSK design tokens (Decisions 02, 05, 11, 12). No colour or duration is hard-coded outside this file. */
 @theme {
-  --color-ivory: #f5efe6;
-  --color-dusk: #1f1914;
-  --color-ink: #231c16;
+  --color-ivory: #f8f2e7;
+  --color-dusk: #17100b;
+  --color-ink: #20170f;
   --color-gold: #ddaf3a;
   --color-deep-gold: #7a5c17;
   --color-muted: #6b5e52;
@@ -17,6 +17,9 @@
   --shadow-rest: 0 1px 2px rgb(58 36 16 / 0.06), 0 8px 24px -12px rgb(58 36 16 / 0.14);
   --shadow-lift: 0 2px 4px rgb(58 36 16 / 0.08), 0 24px 48px -16px rgb(58 36 16 / 0.28);
 
+  /* Lamplight: a warm pool from above and a soft fall-off below, laid over each scene's material. */
+  --lamp-dark: radial-gradient(85% 75% at 50% -5%, rgb(214 158 84 / 0.22) 0%, transparent 72%), radial-gradient(120% 90% at 50% 112%, rgb(0 0 0 / 0.5) 0%, transparent 62%);
+  --lamp-light: radial-gradient(80% 65% at 50% 0%, rgb(255 253 246 / 0.85) 0%, transparent 72%), radial-gradient(130% 80% at 50% 108%, rgb(176 134 84 / 0.11) 0%, transparent 62%);
   --shadow-card-rest: 0 1px 2px rgb(35 28 22 / 0.06), 0 10px 28px -14px rgb(35 28 22 / 0.2);
   --shadow-card-lift: 0 2px 6px rgb(35 28 22 / 0.08), 0 28px 56px -18px rgb(35 28 22 / 0.32);
 
@@ -259,10 +262,10 @@
   main > section {
     position: relative;
     z-index: 1;
-    background: var(--color-ivory) url("./textures/paper-ivory.webp") 0 0 / 512px;
+    background: var(--lamp-light), var(--color-ivory) url("./textures/paper-ivory.webp") 0 0 / 320px;
   }
   main > section[data-tone="dark"] {
-    background: var(--color-dusk) url("./textures/paper-dusk.webp") 0 0 / 512px;
+    background: var(--lamp-dark), var(--color-dusk) url("./textures/paper-dusk.webp") 0 0 / 320px;
   }
   main > section:not(:first-child, .wbsk-storycover + section) {
     margin-top: -24px;
@@ -277,7 +280,7 @@
   main {
     position: relative;
     z-index: 1;
-    background: var(--color-ivory) url("./textures/paper-ivory.webp") 0 0 / 512px;
+    background: var(--color-ivory) url("./textures/paper-ivory.webp") 0 0 / 320px;
     border-radius: 0 0 24px 24px;
     box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.55);
   }
@@ -311,31 +314,128 @@
     }
   }
 
-  /* A ring that trails the cursor over rows and galleries, naming what's possible there. */
-  .wbsk-cursor {
-    position: fixed;
-    top: -40px;
-    left: -40px;
-    z-index: 60;
-    display: grid;
-    width: 80px;
-    height: 80px;
-    place-items: center;
-    font-family: var(--font-ui);
-    font-size: 0.625rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--color-dusk);
-    background: rgb(221 175 58 / 0.92);
-    border-radius: 50%;
-    opacity: 0;
+  /* The logo keeps its size; only the area you can press grows, for fingers. */
+  .wbsk-header__logo {
+    position: relative;
+  }
+  .wbsk-header__logo::after {
+    content: "";
+    position: absolute;
+    inset: -12px -8px;
+  }
+  /* A slim gold mark under anything that moves sideways: only a picture, never something to press. */
+  .wbsk-posbar {
+    position: relative;
+    display: block;
+    width: min(200px, 44%);
+    height: 3px;
+    margin: 14px auto 0;
+    overflow: hidden;
+    background: rgb(122 92 23 / 0.2);
+    border-radius: 3px;
     pointer-events: none;
   }
-  @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
-    .wbsk-cursor {
-      display: none;
-    }
+  [data-tone="dark"] .wbsk-posbar {
+    background: rgb(221 175 58 / 0.24);
   }
+  .wbsk-posbar[hidden] {
+    display: none;
+  }
+  .wbsk-posbar__slider {
+    position: absolute;
+    inset: 0;
+  }
+  .wbsk-posbar__thumb {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background: var(--color-deep-gold);
+    border-radius: 3px;
+  }
+  .wbsk-posbar__thumb--again {
+    left: -100%;
+  }
+  [data-tone="dark"] .wbsk-posbar__thumb {
+    background: var(--color-gold);
+  }
+  /* The same mark up the side of a window that scrolls up and down. */
+  .wbsk-gallerywindow__progress {
+    position: absolute;
+    top: 28px;
+    right: 5px;
+    bottom: 28px;
+    width: 3px;
+    overflow: hidden;
+    background: rgb(221 175 58 / 0.3);
+    border-radius: 3px;
+    pointer-events: none;
+  }
+  .wbsk-gallerywindow__progress > span {
+    display: block;
+    height: 100%;
+    background: var(--color-gold);
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  /* A first-visit hint, like a card in a film's titles: small, and never in the way of a press. */
+  .wbsk-guide {
+    position: fixed;
+    right: 0;
+    bottom: clamp(20px, 5svh, 44px);
+    left: 0;
+    z-index: 35;
+    display: flex;
+    justify-content: center;
+    padding-inline: var(--gutter);
+    pointer-events: none;
+  }
+  .wbsk-guide__card {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    max-width: 30em;
+    padding: 12px 22px 12px 18px;
+    color: var(--color-ivory);
+    background: rgb(23 16 11 / 0.88);
+    border-radius: var(--radius-wbsk);
+    box-shadow: inset 0 0 0 1px rgb(221 175 58 / 0.34), 0 14px 34px -14px rgb(0 0 0 / 0.7);
+  }
+  .wbsk-guide__card p {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1rem, 1.3vw, 1.125rem);
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  .wbsk-guide__arrow {
+    flex: none;
+    color: var(--color-gold);
+  }
+  .wbsk-guide__arrowbox {
+    display: grid;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+  }
+  /* The drawing points down; only its picture turns, so its movement still follows the screen. */
+  .wbsk-guide__arrowbox[data-direction="up"] .wbsk-guide__arrow path {
+    transform: rotate(180deg);
+    transform-origin: center;
+    transform-box: view-box;
+  }
+  .wbsk-guide__arrowbox[data-direction="left"] .wbsk-guide__arrow path {
+    transform: rotate(90deg);
+    transform-origin: center;
+    transform-box: view-box;
+  }
+  .wbsk-guide__arrowbox[data-direction="right"] .wbsk-guide__arrow path {
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transform-box: view-box;
+  }
+
   /* The last impression: the mark, very large, running off the bottom of the page. */
   .wbsk-footer__mark {
     margin-top: clamp(32px, 4vw, 64px);
@@ -358,12 +458,16 @@
   .wbsk-sharedline,
   .wbsk-panel__sheet {
     background-image: url("./textures/paper-ivory.webp");
-    background-size: 512px;
+    background-size: 320px;
   }
   [data-tone="dark"],
   .wbsk-footer {
     background-image: url("./textures/paper-dusk.webp");
-    background-size: 512px;
+    background-size: 320px;
+  }
+  .wbsk-footer {
+    background-image: var(--lamp-dark), url("./textures/paper-dusk.webp");
+    background-size: auto, auto, 320px;
   }
   .wbsk-storycover__label {
     background-image: url("./textures/card-stock.webp");
@@ -1314,8 +1418,12 @@
   }
   .wbsk-weddings__intro {
     text-align: center;
-    padding-top: calc(var(--header-height) + clamp(72px, 10vw, 168px));
-    padding-bottom: clamp(56px, 7vw, 112px);
+    padding-top: calc(var(--header-height) + clamp(16px, 2vw, 28px));
+    padding-bottom: clamp(16px, 1.6vw, 24px);
+  }
+  /* The first wedding is the page's opening: the title stays quiet so its cover shows whole on load. */
+  .wbsk-weddings__intro .wbsk-sectionhead__title {
+    font-size: clamp(2rem, 3.4vw, 3.25rem);
   }
   @media (max-width: 699px) {
     .wbsk-weddings .wbsk-container {
@@ -1363,11 +1471,11 @@
     /* Behind the words it stays dark enough for 4.5:1 on even a white photo; above them it eases away. */
     background: linear-gradient(
       to top,
-      rgb(31 25 20 / 0.86) 0,
-      rgb(31 25 20 / 0.68) calc(100% - var(--lead-fade)),
-      rgb(31 25 20 / 0.42) calc(100% - var(--lead-fade) * 0.62),
-      rgb(31 25 20 / 0.14) calc(100% - var(--lead-fade) * 0.26),
-      rgb(31 25 20 / 0) 100%
+      rgb(23 16 11 / 0.86) 0,
+      rgb(23 16 11 / 0.68) calc(100% - var(--lead-fade)),
+      rgb(23 16 11 / 0.42) calc(100% - var(--lead-fade) * 0.62),
+      rgb(23 16 11 / 0.14) calc(100% - var(--lead-fade) * 0.26),
+      rgb(23 16 11 / 0) 100%
     );
   }
   .wbsk-lead-story__text .wbsk-label {
@@ -2053,9 +2161,6 @@
     margin: 8px 0 0;
     font-size: var(--text-small);
     opacity: 0.86;
-  }
-  .wbsk-film[data-vertical] {
-    aspect-ratio: 9 / 16;
   }
   .wbsk-film__play .wbsk-frame {
     width: 100%;

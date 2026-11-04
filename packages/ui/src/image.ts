@@ -22,6 +22,7 @@ export type WbskImageSource = SanityImage | LocalImage;
 
 export const slotWidths = {
   thumbnail: [300, 600],
+  albumCover: [320, 400, 600],
   fullscreen: [1600, 2048, 2560],
   card: [400, 600, 800, 1000, 1200],
   coverDesktop: [1280, 1920, 2560],

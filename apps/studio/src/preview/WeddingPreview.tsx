@@ -1,4 +1,4 @@
-import { sanityProject, shownQuestions, type FormQuestion } from "@wbsk/content";
+import { chatSteps, sanityProject, shownQuestions, withCameraQuestion, type FormConfig, type FormQuestion } from "@wbsk/content";
 import { AlbumCard, CoupleNames, Gallery, Header, LinkProvider, StoryCover, type SanityImage, type WbskImageSource, type WbskLinkProps } from "@wbsk/ui";
 import { navItems } from "@wbsk/content";
 import logoUrl from "../../../web/public/wbsk-logo.svg";
@@ -129,7 +129,7 @@ function CoverBody({ doc, line, desktop, phone, credit }: { doc: DraftDocument; 
   const portrait = draftImage(doc[phone] as DraftImage);
   const shown = window.matchMedia("(orientation: portrait)").matches ? (portrait ?? poster) : poster;
   return (
-    <section data-tone="dark" className="wbsk-hero" style={{ background: "#1F1914" }}>
+    <section data-tone="dark" className="wbsk-hero" style={{ background: "#17100B" }}>
       {shown?.kind === "sanity" ? (
         <img src={`${shown.url}?w=1600&auto=format`} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
       ) : null}
@@ -156,7 +156,42 @@ function HomepageBody({ doc }: { doc: DraftDocument }) {
 }
 
 /** The form re-flows as questions are shown, hidden or reordered (Decisions 14 and 22). */
+/** Couples meet the form as a conversation, so that's what the preview shows: every question, in the chat's order. */
+function ChatBody({ doc, kind }: { doc: DraftDocument; kind: "wedding" | "preWedding" }) {
+  const config = withCameraQuestion({ kind, questions: (doc.questions as FormQuestion[]) ?? [] } as FormConfig);
+  return (
+    <section className="wbsk-section wbsk-container" style={{ paddingBlock: 64 }}>
+      <div className="wbsk-chat" style={{ height: "auto" }}>
+        <div className="wbsk-chat__head">
+          <span className="wbsk-chat__seal" aria-hidden="true">W</span>
+          <div>
+            <p className="wbsk-chat__title">{(doc.heading as string) || "Heading"}</p>
+            <p className="wbsk-chat__sub">A few quick questions. We reply within a day.</p>
+          </div>
+        </div>
+        <div className="wbsk-chat__log" style={{ overflow: "visible" }}>
+          {chatSteps(config).map((step) => (
+            <div key={step.key} className="wbsk-chat__turn">
+              <div className="wbsk-chat__row">
+                <span className="wbsk-chat__seal" aria-hidden="true">W</span>
+                <div className="wbsk-chat__bubble"><p>{step.ask}</p></div>
+              </div>
+              {step.choices?.length ? (
+                <div className="wbsk-chat__choices" style={{ paddingLeft: 36 }}>
+                  {step.choices.map((choice) => <span key={choice} className="wbsk-chat__chip" style={{ display: "inline-flex", alignItems: "center" }}>{choice}</span>)}
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FormBody({ doc }: { doc: DraftDocument }) {
+  const id = String(doc._id ?? "");
+  if (!id.includes("Careers")) return <ChatBody doc={doc} kind={id.includes("PreWedding") ? "preWedding" : "wedding"} />;
   const questions = shownQuestions((doc.questions as FormQuestion[]) ?? []);
   const steps = (doc.nextSteps as string[]) ?? [];
   return (

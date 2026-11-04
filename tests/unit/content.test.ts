@@ -49,7 +49,6 @@ describe("Upload size rules (Decision 06)", () => {
     ["gallery", { width: 1700, height: 2560 }, true],
     ["gallery", { width: 2000, height: 1500 }, false],
     ["poster", { width: 1920, height: 1080 }, true],
-    ["reactionPoster", { width: 1080, height: 1919 }, false],
     ["destinationArt", { width: 1600, height: 1600 }, true],
   ] as const)("%s at %o: %s", (slot, size, ok) => {
     expect(meetsSize(size, imageRules[slot])).toBe(ok);

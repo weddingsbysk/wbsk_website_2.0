@@ -156,7 +156,7 @@ test.describe("opening intro", () => {
   });
 
   test("without scripts there is no veil", async ({ browser }) => {
-    const context = await browser.newContext({ javaScriptEnabled: false });
+    const context = await browser.newContext({ javaScriptEnabled: false, storageState: { cookies: [], origins: [] } });
     const page = await context.newPage();
     await page.goto("http://127.0.0.1:4173/wbsk_website_2.0/");
     await expect(page.locator(".wbsk-intro__veil")).toBeHidden();
@@ -302,7 +302,7 @@ test.describe("record arc", () => {
   });
 
   test("without scripts the destinations are still real links", async ({ browser }) => {
-    const context = await browser.newContext({ javaScriptEnabled: false });
+    const context = await browser.newContext({ javaScriptEnabled: false, storageState: { cookies: [], origins: [] } });
     const page = await context.newPage();
     await page.goto("http://127.0.0.1:4173/wbsk_website_2.0/pre-wedding/");
     await expect(page.locator(".wbsk-arc__row a").first()).toBeVisible();

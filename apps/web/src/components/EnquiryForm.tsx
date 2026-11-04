@@ -5,6 +5,7 @@ import { fillThankYou, shownQuestions, validateForm, type FormConfig, type FormV
 import { ArrowIcon, WbskLink } from "@wbsk/ui";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { clockNow, loadFormsBundle, newSubmissionId, sendForm } from "../lib/submit";
+import { EnquiryChat } from "./EnquiryChat";
 
 type State = "typing" | "sending" | "sent" | "failed";
 
@@ -14,8 +15,13 @@ const drafts = new Map<string, { values: FormValues; consented: boolean }>();
 const inputType = { email: "email", phone: "tel", url: "text" } as Record<string, string>;
 const autoComplete = { name: "name", names: "name", email: "email", phone: "tel" } as Record<string, string>;
 
-/** One form, configured three ways from the Studio, inline or in the panel (Decisions 14 and 15). */
+/** Couples get the conversation; job applications stay a form, where everything is seen at once. */
 export function EnquiryForm({ config, roles }: { config: FormConfig; roles?: string[] }) {
+  return config.kind === "careers" ? <PlainForm config={config} roles={roles} /> : <EnquiryChat config={config} />;
+}
+
+/** One form, configured from the Studio (Decisions 14 and 15). */
+function PlainForm({ config, roles }: { config: FormConfig; roles?: string[] }) {
   const base = useId();
   const startedAt = useRef(0);
   const draft = drafts.get(config.kind);

@@ -2,6 +2,7 @@ import "@wbsk/ui/css/pages.css";
 import { GlideIn, Reveal, TitleWords, WbskImage, WbskLink, SectionHead } from "@wbsk/ui";
 import type { Metadata } from "next";
 import { EnquireButton } from "../../components/EnquiryPanel";
+import { TeamIntro } from "../../components/TeamIntro";
 import { getTeamPage, mainPageMetadata } from "../../lib/content";
 
 export const generateMetadata = (): Promise<Metadata> => mainPageMetadata("teamPage", "Our team");
@@ -16,6 +17,8 @@ export default async function Page() {
   const others = crew.slice(CORE_CREW - 1);
   return (
     <div data-tone="dark" className="wbsk-teampage">
+      {/* The crew's names roll past and settle on the lead. */}
+      {lead ? <TeamIntro credits={[...crew.slice(0, 3), lead].map(({ name, role }) => ({ name, role }))} /> : null}
       <section className="wbsk-container wbsk-pagehead">
         <div data-depth="48">
           <SectionHead as="h1" line={line ?? "The people you'll forget are working."}>
@@ -34,7 +37,7 @@ export default async function Page() {
           </Reveal>
           <GlideIn side="right">
             <div data-depth="90">
-              {lead.portrait ? <WbskImage image={lead.portrait} slot="card" sizes="(min-width: 900px) 46vw, 92vw" aspectRatio={4 / 5} parallax /> : null}
+              {lead.portrait ? <WbskImage image={lead.portrait} slot="card" sizes="(min-width: 900px) 35vw, 92vw" aspectRatio={4 / 5} parallax /> : null}
             </div>
           </GlideIn>
         </section>
@@ -45,7 +48,7 @@ export default async function Page() {
           <section key={member.name} className="wbsk-container wbsk-person" data-side={side}>
             <GlideIn side={side}>
               <div data-depth={index % 2 === 0 ? 70 : 110}>
-                {member.portrait ? <WbskImage image={member.portrait} slot="card" sizes="(min-width: 900px) 32vw, 92vw" aspectRatio={4 / 5} parallax /> : null}
+                {member.portrait ? <WbskImage image={member.portrait} slot="card" sizes="(min-width: 900px) 24vw, 92vw" aspectRatio={4 / 5} parallax /> : null}
               </div>
             </GlideIn>
             <Reveal className="wbsk-person__text">

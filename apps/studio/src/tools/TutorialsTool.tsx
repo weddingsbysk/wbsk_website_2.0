@@ -27,7 +27,7 @@ export function TutorialsTool() {
     <div className="st-page">
       <div className="st-page__inner">
         <h1 className="st-title st-rise">Tutorials</h1>
-        <p className="st-lede st-rise">The whole Studio in two and a half minutes. Press play, and turn the sound up.</p>
+        <p className="st-lede st-rise">The whole Studio in about four minutes. Press play, and turn the sound up.</p>
         <div className="st-film st-rise" style={{ "--i": 1 } as CSSProperties}>
           <div className="st-film__screen">
             {failed ? (

@@ -38,18 +38,21 @@ async function openFilm() {
 const [mode, ...rest] = process.argv.slice(2);
 mkdirSync(WORK, { recursive: true });
 const first = await openFilm();
-const film = await first.evaluate(() => ({ duration: window.FILM.duration, captions: window.FILM.captions, chapters: window.FILM.chapters, cues: window.FILM.cues }));
+const film = await first.evaluate(() => ({ duration: window.FILM.duration, captions: window.FILM.captions, chapters: window.FILM.chapters, cues: window.FILM.cues, sections: window.FILM.sections, poster: window.FILM.poster, music: window.FILM.music }));
 
 if (mode === "--meta") {
   writeFileSync(join(WORK, "film.json"), JSON.stringify(film, null, 1));
   console.log(`duration ${film.duration.toFixed(1)}s, ${film.captions.length} captions, ${film.cues.length} cues`);
   for (const item of film.chapters) console.log(`${item.at.toFixed(1).padStart(6)}  ${item.title}`);
+  // Anything on screen too briefly to read comfortably.
+  for (const item of film.captions.filter((c) => !c.quiet && c.seconds < c.text.length / 17)) console.log(`quick: ${item.start} (${item.seconds}s, ${item.text.length} chars) ${item.text}`);
 } else if (mode === "--stills") {
   const dir = join(WORK, "stills");
   mkdirSync(dir, { recursive: true });
-  for (const time of rest[0].split(",").map(Number)) {
+  // In order, because the film only ever plays forwards.
+  for (const time of rest[0].split(",").map(Number).sort((a, b) => a - b)) {
     await first.evaluate((value) => window.seekFilm(value), time);
-    await first.screenshot({ path: join(dir, `${String(time).padStart(6, "0")}.jpg`), type: "jpeg", quality: 80 });
+    await first.screenshot({ path: join(dir, `${time.toFixed(2).padStart(7, "0")}.jpg`), type: "jpeg", quality: 80 });
   }
 } else if (mode === "--frames") {
   const from = Math.round((Number(rest[0] ?? 0)) * FPS);

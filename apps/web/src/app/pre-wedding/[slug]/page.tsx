@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BackToRecords } from "../../../components/BackToRecords";
 import { DestinationFilms } from "../../../components/DestinationFilms";
+import { FirstVisitGuide } from "../../../components/FirstVisitGuide";
 import { EnquireButton } from "../../../components/EnquiryPanel";
 import { GoneRedirect } from "../../../components/GoneRedirect";
 import { getDestinationPages, getDestinationShoots, metadataFrom } from "../../../lib/content";
@@ -39,6 +40,7 @@ export default async function Page({ params }: Params) {
   const { films, photos } = await getDestinationShoots(destination.id);
   return (
     <div className="wbsk-destination">
+      <FirstVisitGuide place="destination" />
       <StoryCover cover={destination.cover} coverPhone={destination.coverPhone} place="PRE-WEDDING" names={destination.name} meta="" />
       <div className="wbsk-container wbsk-backrow">
         <BackToRecords />

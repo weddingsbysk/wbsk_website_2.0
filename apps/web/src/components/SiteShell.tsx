@@ -1,6 +1,6 @@
 "use client";
 
-import { CursorLabel, Footer, Header, LinkProvider, type WbskLinkProps } from "@wbsk/ui";
+import { Footer, Header, LinkProvider, type WbskLinkProps } from "@wbsk/ui";
 import { prefersReducedMotion, startWheelSmoothing, takeExpandSource } from "@wbsk/ui/motion";
 import { startScrollScenes } from "@wbsk/ui/scenes";
 import { navItems } from "@wbsk/content";
@@ -236,7 +236,6 @@ export function SiteShell({ children, social }: { children: ReactNode; social: {
         logoSrc={publicAsset("/wbsk-logo.svg")}
         social={social}
       />
-      <CursorLabel />
       <div ref={duskRef} className="wbsk-dusk" aria-hidden="true" />
       </EnquiryPanelProvider>
     </LinkProvider>

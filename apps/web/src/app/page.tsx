@@ -3,7 +3,8 @@ import { Fragment } from "react";
 import { CoverVideo, HeroDrift, Letterbox, Reveal, SectionHead, TitleWords, WbskImage, WbskLink } from "@wbsk/ui";
 import { EnquiryForm } from "../components/EnquiryForm";
 import { FeaturedRow } from "../components/DriftRow";
-import { Counter, FilmStack, ReactionRow, ReviewsLoop } from "../components/HomeSections";
+import { FirstVisitGuide } from "../components/FirstVisitGuide";
+import { Counter, FilmStack, ReviewsLoop } from "../components/HomeSections";
 import { IntroMark, IntroName } from "../components/IntroLogo";
 import { OpeningIntro } from "../components/OpeningIntro";
 import { getHomepageContent, mainPageMetadata } from "../lib/content";
@@ -32,6 +33,15 @@ function emphasised(line: string, word: string) {
   ));
 }
 
+/** A soft pool of light behind a scene, drifting at its own pace as the page scrolls, for quiet depth. */
+function Lamp({ place, light }: { place: "left" | "centre" | "right"; light?: boolean }) {
+  return (
+    <div className="wbsk-lampwrap" aria-hidden="true">
+      <div className="wbsk-lamp" data-depth="90" data-place={place} data-light={light || undefined} />
+    </div>
+  );
+}
+
 const TICKER = ["Weddings", "Films", "Candid moments", "Haldi ceremonies", "Portraits", "Destinations", "Pre-weddings"];
 /** Enough words that the strip outruns any screen as it slides, however few the Studio lists. */
 const TICKER_LENGTH = 21;
@@ -42,6 +52,7 @@ export default async function HomePage() {
   return (
     <>
       <OpeningIntro name={<IntroName />} mark={<IntroMark />} />
+      <FirstVisitGuide place="home" />
       <section id="hero" data-tone="dark" className="wbsk-hero">
         <div className="wbsk-hero__media">
           <CoverVideo desktop={home.videoDesktop} phone={home.videoPhone} posterDesktop={home.posterDesktop} posterPhone={home.posterPhone} label="the WBSK film" />
@@ -57,6 +68,7 @@ export default async function HomePage() {
       </section>
 
       <section data-tone="dark" className="wbsk-philosophy" aria-labelledby="philosophy-quote">
+        <Lamp place="left" />
         <div className="wbsk-ticker" aria-hidden="true">
           <p>
             {Array.from({ length: Math.ceil(TICKER_LENGTH / ticker.length) }, () => ticker).flat().map((word, index) => (
@@ -95,6 +107,7 @@ export default async function HomePage() {
 
       {home.films.length ? (
         <section data-tone="dark" className="wbsk-section" aria-label="Featured films">
+          <Lamp place="centre" />
           <div className="wbsk-container">
             <Reveal>
               <SectionHead>Our Featured Films</SectionHead>
@@ -119,30 +132,19 @@ export default async function HomePage() {
         </Reveal>
       </section>
 
-      {home.reviews.length || home.reactions.length ? (
+      {home.reviews.length ? (
         <section className="wbsk-homesection" aria-label="What our couples say">
+          <Lamp place="right" light />
           <div className="wbsk-container">
-            {home.reviews.length ? (
-              <>
-                <Reveal>
-                  <SectionHead>What Our Couples Say</SectionHead>
-                </Reveal>
-                <ReviewsLoop reviews={home.reviews} />
-              </>
-            ) : null}
+            <Reveal>
+              <SectionHead>What Our Couples Say</SectionHead>
+            </Reveal>
+            <ReviewsLoop reviews={home.reviews} />
             {home.google ? (
               <a className="wbsk-link wbsk-googleline" href={home.google.href} target="_blank" rel="noopener noreferrer">
                 {home.google.rating} on Google · {home.google.count} reviews ↗
                 <span className="wbsk-sr"> (opens in a new tab)</span>
               </a>
-            ) : null}
-            {home.reactions.length ? (
-              <div className="wbsk-reactions">
-                <Reveal>
-                  <SectionHead>Watch Them React</SectionHead>
-                </Reveal>
-                <ReactionRow reactions={home.reactions} />
-              </div>
             ) : null}
           </div>
         </section>

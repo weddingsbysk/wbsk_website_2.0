@@ -63,7 +63,7 @@ export const metadata: Metadata = {
   robots: isProduction ? undefined : { index: false, follow: false },
 };
 
-export const viewport: Viewport = { themeColor: "#1F1914" };
+export const viewport: Viewport = { themeColor: "#17100B" };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const social = await getSocialLinks();

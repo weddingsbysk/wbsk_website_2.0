@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { ListItemBuilder, StructureBuilder, StructureResolver, StructureResolverContext } from "sanity/structure";
-import { BoxLine, FilmLine, FormLine, GearLine, HomeLine, MapLine, PlayLine, QuoteLine, RecordLine, RingsLine, RoleLine, StarLine, TeamLine, TextLine } from "./components/icons";
+import { BoxLine, FilmLine, FormLine, GearLine, HomeLine, MapLine, QuoteLine, RecordLine, RingsLine, RoleLine, StarLine, TeamLine, TextLine } from "./components/icons";
 
 const single = (S: StructureBuilder, type: string, title: string, icon: ComponentType = TextLine) =>
   S.listItem().title(title).id(type).icon(icon).child(S.document().schemaType(type).documentId(type).title(title));
@@ -53,7 +53,6 @@ export const structure: StructureResolver = (S, context) =>
         .child(() => counted(S, context, "Careers", [["careerRole", "Open roles", RoleLine]], [single(S, "careersPage", "Careers page text")])),
       S.divider().title("Couples' words"),
       list(S, "review", "Reviews", QuoteLine),
-      list(S, "reactionVideo", "Reaction videos", PlayLine),
       list(S, "featuredOnItem", "Featured on", StarLine),
       S.divider().title("Forms"),
       S.listItem()

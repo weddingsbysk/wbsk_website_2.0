@@ -1,5 +1,5 @@
 import { createClient } from "@sanity/client";
-import { sanityProject, visibleWithSamples, youTubeId, type FormConfig, type FormKind } from "@wbsk/content";
+import { sanityProject, visibleWithSamples, withCameraQuestion, youTubeId, type FormConfig, type FormKind } from "@wbsk/content";
 import type { SanityImage, WbskImageSource } from "@wbsk/ui";
 import { publicAsset } from "./site";
 
@@ -233,11 +233,11 @@ type FormResult = Omit<FormConfig, "kind">;
 
 const FORM_IDS: Record<FormKind, string> = { wedding: "formWedding", preWedding: "formPreWedding", careers: "formCareers" };
 
-const formFields = /* groq */ `heading, button, questions[]{key, label, kind, example, locked, shown, required, choices}, nextSteps, thankYouHeading, thankYouText, consent`;
+const formFields = /* groq */ `heading, button, questions[]{key, label, kind, example, locked, shown, required, choices, ask, reply}, nextSteps, thankYouHeading, thankYouText, consent`;
 
 export async function getForm(kind: FormKind): Promise<FormConfig> {
   const form = await client.fetch<FormResult>(/* groq */ `*[_id == $id][0]{ ${formFields} }`, { id: FORM_IDS[kind] });
-  return { ...form, kind };
+  return withCameraQuestion({ ...form, kind });
 }
 
 export function getPackages() {
@@ -327,16 +327,19 @@ async function readFilms() {
 }
 
 export async function getFilmsPage() {
-  const [films, intro] = await Promise.all([
+  const [films, intro, form, packages] = await Promise.all([
     readFilms(),
-    client.fetch<{ intro?: string; closingLead?: string; closingLine?: string } | null>(
-      /* groq */ `*[_id == "filmsPage"][0]{ intro, closingLead, closingLine }`,
+    client.fetch<{ intro?: string; closingLead?: string } | null>(
+      /* groq */ `*[_id == "filmsPage"][0]{ intro, closingLead }`,
     ),
+    getForm("wedding"),
+    getPackages(),
   ]);
   return {
     intro: intro?.intro,
     closingLead: intro?.closingLead,
-    closingLine: intro?.closingLine,
+    form,
+    packages,
     films: films
       .filter((film) => film.showOnFilmsPage !== false)
       .map(({ id, videoId, poster, names, place, kind, line, href }) => ({ id, videoId, poster, names, place, kind, line, href })),
@@ -353,17 +356,6 @@ type ReviewResult = {
   highlight?: string;
   rating?: number;
   reviewDate?: string;
-  linked: Linked;
-};
-
-type ReactionResult = {
-  _id: string;
-  _createdAt: string;
-  isSample?: boolean;
-  url: string;
-  poster: ImageResult;
-  names: string;
-  place: string;
   linked: Linked;
 };
 
@@ -392,7 +384,6 @@ export async function getHomepageContent() {
       filmOrder?: string[];
     } | null;
     reviews: ReviewResult[];
-    reactions: ReactionResult[];
     featuredOn: { _createdAt: string; isSample?: boolean; name: string; link: string; image: ImageResult }[];
     settings: { googleRating?: number; googleReviewCount?: number; googleProfile?: string } | null;
   }>(/* groq */ `{
@@ -404,9 +395,6 @@ export async function getHomepageContent() {
     },
     "reviews": *[_type == "review" && approved == true && hidden != true] | order(order asc){
       _id, _createdAt, isSample, names, place, text, highlight, rating, reviewDate, ${linkedFields}
-    },
-    "reactions": *[_type == "reactionVideo" && featured != false && hidden != true] | order(order asc){
-      _id, _createdAt, isSample, url, poster${imageFields}, names, place, ${linkedFields}
     },
     "featuredOn": *[_type == "featuredOnItem" && hidden != true] | order(order asc){ _createdAt, isSample, name, link, image${imageFields} },
     "settings": *[_id == "siteSettings"][0]{ googleRating, googleReviewCount, googleProfile }
@@ -459,13 +447,6 @@ export async function getHomepageContent() {
       date: review.reviewDate ? monthYear(review.reviewDate) : undefined,
       href: linkedHref(review.linked),
     })),
-    reactions: visibleWithSamples(data.reactions).flatMap((reaction) => {
-      const videoId = youTubeId(reaction.url);
-      const poster = withoutInlinePreview(toImage(reaction.poster));
-      return videoId && poster
-        ? [{ id: reaction._id, videoId, poster, names: reaction.names, place: reaction.place, href: linkedHref(reaction.linked) }]
-        : [];
-    }),
     featuredOn: home?.showFeaturedOn
       ? visibleWithSamples(data.featuredOn).map((item) => ({
           name: item.name,

@@ -1,7 +1,7 @@
 export const colors = {
-  ivory: "#F5EFE6",
-  dusk: "#1F1914",
-  ink: "#231C16",
+  ivory: "#F8F2E7",
+  dusk: "#17100B",
+  ink: "#20170F",
   gold: "#DDAF3A",
   deepGold: "#7A5C17",
   muted: "#6B5E52",

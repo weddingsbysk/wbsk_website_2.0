@@ -16,6 +16,8 @@ export function useScrollWindow(scrollerRef: RefObject<HTMLElement | null>, prog
     const update = () => {
       frame = 0;
       const max = scroller.scrollHeight - scroller.clientHeight;
+      // Nothing to scroll, so nothing to suggest.
+      if (bar.parentElement) bar.parentElement.hidden = max <= 1;
       bar.style.transform = `scaleY(${max > 0 ? Math.max(0.04, scroller.scrollTop / max) : 1})`;
     };
     const onScroll = () => {
@@ -23,9 +25,14 @@ export function useScrollWindow(scrollerRef: RefObject<HTMLElement | null>, prog
     };
     update();
     scroller.addEventListener("scroll", onScroll, { passive: true });
+    // Photographs load and films are added as people go, which changes how far there is to scroll.
+    const watch = new ResizeObserver(onScroll);
+    watch.observe(scroller);
+    if (scroller.firstElementChild) watch.observe(scroller.firstElementChild);
     return () => {
       cancelAnimationFrame(frame);
       scroller.removeEventListener("scroll", onScroll);
+      watch.disconnect();
     };
   }, [scrollerRef, progressRef, enabled]);
 

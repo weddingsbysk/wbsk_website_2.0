@@ -97,7 +97,7 @@ File sizes are estimates and vary with detail and noise.
 
 **What the Studio does with a too-small photo**: album photos, card photos and covers below the minimum are refused with a friendly message; a smaller gallery photo shows a warning but can still be added.
 
-**Save ten presets** so nobody retypes settings. Set up the Export panel once, change only Resize to Fit, then click Add (bottom left) for each:
+**Save nine presets** so nobody retypes settings. Set up the Export panel once, change only Resize to Fit, then click Add (bottom left) for each:
 
 1. WBSK – Album cover 3x7 (2800)
 2. WBSK – Card 4x5 (2000), also for the bride and groom pages
@@ -108,7 +108,6 @@ File sizes are estimates and vary with detail and noise.
 7. WBSK – Hero poster desktop 16x9 (2560)
 8. WBSK – Hero poster mobile 9x16 (2400)
 9. WBSK – Team portrait B&W 4x5 (2000)
-10. WBSK – Reaction poster 9x16 (1920)
 
 ## Homepage fallback images and client card photos
 
@@ -149,15 +148,9 @@ Team portraits for the Our team page are exported in stylized black and white at
 - **Framing:** head and shoulders or half-length, with some dark space around the person; the page adds a soft spotlight behind each portrait.
 - **Homepage team photo:** colour or black and white is still to be confirmed.
 
-## Reaction video posters
+## Reviews
 
-Each reaction video needs a 9:16 poster. Written reviews have no photo; the couple's name identifies them.
-
-| Image | Ratio | Lightroom crop | Long edge to export | Result | Minimum accepted |
-| --- | --- | --- | --- | --- | --- |
-| Reaction video poster | 9:16 portrait | 16 x 9, then press X | 1920 px | 1080 × 1920 | 1080 × 1920 |
-
-- **Reaction poster:** take a still from the reaction video that shows the couple's faces clearly, ideally mid-reaction; keep the colour grade consistent across posters, since they sit side by side.
+Written reviews have no photo; the couple's name identifies them.
 
 ## Pre-wedding
 

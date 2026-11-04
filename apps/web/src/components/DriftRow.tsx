@@ -2,7 +2,7 @@
 
 import "@wbsk/ui/css/home.css";
 import "@wbsk/ui/css/album.css";
-import { AlbumCard, canHover, pressThen, WbskLink, type WeddingSummary } from "@wbsk/ui";
+import { AlbumCard, canHover, LoopBar, placeLoopBar, pressThen, WbskLink, type WeddingSummary } from "@wbsk/ui";
 import { capFling, DRAG_START, MOMENTUM_TAU, nearestLoop, roundsToFill, scalePush, SECONDS_PER_CARD, shouldDrift, stepDrift, targetForCard, type DriftNumbers } from "@wbsk/ui/drift";
 import { loadGsap, peekGsap, prefersReducedMotion, setExpandSource, travelEase, watchRestedWheel } from "@wbsk/ui/motion";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -88,6 +88,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref, albumLabel }: {
   const [limit, setLimit] = useState<number | null>(null);
   const weddings = limit === null ? allWeddings : allWeddings.slice(0, limit);
   const [mode, setMode] = useState<Mode>("plain");
+  const loopBarRef = useRef<HTMLSpanElement>(null);
   const [fits, setFits] = useState(false);
   const [rounds, setRounds] = useState(1);
   const [paused, setPaused] = useState(false);
@@ -258,6 +259,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref, albumLabel }: {
       if (at === lastX) return;
       lastX = at;
       track.style.transform = `translate3d(${(-at).toFixed(2)}px, 0, 0)`;
+      placeLoopBar(loopBarRef.current, n.x / layout.setWidth);
       shelfRef.current?.depth();
     };
     renderRef.current = render;
@@ -754,6 +756,7 @@ export function FeaturedRow({ weddings: allWeddings, seeAllHref, albumLabel }: {
         <span className="wbsk-drifttray__sweep" aria-hidden="true" />
         <span className="wbsk-drifttray__lamp" aria-hidden="true" />
       </div>
+      {showArrows ? <LoopBar sliderRef={loopBarRef} count={weddings.length} /> : null}
       <div className="wbsk-container wbsk-drift__below">
         <div className="wbsk-drift__line">
           <CrossfadeLine text={description} />

@@ -9,6 +9,9 @@ export type FormQuestion = {
   shown?: boolean;
   required?: boolean;
   choices?: string[];
+  /** How the chat words this question, and what it says back. Empty uses the chat's own wording. */
+  ask?: string;
+  reply?: string;
 };
 
 export type FormKind = "wedding" | "preWedding" | "careers";

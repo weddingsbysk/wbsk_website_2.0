@@ -16,7 +16,6 @@ export const imageRules = {
   heroPosterPhone: { width: 1080, height: 1920 },
   teamPortrait: { width: 1600, height: 2000 },
   teamPhoto: { width: 2560 },
-  reactionPoster: { width: 1080, height: 1920 },
   destinationArt: { width: 1600, height: 1600 },
 } satisfies Record<string, SizeRule>;
 

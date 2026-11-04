@@ -204,28 +204,6 @@ export const review = defineType({
   },
 });
 
-export const reactionVideo = defineType({
-  name: "reactionVideo",
-  title: "Reaction video",
-  type: "document",
-  fields: [
-    sampleField,
-    defineField({ name: "url", title: "YouTube link", type: "url", validation: (rule) => [rule.required().error("Add the YouTube link"), rule.custom(youtubeLinkValidation)] }),
-    photoField({ name: "poster", title: "Poster 9:16", slot: "poster", rule: imageRules.reactionPoster, required: true }),
-    defineField({ name: "names", title: "Couple's names", type: "string", validation: required("the names") as never }),
-    defineField({ name: "place", type: "string", validation: required("the place") as never }),
-    defineField({ name: "linked", title: "Linked wedding (optional)", type: "reference", to: [{ type: "wedding" }] }),
-    defineField({ name: "featured", type: "boolean", initialValue: true }),
-    orderField,
-    hideField,
-  ],
-  orderings: [{ title: "By hand", name: "order", by: [{ field: "order", direction: "asc" }] }],
-  preview: {
-    select: { title: "names", media: "poster", sample: "isSample" },
-    prepare: ({ title, media, sample }) => ({ title: title as string, subtitle: sample ? "Sample" : undefined, media: media as never }),
-  },
-});
-
 export const careerRole = defineType({
   name: "careerRole",
   title: "Open role",

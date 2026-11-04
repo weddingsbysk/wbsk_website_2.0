@@ -1,100 +1,165 @@
 /* Films, Our team, Careers, Pre-wedding and destination pages. */
 @layer components {
   /* Films: a screening room (Decision 10). */
-  /* All the films in one tray of dark cloth; they scroll inside it while the page holds still. */
+  /* All the films in one window on the page's own cloth; they scroll inside it while the page holds still. */
   .wbsk-filmtray {
     position: relative;
-    padding: clamp(10px, 1.1vw, 16px);
-    background: rgb(245 239 230 / 0.04);
-    border-radius: clamp(16px, 1.8vw, 24px);
-    box-shadow:
-      inset 0 0 0 1px rgb(221 175 58 / 0.18),
-      inset 0 0 30px rgb(0 0 0 / 0.5);
+    max-width: 1080px;
+    margin-inline: auto;
+  }
+  .wbsk-filmspage {
+    padding-bottom: clamp(56px, 6vw, 88px);
+  }
+  .wbsk-filmspage .wbsk-pagehead {
+    padding-block: calc(var(--header-height) + clamp(16px, 2vw, 28px)) clamp(20px, 2.4vw, 32px);
   }
   .wbsk-filmtray__window {
-    height: min(78svh, 840px);
+    height: min(66svh, 620px);
     overflow: hidden auto;
     overscroll-behavior: auto;
     scrollbar-width: none;
     border-radius: 10px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
   }
-  @media (hover: none), (pointer: coarse), (max-width: 699px) {
-    .wbsk-filmtray__window {
-      height: 66svh;
-    }
-    .wbsk-offering .wbsk-gallerywindow {
-      height: 52svh;
-    }
+  .wbsk-offering .wbsk-gallerywindow {
+    height: 52svh;
   }
   .wbsk-filmtray__window::-webkit-scrollbar {
     display: none;
   }
+  @media (min-width: 700px) {
+    .wbsk-filmtray .wbsk-posbar {
+      display: none;
+    }
+  }
+  /* The window has no tray around it, so its mark sits just outside the films. */
+  .wbsk-filmtray > .wbsk-gallerywindow__progress {
+    top: 8px;
+    right: -11px;
+    bottom: 64px;
+  }
   .wbsk-filmtray__window:focus-visible {
     outline-offset: 4px;
   }
+  /* Two films to a row on computers, with their words beneath; a sideways row on phones. */
   .wbsk-screening {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(32px, 3.4vw, 52px) clamp(24px, 3vw, 44px);
     margin: 0;
-    padding: clamp(16px, 2.4vw, 36px) clamp(16px, 2.6vw, 40px);
+    padding: 4px 4px 64px;
     list-style: none;
   }
-  /* Each film beside its story, on alternating sides, so the page reads like a programme. */
   .wbsk-screening__film {
-    padding-block: clamp(28px, 3.4vw, 52px);
+    min-width: 0;
   }
   .wbsk-screening__inner {
     display: grid;
-    gap: 20px clamp(32px, 5vw, 80px);
-    align-items: center;
+    gap: 16px;
   }
-  @media (min-width: 900px) {
-    .wbsk-screening__inner {
-      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  /* A thin gold edge and a soft lamp behind the film you're looking at. */
+  .wbsk-screening__film .wbsk-film {
+    position: relative;
+    overflow: visible;
+  }
+  .wbsk-screening__film .wbsk-film::before {
+    content: "";
+    position: absolute;
+    inset: -14px -18px -22px;
+    z-index: -1;
+    background: radial-gradient(60% 60% at 50% 55%, rgb(214 158 84 / 0.28), transparent 72%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--hover) var(--settle);
+  }
+  .wbsk-screening__film .wbsk-film::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgb(221 175 58 / 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--hover) var(--settle);
+  }
+  .wbsk-screening__inner {
+    isolation: isolate;
+  }
+  .wbsk-screening__film:focus-within .wbsk-film::before,
+  .wbsk-screening__film:focus-within .wbsk-film::after {
+    opacity: 1;
+  }
+  @media (hover: hover) {
+    .wbsk-screening__film:hover .wbsk-film::before,
+    .wbsk-screening__film:hover .wbsk-film::after {
+      opacity: 1;
     }
-    .wbsk-screening__film:nth-child(even) .wbsk-screening__inner {
-      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    @media (prefers-reduced-motion: no-preference) {
+      .wbsk-screening__film .wbsk-film {
+        transition: transform var(--hover) var(--settle);
+      }
+      .wbsk-screening__film:hover .wbsk-film {
+        transform: translateY(-4px);
+      }
     }
-    .wbsk-screening__film:nth-child(even) .wbsk-screening__text {
-      order: -1;
-      text-align: right;
-    }
-    .wbsk-screening__film:nth-child(even) .wbsk-filmcaption__line {
-      margin-left: auto;
-    }
+  }
+  .wbsk-screening__meta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .wbsk-screening__meta .wbsk-morelink {
+    flex: none;
+    margin: 0;
   }
   .wbsk-screening__text > * + * {
-    margin-top: 12px;
+    margin-top: 6px;
   }
   .wbsk-screening__text .wbsk-h3 {
-    font-size: var(--text-h2);
+    font-size: clamp(1.25rem, 1.7vw, 1.625rem);
     font-weight: 700;
-    line-height: 1.12;
+    line-height: 1.16;
     text-wrap: balance;
   }
   .wbsk-screening__text .wbsk-filmcaption__line {
-    max-width: 30em;
-    font-size: var(--text-lead);
-    line-height: 1.35;
+    display: -webkit-box;
+    overflow: hidden;
+    max-width: 40em;
+    font-size: var(--text-small);
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
-  @media (prefers-reduced-motion: no-preference) {
-    .wbsk-screening__film .wbsk-film {
-      opacity: 0.7;
-      transition: opacity 0.9s var(--settle);
+  @media (max-width: 699px) {
+    .wbsk-filmtray__window {
+      height: auto;
+      overflow: auto hidden;
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: var(--gutter);
+      margin-inline: calc(var(--gutter) * -1);
+      border-radius: 0;
+      -webkit-mask-image: none;
+      mask-image: none;
     }
-    .wbsk-screening__film[data-centre="true"] .wbsk-film {
-      opacity: 1;
+    .wbsk-screening {
+      display: flex;
+      gap: 16px;
+      width: max-content;
+      padding: 4px var(--gutter) 12px;
     }
-    .wbsk-screening__film .wbsk-screening__text {
-      opacity: 0.4;
-      transition: opacity 0.9s var(--settle);
+    .wbsk-screening__film {
+      width: min(82vw, 340px);
+      scroll-snap-align: start;
     }
-    .wbsk-screening__film[data-centre="true"] .wbsk-screening__text {
-      opacity: 1;
+    .wbsk-filmtray .wbsk-gallerywindow__progress {
+      display: none;
     }
-    @media (scripting: none) {
-      .wbsk-screening__film .wbsk-film,
-      .wbsk-screening__film .wbsk-screening__text {
-        opacity: 1;
-      }
+    /* The row runs sideways here, so the posters sit still and show whole. */
+    .wbsk-screening .wbsk-frame[data-parallax] img {
+      height: 100%;
+      animation: none;
     }
   }
   /* Our team: a dark, lit chapter (Decision 07). The grain is part of the page, so nothing repaints. */
@@ -115,8 +180,11 @@
     align-items: center;
     padding-block: var(--gap-block);
   }
-  /* On a phone each portrait comes first, directly above its own name. */
+  /* On a phone each portrait comes first, directly above its own name, with room for it to drift. */
   @media (max-width: 899px) {
+    .wbsk-person {
+      row-gap: 52px;
+    }
     .wbsk-person .wbsk-person__photo {
       order: -1;
     }
@@ -138,6 +206,110 @@
   .wbsk-person__photo {
     position: relative;
     isolation: isolate;
+  }
+  /* On computers the page is about 23% smaller, so it scrolls past faster: photos, words and the space between. */
+  @media (min-width: 900px) {
+    .wbsk-teampage .wbsk-pagehead {
+      padding-block: calc(var(--header-height) + clamp(32px, 3.4vw, 56px)) clamp(16px, 2vw, 32px);
+    }
+    .wbsk-person {
+      padding-block: calc(var(--gap-block) * 0.58);
+    }
+    .wbsk-person .wbsk-person__photo {
+      width: 77%;
+    }
+    .wbsk-person[data-lead] .wbsk-person__photo,
+    .wbsk-person[data-side="right"]:not([data-lead]) .wbsk-person__photo {
+      justify-self: end;
+    }
+    .wbsk-person[data-side="left"]:not([data-lead]) .wbsk-person__photo {
+      justify-self: start;
+    }
+    .wbsk-person[data-lead] .wbsk-person__name {
+      font-size: clamp(2.25rem, 3.4vw, 3.25rem);
+    }
+    .wbsk-person:not([data-lead]) .wbsk-person__name {
+      font-size: clamp(1.5rem, 2.1vw, 2rem);
+    }
+  }
+  /* The Team page's opening: a film's credits. It covers the page, but never takes a click. */
+  .wbsk-teamintro {
+    position: fixed;
+    inset: 0;
+    z-index: 38;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    color: var(--color-ivory);
+    text-align: center;
+    background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 320px;
+    pointer-events: none;
+    /* If the scripts never start, it lifts by itself. */
+    animation: wbsk-teamintro-lift 0.6s 4.5s forwards;
+  }
+  .wbsk-teamintro[hidden] {
+    display: none;
+  }
+  @keyframes wbsk-teamintro-lift {
+    to {
+      visibility: hidden;
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce), (scripting: none) {
+    .wbsk-teamintro {
+      display: none;
+    }
+  }
+  .wbsk-teamintro__lamp {
+    position: absolute;
+    width: min(120vmax, 1400px);
+    aspect-ratio: 1;
+    background: radial-gradient(closest-side, rgb(221 175 58 / 0.3), rgb(214 158 84 / 0.1) 46%, transparent);
+    opacity: 0;
+  }
+  .wbsk-teamintro__credits {
+    position: relative;
+    display: grid;
+    gap: 22px;
+    justify-items: center;
+    padding-inline: var(--gutter);
+  }
+  .wbsk-teamintro__rule {
+    display: block;
+    width: 96px;
+    height: 1px;
+    background: var(--color-gold);
+    transform: scaleX(0);
+  }
+  /* One credit shows at a time; the rest roll past behind this mask. */
+  .wbsk-teamintro__names {
+    height: clamp(104px, 11vw, 148px);
+    overflow: clip;
+    opacity: 0;
+  }
+  .wbsk-teamintro__line {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+    height: clamp(104px, 11vw, 148px);
+  }
+  .wbsk-teamintro__line .wbsk-label {
+    color: var(--color-gold);
+  }
+  .wbsk-teamintro__name {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(2.25rem, 5.4vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  /* The page's title waits for the credits, then arrives as the lamp opens. */
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-team-intro="off"]) .wbsk-teampage:has(.wbsk-teamintro) .wbsk-title__word > span {
+      animation-delay: calc(var(--word) * 70ms + 2.1s);
+    }
   }
   /* A soft warm spotlight behind each portrait. */
   .wbsk-person__photo::before {
@@ -237,7 +409,7 @@
     pointer-events: none;
   }
   .wbsk-offers__cloth {
-    background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
+    background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 320px;
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M53 0 C47 20 54 38 50 56 S46.5 82 52 100 L100 100 L100 0 Z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M53 0 C47 20 54 38 50 56 S46.5 82 52 100 L100 100 L100 0 Z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
   }
@@ -285,7 +457,7 @@
       padding-inline: var(--gutter);
     }
     .wbsk-offering[data-tone="dark"] {
-      background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
+      background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 320px;
       border-radius: 28px 28px 0 0;
     }
     /* On phones the pair sits in a row you can swipe, with the next one peeking in. */

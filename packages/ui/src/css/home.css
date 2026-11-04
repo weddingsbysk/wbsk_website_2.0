@@ -8,6 +8,38 @@
     overflow: clip;
     text-align: center;
   }
+  /* Quiet depth: a pool of lamplight behind a scene, drifting more slowly than what's in front of it. */
+  .wbsk-lampwrap {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: clip;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .wbsk-lamp {
+    position: absolute;
+    inset: -14% 0 auto;
+    height: 80%;
+    background: radial-gradient(52% 58% at var(--lamp-x, 50%) 50%, rgb(214 158 84 / 0.2), transparent 72%);
+  }
+  .wbsk-lamp[data-place="left"] {
+    --lamp-x: 24%;
+  }
+  .wbsk-lamp[data-place="right"] {
+    --lamp-x: 76%;
+  }
+  .wbsk-lamp[data-light] {
+    background: radial-gradient(52% 58% at var(--lamp-x, 50%) 50%, rgb(214 158 84 / 0.11), transparent 72%);
+  }
+  /* The team photo drifts at the low end of the range, at 12% of the scroll (Decision 12). */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .wbsk-teamblock .wbsk-frame[data-parallax] img {
+        animation-range: cover calc(50% - 104cqh) cover calc(50% + 104cqh);
+      }
+    }
+  }
   /* The old site's strip of words, in the gold of the labels. */
   .wbsk-ticker {
     margin-bottom: clamp(56px, 6.4vw, 96px);
@@ -89,41 +121,6 @@
   .wbsk-homesection__label {
     margin-bottom: clamp(20px, 3vw, 40px);
     text-align: center;
-  }
-  /* Sideways rows. */
-  .wbsk-siderow__list {
-    display: flex;
-    gap: clamp(20px, 2.6vw, 40px);
-    margin-inline: calc(var(--gutter) * -1);
-    padding: 6px var(--gutter) 24px;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scroll-padding-inline: var(--gutter);
-    scrollbar-width: none;
-    cursor: grab;
-  }
-  .wbsk-siderow__list::-webkit-scrollbar {
-    display: none;
-  }
-  .wbsk-siderow__list > li {
-    flex: none;
-    scroll-snap-align: start;
-  }
-  .wbsk-siderow__card {
-    width: clamp(260px, 30vw, 460px);
-  }
-  .wbsk-siderow__reaction {
-    width: clamp(190px, 20vw, 300px);
-  }
-  .wbsk-siderow__bar {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .wbsk-siderow__arrows {
-    display: flex;
-    gap: 8px;
   }
   .wbsk-roundbutton {
     display: grid;
@@ -220,10 +217,6 @@
       letter-spacing: 0.14em;
       white-space: nowrap;
     }
-  }
-  .wbsk-reaction__who {
-    margin: 12px 0 4px;
-    font-size: var(--text-small);
   }
   /* The film stack (Decision 04). */
   /* The depth arc, in its own rounded tray, so no film ever fills the whole screen. */
@@ -382,9 +375,6 @@
     margin-top: 24px;
     font-size: var(--text-small);
   }
-  .wbsk-reactions {
-    margin-top: var(--gap-block);
-  }
   .wbsk-readview {
     position: fixed;
     inset: 0;
@@ -453,32 +443,8 @@
   .wbsk-reviews__controls {
     justify-content: center;
   }
-  /* Reactions: the same dark tray as the weddings, smaller. */
-  .wbsk-reactions {
-    margin-top: var(--gap-block);
-  }
-  .wbsk-reactions .wbsk-sectionhead__title,
   .wbsk-homesection .wbsk-featuredon-title {
     font-size: var(--text-h2);
-  }
-  .wbsk-reactions .wbsk-siderow__list {
-    --focus: var(--color-gold);
-    margin-inline: 0;
-    padding: 24px;
-    color: var(--color-ivory);
-    background: var(--color-dusk) url("../textures/paper-dusk.webp") 0 0 / 512px;
-    border-radius: clamp(16px, 1.8vw, 24px);
-    box-shadow: inset 0 2px 18px rgb(0 0 0 / 0.55);
-  }
-  .wbsk-reactions .wbsk-siderow__bar {
-    margin-top: 12px;
-  }
-  .wbsk-reactions .wbsk-siderow__reaction {
-    width: clamp(150px, 13vw, 200px);
-  }
-  .wbsk-reactions .wbsk-film__icon {
-    width: 44px;
-    height: 44px;
   }
   /* Featured on: a quiet strip of credits. */
   .wbsk-featuredon {

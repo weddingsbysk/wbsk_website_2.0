@@ -100,6 +100,8 @@ export const formQuestion = defineType({
     defineField({ name: "key", title: "Sheet column", type: "string", readOnly: true, description: "Stays the same when the question is reworded, so the Sheet keeps its column." }),
     defineField({ name: "label", title: "Question", type: "string", validation: (rule) => rule.required() }),
     defineField({ name: "example", title: "Example text", type: "string" }),
+    defineField({ name: "ask", title: "How the chat asks it", type: "string", description: "Leave empty to use the chat's own wording." }),
+    defineField({ name: "reply", title: "What the chat says back", type: "string", description: "Optional. [first] is their first name, [answer] is what they said." }),
     defineField({ name: "kind", title: "Kind", type: "string", readOnly: true }),
     defineField({ name: "locked", title: "Always on", type: "boolean", readOnly: true, hidden: ({ value }) => !value }),
     defineField({ name: "shown", title: "Shown", type: "boolean", initialValue: true, readOnly: ({ parent }) => Boolean((parent as { locked?: boolean })?.locked) }),

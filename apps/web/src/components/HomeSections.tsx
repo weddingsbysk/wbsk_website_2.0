@@ -1,7 +1,7 @@
 "use client";
 
 import "@wbsk/ui/css/home.css";
-import { FilmPlayer, SideRow, WbskLink, type WbskImageSource } from "@wbsk/ui";
+import { FilmPlayer, LoopBar, placeLoopBar, RowBar, WbskLink, type WbskImageSource } from "@wbsk/ui";
 import { loadGsap, peekGsap, prefersReducedMotion, watchRestedWheel } from "@wbsk/ui/motion";
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 
@@ -107,6 +107,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
   const motion = useRef({ p: 0, target: 0 });
   const fans = useRef<number[]>([]);
   const drawRef = useRef<() => void>(() => {});
+  const loopBarRef = useRef<HTMLSpanElement>(null);
   const holdRef = useRef<{ holding: boolean; holdUntil: number } | null>(null);
   const glideRef = useRef<(to: number) => void>(() => {});
   const wheelAt = useRef(0);
@@ -141,6 +142,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
       return distance;
     };
     const draw = () => {
+      placeLoopBar(loopBarRef.current, -motion.current.p / count);
       cards.forEach((card, index) => {
         const place = placeFilm(nearest(index), fans.current[index] ?? 1, window.innerWidth < PHONE_BELOW ? PHONE_SPREAD : 1);
         card.style.transform = place.transform;
@@ -297,6 +299,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
 
   if (reduced) {
     return (
+      <>
       <ul className="wbsk-filmrow" aria-label="Featured films">
         {films.map((film) => (
           <li key={film.id}>
@@ -305,6 +308,8 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
           </li>
         ))}
       </ul>
+      <RowBar />
+      </>
     );
   }
 
@@ -315,7 +320,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
   // the one on that side forward. Vertical movement stays with the page.
   const pointer = pointerRef.current;
   return (
-    <div ref={stackRef} className="wbsk-stack" data-scene="grow" data-cursor="Scroll" role="group" aria-roledescription="carousel" aria-label="Featured films">
+    <div ref={stackRef} className="wbsk-stack" data-scene="grow" role="group" aria-roledescription="carousel" aria-label="Featured films">
       <div
         ref={stageRef}
         className="wbsk-stack__cards"
@@ -385,6 +390,7 @@ export function FilmStack({ films }: { films: StackFilm[] }) {
           );
         })}
       </div>
+      {count > 1 ? <LoopBar sliderRef={loopBarRef} count={count} /> : null}
       <div className="wbsk-stack__bar">
         <FilmCaption film={current} />
         <div className="wbsk-stack__controls">
@@ -622,45 +628,5 @@ export function ReviewsLoop({ reviews }: { reviews: ReviewItem[] }) {
         </div>
       </dialog>
     </div>
-  );
-}
-
-export type ReactionItem = {
-  id: string;
-  videoId: string;
-  poster: WbskImageSource;
-  names: string;
-  place: string;
-  href: string | null;
-};
-
-/** 9:16 reaction films in a sideways row; only one plays at a time (Decision 07). */
-export function ReactionRow({ reactions }: { reactions: ReactionItem[] }) {
-  const [playing, setPlaying] = useState<string | null>(null);
-  return (
-    <SideRow label="Reaction videos">
-      {reactions.map((reaction) => (
-        <li key={reaction.id} className="wbsk-siderow__reaction">
-          <FilmPlayer
-            vertical
-            videoId={reaction.videoId}
-            poster={reaction.poster}
-            title={`${reaction.names} reacting to their film`}
-            sizes="(min-width: 1024px) 22vw, 60vw"
-            active={playing === reaction.id}
-            onPlay={() => setPlaying(reaction.id)}
-            onStop={() => setPlaying((p) => (p === reaction.id ? null : p))}
-          />
-          <p className="wbsk-reaction__who">
-            {reaction.names} · {reaction.place}
-          </p>
-          {reaction.href ? (
-            <WbskLink href={reaction.href} className="wbsk-link wbsk-morelink">
-              Their story →
-            </WbskLink>
-          ) : null}
-        </li>
-      ))}
-    </SideRow>
   );
 }

@@ -7,8 +7,18 @@ import type { WeddingSummary } from "./WeddingViews";
 
 /** The cover's photograph runs the album's full height beside the names. It's exported at 3:7. */
 const COVER_RATIO = 3 / 7;
-const COVER_SIZES = "(min-width: 1528px) 136px, (min-width: 700px) 8.9vw, 25vw";
-const PAGE_SIZES = "(min-width: 1528px) 240px, (min-width: 700px) 15.6vw, 38vw";
+const COVER_SIZES = "(min-width: 1530px) 195px, (min-width: 700px) 12.7vw, 25vw";
+const PAGE_SIZES = "(min-width: 1530px) 321px, (min-width: 700px) 21vw, 38vw";
+
+/** Enough short pieces that the ribbon reads as one curve. albumMotion turns each a little. */
+const RIBBON_PIECES = 8;
+function RibbonPieces({ left }: { left: number }) {
+  return (
+    <span className={`wbsk-album__link-piece${left === 1 ? " wbsk-album__link-piece--tail" : ""}`}>
+      {left > 1 ? <RibbonPieces left={left - 1} /> : null}
+    </span>
+  );
+}
 
 /** The second name steps right by this much of the type size. Matches album.css. */
 const NAME_STEP = 0.5;
@@ -74,13 +84,7 @@ export const AlbumCard = memo(function AlbumCard({
             <span className="wbsk-album__frame" data-expand="">
               <span className="wbsk-album__body">
                 <span className="wbsk-album__ribbon">
-                  <span className="wbsk-album__link-piece">
-                    <span className="wbsk-album__link-piece">
-                      <span className="wbsk-album__link-piece">
-                        <span className="wbsk-album__link-piece wbsk-album__link-piece--tail" />
-                      </span>
-                    </span>
-                  </span>
+                  <RibbonPieces left={RIBBON_PIECES} />
                 </span>
                 <span className="wbsk-album__3d">
                   <i className="wbsk-album__back wbsk-album__back--left" />
@@ -103,7 +107,7 @@ export const AlbumCard = memo(function AlbumCard({
                     <span className="wbsk-album__cover">
                       <span className="wbsk-album__front">
                         <span className="wbsk-album__photo">
-                          {coverPhoto ? <WbskImage image={coverPhoto} slot="thumbnail" sizes={COVER_SIZES} aspectRatio={COVER_RATIO} /> : null}
+                          {coverPhoto ? <WbskImage image={coverPhoto} slot="albumCover" sizes={COVER_SIZES} aspectRatio={COVER_RATIO} /> : null}
                           <i className="wbsk-album__photo-edge" />
                         </span>
                         <span className="wbsk-album__type">

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType, type KeyboardEvent } from "react";
-import { BoxLine, ContentLine, FilmLine, FormLine, GearLine, GuideLine, HomeLine, MapLine, PhotosLine, PlayLine, QuoteLine, RecordLine, RingsLine, RoleLine, SearchLine, StarLine, TeamLine } from "./icons";
+import { BoxLine, ContentLine, FilmLine, FormLine, GearLine, GuideLine, HomeLine, MapLine, PhotosLine, PlayLine, QuoteLine, RecordLine, RingsLine, RoleLine, SearchLine, StarLine, TeamLine, RupeeLine } from "./icons";
 import { useClient, useRouter } from "./studio-hooks";
 
 const OPEN_EVENT = "wbsk-open-spotlight";
@@ -23,7 +23,6 @@ const KIND_NAMES: Record<string, string> = {
   destination: "Destination",
   preWeddingShoot: "Pre-wedding shoot",
   review: "Review",
-  reactionVideo: "Reaction video",
   teamMember: "Team member",
   careerRole: "Open role",
   featuredOnItem: "Featured on",
@@ -36,7 +35,6 @@ const KIND_ICONS: Record<string, ComponentType> = {
   destination: RecordLine,
   preWeddingShoot: MapLine,
   review: QuoteLine,
-  reactionVideo: PlayLine,
   teamMember: TeamLine,
   careerRole: RoleLine,
   featuredOnItem: StarLine,
@@ -141,9 +139,9 @@ export function Spotlight() {
       { id: "team", group: "Go to", title: "Our team", icon: TeamLine, run: section("team-section") },
       { id: "careers", group: "Go to", title: "Careers", icon: RoleLine, run: section("careers-section") },
       { id: "reviews", group: "Go to", title: "Reviews", icon: QuoteLine, run: section("review") },
-      { id: "reactions", group: "Go to", title: "Reaction videos", icon: PlayLine, run: section("reactionVideo") },
       { id: "forms", group: "Go to", title: "Enquiry forms", icon: FormLine, run: section("forms-section") },
       { id: "settings", group: "Go to", title: "Site settings", icon: GearLine, run: edit("siteSettings", "siteSettings") },
+      { id: "quotes", group: "Do something", title: "Make a quote", note: "A rough estimate for a couple", icon: RupeeLine, run: tool("quotes") },
       { id: "photos", group: "Go to", title: "Photo library", icon: PhotosLine, run: tool("photos") },
       { id: "guide", group: "Go to", title: "Guide", icon: GuideLine, run: tool("guide") },
       { id: "tutorials", group: "Go to", title: "Tutorials", note: "Watch the short film", icon: PlayLine, run: tool("tutorials") },

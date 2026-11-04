@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
-import { useEditState, useFormValue, type InputProps, type ObjectInputProps, type ObjectSchemaType, type Path } from "sanity";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useEditState, useFormValue, useSyncState, type InputProps, type ObjectInputProps, type ObjectSchemaType, type Path } from "sanity";
 import { useDocumentPane } from "sanity/structure";
 import { PREVIEW_INSPECTOR } from "../preview/inspector";
 import { SITE_ADDRESS } from "../brand";
 import { useWebsiteStatus } from "../tools/useWebsiteStatus";
 import { useTryAgain } from "./actions";
+import { hasHelp, HelpDrawer } from "./HelpDrawer";
 
-const CHROME_TYPES = new Set(["wedding", "destination", "preWeddingShoot", "film", "review", "reactionVideo", "teamMember", "homepage", "preWeddingPage", "enquiryForm", "careerRole"]);
+const CHROME_TYPES = new Set(["wedding", "destination", "preWeddingShoot", "film", "review", "teamMember", "homepage", "preWeddingPage", "enquiryForm", "careerRole"]);
 
 function friendly(path: Path, message: string, schemaType: ObjectSchemaType): string {
   const last = path.filter((p) => typeof p === "string").at(-1);
@@ -18,6 +19,17 @@ function friendly(path: Path, message: string, schemaType: ObjectSchemaType): st
   }
   return message.replace(/^Add (the |a |an )?/, "").replace(/\.$/, "");
 }
+
+/** Where each kind of entry shows up, for "View on website". */
+const WEBSITE_PAGE: Record<string, string> = {
+  film: "/films/",
+  teamMember: "/our-team/",
+  careerRole: "/careers/",
+  preWeddingPage: "/pre-wedding/",
+  preWeddingShoot: "/pre-wedding/",
+};
+
+const stepName = (title: string | undefined) => (title ?? "").replace(/^\d+\s*/, "").replace(/\s*✓$/, "");
 
 const MAX_LISTED = 4;
 const RING = 2 * Math.PI * 15.5;
@@ -32,6 +44,10 @@ function Chrome(props: ObjectInputProps) {
   const { draft, published } = useEditState(id, type);
   const { inspector, inspectors, openInspector, validation } = useDocumentPane();
   const [showAll, setShowAll] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [justPublished, setJustPublished] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const { isSyncing } = useSyncState(id, type);
   const errors = useMemo(() => validation.filter((m) => m.level === "error"), [validation]);
   // Nothing has been checked until the first change saves, so a blank form earns no ticks.
   const isNew = !draft && !published;
@@ -92,6 +108,34 @@ function Chrome(props: ObjectInputProps) {
   const stepNames = (props.groups ?? []).filter((g) => g.name !== "all-fields").map((g) => g.name);
   const stepsLeft = stepNames.filter((name) => errors.some((m) => fieldGroup.get(String(m.path[0]))?.includes(name))).length;
   const progress = isNew ? 0 : stepNames.length ? (stepNames.length - stepsLeft) / stepNames.length : errors.length ? 0.5 : 1;
+  // Moving between steps: where you are, and a press to go on.
+  const steps = (props.groups ?? []).filter((g) => g.name !== "all-fields");
+  const stepAt = steps.findIndex((g) => g.selected);
+  // The tabs number the main steps, so the count matches them; an unnumbered tab is an optional extra.
+  const numbered = steps.filter((g) => /^\d/.test(g.title ?? ""));
+  const stepTotal = numbered.length || steps.length;
+  const isExtra = numbered.length > 0 && !/^\d/.test(steps[stepAt]?.title ?? "");
+  const goToStep = (index: number) => {
+    const step = steps[index];
+    if (!step) return;
+    props.onFieldGroupSelect(step.name);
+    const scroller = rootRef.current?.closest('[data-testid="document-panel-scroller"]');
+    scroller?.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  };
+
+  // Publishing clears the draft, so the moment it disappears is the moment to say it went through.
+  const hadDraft = useRef(Boolean(draft));
+  useEffect(() => {
+    if (hadDraft.current && !draft && published) {
+      setJustPublished(true);
+      const timer = window.setTimeout(() => setJustPublished(false), 3200);
+      hadDraft.current = false;
+      return () => window.clearTimeout(timer);
+    }
+    hadDraft.current = Boolean(draft);
+    return undefined;
+  }, [draft, published]);
+
   const website = useWebsiteStatus();
   const tryAgain = useTryAgain();
   const publishedAt = (published as { _updatedAt?: string } | null)?._updatedAt;
@@ -101,10 +145,45 @@ function Chrome(props: ObjectInputProps) {
   // What publishing is doing right now (Decision 19), once there's nothing newer in a draft.
   const publishing = !draft && published && !onSite && website.state !== "unknown";
   const state = draft ? (published ? "Unpublished changes" : "Draft · not on the website yet") : published ? "On the website" : "New";
+  const viewLink = address ? liveLink : `${SITE_ADDRESS}${WEBSITE_PAGE[type] ?? "/"}`;
 
   return (
-    <div>
+    <div ref={rootRef}>
       {props.renderDefault({ ...props, groups })}
+      {steps.length > 1 && stepAt >= 0 ? (
+        <nav className="st-steps" aria-label="Steps">
+          <button type="button" className="st-steps__go" disabled={stepAt === 0} onClick={() => goToStep(stepAt - 1)}>
+            ← Back
+          </button>
+          <div className="st-steps__where">
+            <span>
+              {isExtra ? "Optional" : `Step ${stepAt + 1} of ${stepTotal}`} · <b>{stepName(steps[stepAt]?.title)}</b>
+            </span>
+            <span className="st-steps__line" aria-hidden="true">
+              <span style={{ transform: `scaleX(${isExtra ? 1 : (stepAt + 1) / stepTotal})` }} />
+            </span>
+          </div>
+          {stepAt < steps.length - 1 ? (
+            <button type="button" className="st-steps__go st-steps__go--next" onClick={() => goToStep(stepAt + 1)}>
+              Next: {stepName(steps[stepAt + 1]?.title)} →
+            </button>
+          ) : (
+            <span className="st-steps__end">Last step</span>
+          )}
+        </nav>
+      ) : null}
+      {justPublished ? (
+        <div className="st-published" role="status">
+          <svg viewBox="0 0 38 38" aria-hidden="true">
+            <circle cx="19" cy="19" r="15.5" />
+            <path d="m12.500 19.500 4.500 4.500 8.500-9" />
+          </svg>
+          <div>
+            <strong>Published.</strong> On the website in about 10 minutes.
+          </div>
+        </div>
+      ) : null}
+      <HelpDrawer type={type} open={helpOpen} onClose={() => setHelpOpen(false)} />
       <div role="status" aria-live="polite" className="st-bar">
         <svg className="st-ring" viewBox="0 0 38 38" aria-hidden="true">
           <circle cx="19" cy="19" r="15.5" />
@@ -123,12 +202,7 @@ function Chrome(props: ObjectInputProps) {
           ) : publishing ? (
             <div>Publishing… the website updates in about 10 minutes. You can keep working.</div>
           ) : !draft && published && onSite ? (
-            <div>
-              Live on the website ✓ ·{" "}
-              <a href={liveLink} target="_blank" rel="noreferrer">
-                Open page ↗
-              </a>
-            </div>
+            <div>Live on the website ✓</div>
           ) : (
             <div>
               {summary}
@@ -148,6 +222,19 @@ function Chrome(props: ObjectInputProps) {
               ) : null}
             </div>
           )}
+        </div>
+        <div className="st-bar__side">
+          {draft ? <span className="st-saved" data-saving={isSyncing || undefined}>{isSyncing ? "Saving…" : "Saved just now"}</span> : null}
+          {published ? (
+            <a className="st-bar__view" href={viewLink} target="_blank" rel="noreferrer">
+              View on website ↗
+            </a>
+          ) : null}
+          {hasHelp(type) ? (
+            <button type="button" className="st-bar__help" onClick={() => setHelpOpen(true)}>
+              How this works
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

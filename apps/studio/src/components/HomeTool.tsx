@@ -7,7 +7,7 @@ import { openSpotlight } from "./Spotlight";
 import { useClient, useRouter } from "./studio-hooks";
 
 const API = "2026-11-01";
-const SAMPLE_KINDS = ["wedding", "destination", "preWeddingShoot", "film", "review", "reactionVideo", "teamMember", "careerRole", "featuredOnItem"];
+const SAMPLE_KINDS = ["wedding", "destination", "preWeddingShoot", "film", "review", "teamMember", "careerRole", "featuredOnItem"];
 
 const quick: [string, string, string | null, ComponentType][] = [
   ["Add a wedding", "Names, six photos, gallery, films. Step by step.", "wedding", RingsLine],

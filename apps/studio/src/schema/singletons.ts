@@ -60,8 +60,7 @@ export const weddingsPage = simplePage("weddingsPage", "Weddings page", [
 ]);
 export const filmsPage = simplePage("filmsPage", "Films page", [
   defineField({ name: "intro", title: "Intro line", type: "string" }),
-  defineField({ name: "closingLead", title: "Closing question", type: "string", description: 'Empty reads "Want a film like this?".' }),
-  defineField({ name: "closingLine", title: "Closing line", type: "string", description: 'Empty reads "Tell us about your wedding".' }),
+  defineField({ name: "closingLead", title: "Line beside the chat", type: "string", description: 'Empty reads "Want a film like this?".' }),
 ]);
 export const teamPage = simplePage("teamPage", "Our team page", [
   defineField({ name: "studioLine", title: "Studio line", type: "string" }),
@@ -111,7 +110,7 @@ export const enquiryForm = defineType({
     defineField({ name: "title", title: "Form", type: "string", readOnly: true }),
     defineField({ name: "heading", type: "string" }),
     defineField({ name: "button", title: "Button text", type: "string" }),
-    defineField({ name: "questions", type: "array", description: "Drag to reorder. Reword or hide what you like.", of: [defineArrayMember({ type: "formQuestion" })] }),
+    defineField({ name: "questions", type: "array", description: "Reword or hide what you like. On the website these are asked one at a time, in the chat's own order; contact details come near the end.", of: [defineArrayMember({ type: "formQuestion" })] }),
     defineField({ name: "nextSteps", title: "What happens next", type: "array", of: [defineArrayMember({ type: "string" })], validation: (rule) => rule.max(3).warning("Three short steps read best") }),
     defineField({ name: "thankYouHeading", title: "Thank-you heading", type: "string", description: "[names] is replaced with what they typed." }),
     defineField({ name: "thankYouText", title: "Thank-you text", type: "text", rows: 3 }),

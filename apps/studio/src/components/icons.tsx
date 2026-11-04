@@ -19,6 +19,7 @@ export const SearchLine = line(<><circle cx="11" cy="11" r="6.5" /><path d="m16 
 export const OutLine = line(<path d="M8 16 17 7M9 7h8v8" />);
 export const RingsLine = line(<><circle cx="9" cy="14" r="5.2" /><circle cx="15" cy="14" r="5.2" /><path d="m7.5 4.5 1.5 2 1.5-2" /></>);
 export const FilmLine = line(<><rect x="3.5" y="5" width="17" height="14" rx="2.5" /><path d="M7.5 5v14M16.5 5v14M3.5 9.5h4M3.5 14.5h4M16.5 9.5h4M16.5 14.5h4" /></>);
+export const RupeeLine = line(<path d="M7 5h10M7 9.5h10M7 5h3.5a4.5 4.5 0 0 1 0 9H7l7.5 6" />);
 export const QuoteLine = line(<path d="M5 18c2.8-1 4.4-3.2 4.4-6V7H5v5h2.2M14 18c2.8-1 4.4-3.2 4.4-6V7H14v5h2.2" />);
 export const MapLine = line(<><path d="M12 21s6.5-5.6 6.5-11a6.5 6.5 0 0 0-13 0c0 5.4 6.5 11 6.5 11z" /><circle cx="12" cy="10" r="2.3" /></>);
 export const PlayLine = line(<><rect x="3.5" y="5" width="17" height="14" rx="2.5" /><path d="m10 9 5 3-5 3z" /></>);

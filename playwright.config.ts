@@ -16,7 +16,15 @@ export default defineConfig({
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"], ["html", { open: "never" }]],
-  use: { baseURL: "http://127.0.0.1:4173/wbsk_website_2.0/", trace: "retain-on-failure" },
+  use: {
+    baseURL: "http://127.0.0.1:4173/wbsk_website_2.0/",
+    trace: "retain-on-failure",
+    // Most tests are about other things, so the first-visit guide counts as already seen (see guide.spec.ts).
+    storageState: {
+      cookies: [],
+      origins: [{ origin: "http://127.0.0.1:4173", localStorage: ["couple", "gallery", "albums", "filmstack", "records", "filmrow", "filmswindow"].map((name) => ({ name: `wbsk-guide-${name}`, value: "1" })) }],
+    },
+  },
   webServer: {
     command: "node scripts/serve-out.mjs",
     url: "http://127.0.0.1:4173/wbsk_website_2.0/",

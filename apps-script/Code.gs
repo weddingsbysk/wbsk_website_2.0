@@ -18,8 +18,8 @@ var MAX_CONFIRMATIONS_PER_DAY = 30;
 var MAX_ALERTS_PER_DAY = 60;
 var QUOTA_RESERVE = 5;
 
-var ENQUIRY_COLUMNS = ['Received', 'Type', 'Names', 'Wedding date / shoot month', 'City or venue / destination', 'Wedding type', 'Events', 'Days', 'Guests', 'Coverage / offering', 'Phone', 'Email', 'Message', 'Opened from', 'Source', 'Consent time', 'Repeat?', 'Status', 'Owner', 'Last contact', 'Next follow-up', 'Notes', 'Lost reason', 'Flag'];
-var AUTO_ENQUIRY_COLUMNS = 17;
+var ENQUIRY_COLUMNS = ['Received', 'Type', 'Names', 'Wedding date / shoot month', 'City or venue / destination', 'Wedding type', 'Events', 'Days', 'Guests', 'Coverage / offering', 'Cameramen', 'Phone', 'Email', 'Message', 'Opened from', 'Source', 'Consent time', 'Repeat?', 'Status', 'Owner', 'Last contact', 'Next follow-up', 'Notes', 'Lost reason', 'Flag'];
+var AUTO_ENQUIRY_COLUMNS = 18;
 var CAREERS_COLUMNS = ['Received', 'Name', 'Role', 'Experience', 'Portfolio link', 'Phone', 'Email', 'Consent time', 'Status', 'Notes', 'Flag'];
 var AUTO_CAREERS_COLUMNS = 8;
 var STAGES = ['New', 'Replied', 'Call booked', 'Proposal sent', 'Confirmed', 'Lost'];
@@ -194,7 +194,7 @@ function earlierRow_(sheet, phoneColumn, emailColumn, phone, email) {
 function saveEnquiry_(kind, values, openedFrom, reasons) {
   var sheet = sheet_(ENQUIRIES);
   var now = new Date();
-  var earlier = earlierRow_(sheet, 11, 12, values.phone, values.email);
+  var earlier = earlierRow_(sheet, 12, 13, values.phone, values.email);
   if (earlier && isQuickRepeat(earlier.received, now.getTime())) {
     return noteRepeat_(sheet, earlier.row, ENQUIRY_COLUMNS.length, now);
   }
@@ -209,6 +209,7 @@ function saveEnquiry_(kind, values, openedFrom, reasons) {
     safeCell(values.days),
     safeCell(values.guests),
     safeCell(values.coverage),
+    safeCell(values.cameras),
     safeCell(values.phone),
     safeCell(values.email),
     safeCell(values.message),
@@ -365,9 +366,9 @@ function setUpEnquiryRules_(sheet) {
   sheet.getRange(2, column('Lost reason'), max).setDataValidation(list(LOST_REASONS));
   sheet.getRange(2, column('Last contact'), max, 2).setNumberFormat('d mmm yyyy');
 
-  var status = 'R';
-  var next = 'U';
-  var lost = 'W';
+  var status = 'S';
+  var next = 'V';
+  var lost = 'X';
   var open = '$' + status + '2<>"Confirmed",$' + status + '2<>"Lost"';
   var rules = [
     rule_('=AND($' + next + '2<>"",$' + next + '2<TODAY(),' + open + ')', '#F4C7C3', sheet.getRange(next + '2:' + next)),
@@ -401,14 +402,14 @@ function setUpSummary_(sheet) {
     ['', ''],
     ['By stage', ''],
   ];
-  STAGES.forEach(function (stage) { rows.push([stage, '=COUNTIF(' + e + 'R2:R,"' + stage + '")']); });
+  STAGES.forEach(function (stage) { rows.push([stage, '=COUNTIF(' + e + 'S2:S,"' + stage + '")']); });
   rows.push(['', '']);
   rows.push(['Wedding', '=COUNTIF(' + e + 'B2:B,"Wedding")']);
   rows.push(['Pre-wedding', '=COUNTIF(' + e + 'B2:B,"Pre-wedding")']);
   rows.push(['Destination', '=COUNTIF(' + e + 'F2:F,"Destination")']);
   rows.push(['In my city', '=COUNTIF(' + e + 'F2:F,"In my city")']);
   rows.push(['', '']);
-  rows.push(['Follow-ups overdue', '=COUNTIFS(' + e + 'U2:U,"<"&TODAY(),' + e + 'U2:U,"<>",' + e + 'R2:R,"<>Confirmed",' + e + 'R2:R,"<>Lost")']);
+  rows.push(['Follow-ups overdue', '=COUNTIFS(' + e + 'V2:V,"<"&TODAY(),' + e + 'V2:V,"<>",' + e + 'S2:S,"<>Confirmed",' + e + 'S2:S,"<>Lost")']);
   sheet.getRange(1, 1, rows.length, 2).setValues(rows);
   sheet.getRange(1, 1).setFontWeight('bold').setFontSize(14);
   sheet.getRange(7, 1).setFontWeight('bold');

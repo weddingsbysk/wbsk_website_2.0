@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type 
 import { MANAGER_NAME, SITE_ADDRESS } from "../brand";
 import { minutesAgo, useWebsiteStatus } from "../tools/useWebsiteStatus";
 import logoUrl from "../../../web/public/wbsk-logo.svg";
-import { ContentLine, GuideLine, HomeLine, OutLine, PhotosLine, PlayLine, SearchLine } from "./icons";
+import { ContentLine, GuideLine, HomeLine, OutLine, PhotosLine, PlayLine, SearchLine, RupeeLine } from "./icons";
 import { openSpotlight } from "./Spotlight";
 import { useCurrentUser, useRouter, useRouterState, useWorkspace } from "./studio-hooks";
 
@@ -16,6 +16,7 @@ const WORDS = {
 const TOOLS: Record<string, { label: string; icon: ComponentType }> = {
   home: { label: "Home", icon: HomeLine },
   content: { label: "Content", icon: ContentLine },
+  quotes: { label: "Quotes", icon: RupeeLine },
   photos: { label: "Photos", icon: PhotosLine },
   guide: { label: "Guide", icon: GuideLine },
   tutorials: { label: "Tutorials", icon: PlayLine },

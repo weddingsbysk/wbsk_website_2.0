@@ -17,7 +17,7 @@ const TILT_BACK = 13;
 const TURN_AT_EDGE = 19;
 const GLARE_TRAVEL = 44;
 const ALBUM_HEIGHT = 1.27;
-const OPEN_SCALE = 1.14;
+const OPEN_SCALE = 1.08;
 const HOVER_INTENT_MS = 170;
 const LEAVE_MS = 320;
 const SWELL = 0.045;
@@ -36,6 +36,8 @@ const ACCEL_CAP = 6000;
 const FLUTTER = 2;
 const SWING_CAP = 58;
 const BRUSH_CAP = 170;
+/** No piece turns further than this from the one above, so the satin curves and never creases. */
+const PIECE_TURN_CAP = 11;
 
 export type AlbumSlot = {
   li: HTMLElement;
@@ -62,7 +64,7 @@ export type AlbumSlot = {
   pushed: number;
   swing: number[];
   swingSpeed: number[];
-  swingShown: number[];
+  pieceShown: number[];
   ribbonFrom: number;
   ribbonSpeed: number;
   phase: number;
@@ -93,6 +95,15 @@ type Options = {
 };
 
 export type Shelf = ReturnType<typeof createShelf>;
+
+/** A smooth value between two of a row of points, shaped by the points either side (Catmull-Rom). */
+function curveThrough(points: number[], from: number, t: number) {
+  const a = points[Math.max(from - 1, 0)]!;
+  const b = points[from]!;
+  const c = points[from + 1]!;
+  const d = points[Math.min(from + 2, points.length - 1)]!;
+  return 0.5 * (2 * b + (c - a) * t + (2 * a - 5 * b + 4 * c - d) * t * t + (3 * b - a - 3 * c + d) * t * t * t);
+}
 
 export function createShelf({ gsap, row, track, tray, layout, at, calm, culling, moving, gliding, onShow, onOpen, onMove, onStop }: Options) {
   const touchScreen = window.matchMedia("(hover: none), (pointer: coarse)").matches;
@@ -132,7 +143,7 @@ export function createShelf({ gsap, row, track, tray, layout, at, calm, culling,
       pushed: 0,
       swing: new Array<number>(RIBBON_LINKS).fill(0),
       swingSpeed: new Array<number>(RIBBON_LINKS).fill(0),
-      swingShown: new Array<number>(RIBBON_LINKS).fill(NaN),
+      pieceShown: [] as number[],
       ribbonFrom: NaN,
       ribbonSpeed: 0,
       phase: position * 1.7,
@@ -246,11 +257,19 @@ export function createShelf({ gsap, row, track, tray, layout, at, calm, culling,
           slot.swing[i] = Math.max(-SWING_CAP, Math.min(SWING_CAP, slot.swing[i]! + slot.swingSpeed[i]! * h));
         }
       }
-      for (let i = 0; i < RIBBON_LINKS; i += 1) {
-        const turn = slot.swing[i]! - (i ? slot.swing[i - 1]! : 0);
-        if (Math.abs(turn - slot.swingShown[i]!) > 0.08 || Number.isNaN(slot.swingShown[i]!)) {
-          slot.swingShown[i] = turn;
-          slot.links[i]!.style.transform = `rotate(${turn.toFixed(2)}deg)`;
+      // The pieces lie along one smooth curve through the four weights, so it bends without a corner.
+      const pieces = slot.links.length;
+      let above = 0;
+      for (let piece = 0; piece < pieces; piece += 1) {
+        const along = (piece / Math.max(pieces - 1, 1)) * (RIBBON_LINKS - 1);
+        const from = Math.min(Math.floor(along), RIBBON_LINKS - 2);
+        const angle = curveThrough(slot.swing, from, along - from);
+        const turn = Math.max(-PIECE_TURN_CAP, Math.min(PIECE_TURN_CAP, angle - above));
+        above += turn;
+        const shown = slot.pieceShown[piece];
+        if (shown === undefined || Math.abs(turn - shown) > 0.06) {
+          slot.pieceShown[piece] = turn;
+          slot.links[piece]!.style.transform = `rotate(${turn.toFixed(2)}deg)`;
         }
       }
     }

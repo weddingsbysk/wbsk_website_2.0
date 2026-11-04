@@ -45,6 +45,7 @@ for (const path of pages) {
   }) => {
     const context = await browser.newContext({
       javaScriptEnabled: false,
+      storageState: { cookies: [], origins: [] },
       viewport: { width: 390, height: 844 },
     });
     const page = await context.newPage();
