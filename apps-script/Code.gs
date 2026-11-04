@@ -71,6 +71,17 @@ function missingAnswers(form, kind, values) {
   return missing;
 }
 
+/** The chat always asks about cameramen, so the answer reaches the emails even before the question is in the Studio's form. */
+function withCameras(form, kind) {
+  if (kind === 'careers' || !form || !form.questions) return form;
+  if (form.questions.some(function (question) { return question.key === 'cameras'; })) return form;
+  var questions = form.questions.concat([{ key: 'cameras', label: 'How many cameramen do you need?', kind: 'one', shown: true, required: false }]);
+  var copy = {};
+  Object.keys(form).forEach(function (name) { copy[name] = form[name]; });
+  copy.questions = questions;
+  return copy;
+}
+
 /** The same person sending again within minutes: one row, noted, not a flood (plan, section 6). */
 function isQuickRepeat(earlierReceived, now) {
   return earlierReceived instanceof Date ? now - earlierReceived.getTime() < REPEAT_WINDOW_MS : false;
@@ -131,7 +142,7 @@ function handleSubmission_(payload) {
   if (cache.get(seenKey)) return { ok: true };
 
   var reasons = spamReasons(payload);
-  var form = publishedForm_(kind);
+  var form = withCameras(publishedForm_(kind), kind);
   var missing = missingAnswers(form, kind, values);
   if (payload.consent !== true) missing.push('consent');
   if (missing.length && !reasons.length) return { ok: false, missing: missing };

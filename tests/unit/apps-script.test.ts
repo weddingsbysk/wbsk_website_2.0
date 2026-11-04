@@ -58,4 +58,11 @@ describe("Sheet script", () => {
     expect(call("safeCell", "Meera")).toBe("Meera");
     expect(call("escapeHtml", "<b>&")).toBe("&lt;b&gt;&amp;");
   });
+  it("adds the cameramen answer to the emails, once, and never to careers", () => {
+    const form = { questions: [{ key: "names", label: "Your names" }] };
+    const added = call<{ questions: { key: string }[] }>("withCameras", form, "wedding");
+    expect(added.questions.map((q) => q.key)).toEqual(["names", "cameras"]);
+    expect(call<{ questions: unknown[] }>("withCameras", added, "wedding").questions).toHaveLength(2);
+    expect(call<{ questions: unknown[] }>("withCameras", form, "careers").questions).toHaveLength(1);
+  });
 });
